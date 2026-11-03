@@ -1,233 +1,234 @@
 // ========================================================
-// DASHBOARD OPERASIONAL BISNIS & ORDER DATASET
-// Terinspirasi dari sistem operasional modern (gambar referensi)
+// DATASET ERP OPERASIONAL PT DIGAJI SOLUSI INDONESIA
+// Modul: Human Capital Management, Payroll & Enterprise Operations
 // ========================================================
 
 // 1. KPI Top Summary Cards
 export const kpiSummary = {
   totalOrder: {
     value: 142,
-    unit: 'order',
+    unit: 'transaksi',
     growth: '+12,7%',
     growthType: 'up',
-    subtitle: 'dari kemarin',
+    subtitle: 'batch payroll bulan ini',
   },
   omzet: {
-    value: 7850000,
-    formatted: 'Rp 7.850.000',
-    growth: '+18,4%',
+    value: 384500000,
+    formatted: 'Rp 384.500.000',
+    growth: '+14,2%',
     growthType: 'up',
-    subtitle: 'dari kemarin',
+    subtitle: 'realisasi payroll disalurkan',
   },
   orderDiproses: {
     value: 36,
-    unit: 'order',
-    subtitle: 'Sedang berjalan di antrean',
+    unit: 'tiket',
+    subtitle: 'Klaim & lembur dalam antrean',
   },
   pelangganAktif: {
     value: 1248,
-    unit: 'org',
-    growth: '+3,9%',
+    unit: 'pegawai',
+    growth: '+4,8%',
     growthType: 'up',
-    subtitle: '7 hari terakhir',
+    subtitle: 'karyawan aktif di 6 cabang',
   },
   mesinAktif: {
-    aktif: 8,
+    aktif: 10,
     total: 10,
-    utilisasiPct: 80,
-    subtitle: '80% Utilisasi',
+    utilisasiPct: 99.8,
+    subtitle: '99,8% Uptime SLA',
   },
   stokMenipis: {
     count: 4,
-    unit: 'item',
-    warning: 'Perlu restok segera',
+    unit: 'pegawai',
+    warning: 'Evaluasi PKWT segera',
     isAlert: true,
   },
 }
 
-// 2. Data Tren Omzet & Order (Dual Line / Area Chart)
+// 2. Data Tren Penggajian & Alokasi Anggaran (Dual Line / Area Chart)
 export const trenDataPresets = {
   '7hari': {
     label: '7 Hari Terakhir',
     dates: ['21 Jan', '22 Jan', '23 Jan', '24 Jan', '25 Jan', '26 Jan', '27 Jan'],
-    omzet: [4200000, 4800000, 5100000, 5600000, 6900000, 7200000, 7850000],
+    omzet: [42000000, 48000000, 51000000, 56000000, 69000000, 72000000, 84500000],
     order: [82, 94, 98, 110, 132, 136, 142],
-    maxOmzet: 10000000,
+    maxOmzet: 100000000,
     maxOrder: 200,
   },
   '14hari': {
     label: '14 Hari Terakhir',
     dates: ['14 Jan', '16 Jan', '18 Jan', '20 Jan', '22 Jan', '24 Jan', '27 Jan'],
-    omzet: [3800000, 4100000, 4600000, 4900000, 5800000, 6700000, 7850000],
+    omzet: [38000000, 41000000, 46000000, 49000000, 58000000, 67000000, 84500000],
     order: [74, 80, 88, 96, 114, 128, 142],
-    maxOmzet: 10000000,
+    maxOmzet: 100000000,
     maxOrder: 200,
   },
   'bulan': {
     label: 'Bulan Ini',
-    dates: ['W1', 'W2', 'W3', 'W4'],
-    omzet: [22400000, 28500000, 34200000, 39800000],
-    order: [450, 560, 670, 780],
-    maxOmzet: 50000000,
-    maxOrder: 1000,
+    dates: ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'],
+    omzet: [75000000, 92000000, 110000000, 138000000],
+    order: [310, 420, 540, 680],
+    maxOmzet: 160000000,
+    maxOrder: 800,
   },
 }
 
-// 3. Volume Order per Layanan (Horizontal Bar Chart)
+// 3. Distribusi SDM per Divisi (Horizontal Bar Chart)
 export const layananData = [
-  { id: 'cuci-kiloan', label: 'Cuci Kiloan', count: 68, pct: 47.8, color: '#3b82f6' },
-  { id: 'cuci-satuan', label: 'Cuci Satuan', count: 28, pct: 19.7, color: '#60a5fa' },
-  { id: 'setrika-saja', label: 'Setrika Saja', count: 18, pct: 12.6, color: '#93c5fd' },
-  { id: 'cuci-bedcover', label: 'Cuci Bedcover', count: 12, pct: 8.5, color: '#a5b4fc' },
-  { id: 'cuci-ekspres', label: 'Cuci Ekspres', count: 9, pct: 6.3, color: '#f59e0b' },
-  { id: 'lainnya', label: 'Lainnya', count: 7, pct: 5.1, color: '#94a3b8' },
+  { id: 'tech', label: 'Teknologi & Engineering', count: 426, pct: 34.2, color: '#3b82f6' },
+  { id: 'ops', label: 'Operasional & Logistik', count: 310, pct: 24.8, color: '#0ea5e9' },
+  { id: 'fin', label: 'Finance & Akuntansi', count: 206, pct: 16.5, color: '#10b981' },
+  { id: 'sales', label: 'Sales & Bisnis', count: 155, pct: 12.4, color: '#f59e0b' },
+  { id: 'hr', label: 'People Ops & HRD', count: 95, pct: 7.6, color: '#8b5cf6' },
+  { id: 'legal', label: 'Legal & Kepatuhan', count: 56, pct: 4.5, color: '#ec4899' },
 ]
 
-// 4. Distribusi Status Order (Donut Chart)
+// 4. Distribusi Status Pengajuan & Tiket Payroll (Donut Chart)
 export const statusDistribusi = [
-  { id: 'selesai', label: 'Selesai', count: 72, pct: 50.7, color: '#10b981', softBg: '#ecfdf5' },
-  { id: 'diproses', label: 'Diproses', count: 36, pct: 25.4, color: '#3b82f6', softBg: '#eff6ff' },
-  { id: 'siap', label: 'Siap Diambil', count: 24, pct: 16.9, color: '#f59e0b', softBg: '#fffbeb' },
-  { id: 'batal', label: 'Dibatalkan', count: 10, pct: 7.0, color: '#f43f5e', softBg: '#fff1f2' },
+  { id: 'selesai', label: 'Disetujui & Cair', count: 78, pct: 54.9, color: '#10b981', softBg: '#ecfdf5' },
+  { id: 'diproses', label: 'Verifikasi HR', count: 36, pct: 25.4, color: '#3b82f6', softBg: '#eff6ff' },
+  { id: 'siap', label: 'Review Finance', count: 20, pct: 14.1, color: '#f59e0b', softBg: '#fffbeb' },
+  { id: 'batal', label: 'Revisi / Ditolak', count: 8, pct: 5.6, color: '#f43f5e', softBg: '#fff1f2' },
 ]
 
-// 5. Ringkasan Keuangan
+// 5. Ringkasan Finansial ERP
 export const ringkasanKeuangan = {
-  pemasukan: 7850000,
-  pengeluaran: 2145000,
-  labaKotor: 5705000,
-  labaGrowthPct: '+72,7%',
+  pemasukan: 512000000, // Pendapatan operasional
+  pengeluaran: 384500000, // Beban payroll & tunjangan
+  labaKotor: 127500000, // Margin bersih perusahaan
+  labaGrowthPct: '+24,9%',
 }
 
-// 6. Utilisasi Mesin
+// 6. Utilisasi Modul & Infrastruktur ERP Cloud
 export const utilisasiMesin = {
   totalUnit: 10,
-  aktifUnit: 8,
-  utilisasiPct: 80,
-  totalSiklus: 64,
-  totalKg: 436.5,
+  aktifUnit: 10,
+  utilisasiPct: 99.8,
+  totalSiklus: 1420, // Total request / batch run hari ini
+  totalKg: 99.9, // 99.9% Sistem Uptime SLA
 }
 
-// 7. Stok & Inventaris (Peringatan Menipis)
+// 7. Peringatan Kepatuhan & Masa Berlaku Dokumen (Compliance Alerts)
 export const inventarisWarning = [
-  { id: 1, nama: 'Parfum Laundry Premium', sisa: '2,5 L', status: 'Kritis', badgeVariant: 'danger' },
-  { id: 2, nama: 'Deterjen Cair Konsentrat', sisa: '5,0 kg', status: 'Menipis', badgeVariant: 'warning' },
-  { id: 3, nama: 'Softener Anti Bakteri', sisa: '4,2 L', status: 'Menipis', badgeVariant: 'warning' },
-  { id: 4, nama: 'Plastik Packing Klip (L)', sisa: '80 pcs', status: 'Menipis', badgeVariant: 'warning' },
+  { id: 1, nama: 'Evaluasi PKWT 4 Karyawan', sisa: 'Batas 31 Jan', status: 'Kritis', badgeVariant: 'danger' },
+  { id: 2, nama: 'Rekonsiliasi BPJS Ketenagakerjaan', sisa: 'Cabang JKT & SBY', status: 'Verifikasi', badgeVariant: 'warning' },
+  { id: 3, nama: 'Pelaporan PPh 21 Masa Pajak', sisa: 'e-Bupot DJP Siap', status: 'Normal', badgeVariant: 'success' },
+  { id: 4, nama: 'Lisensi Modul Payroll Cloud', sisa: '180 Hari Aktif', status: 'Aman', badgeVariant: 'neutral' },
 ]
 
-// 8. Pickup, Delivery & Absensi
+// 8. Ringkasan Presensi & Distribusi Tenaga Kerja
 export const logistikDanKaryawan = {
   pickup: {
-    count: 18,
-    growth: '+28,6%',
+    count: 842,
+    growth: '+94,2%',
+    label: 'WFO (Kantor)',
   },
   delivery: {
-    count: 20,
-    growth: '+11,1%',
+    count: 386,
+    growth: '+96,5%',
+    label: 'WFH (Remote)',
   },
   absensi: {
-    hadir: 12,
-    total: 14,
-    pct: 85.7,
+    hadir: 1208,
+    total: 1248,
+    pct: 96.8,
   },
 }
 
-// 9. Timeline Aktivitas Operasional Real-Time
+// 9. Timeline Aktivitas Operasional ERP Real-Time
 export const aktivitasOperasional = [
   {
     id: 'act-1',
     waktu: '10:24',
-    judul: 'Order baru masuk',
-    deskripsi: 'ORD-250127-0142 • Budi Santoso • Cuci Kiloan (5,0 kg)',
+    judul: 'Slip Gaji Jan 2025 Terbit',
+    deskripsi: 'Batch slip gaji untuk 426 staf Divisi Engineering berhasil dikirim ke portal pegawai.',
     icon: 'cart',
     color: 'emerald',
   },
   {
     id: 'act-2',
     waktu: '10:18',
-    judul: 'Pembayaran diterima',
-    deskripsi: 'ORD-250127-0140 • Rp 45.000 (QRIS Merchant)',
+    judul: 'Pencairan Klaim Medis Disetujui',
+    deskripsi: 'TRX-250127-0842 • Rp 3.450.000 via Mandiri Payroll Transfer.',
     icon: 'wallet',
     color: 'blue',
   },
   {
     id: 'act-3',
     waktu: '10:07',
-    judul: 'Pickup selesai',
-    deskripsi: 'ORD-250127-0138 • Diambil oleh Kurir Armada #K003',
+    judul: 'Presensi Biometrik WFO Tercatat',
+    deskripsi: '184 pegawai Cabang Sudirman telah check-in tepat waktu via mobile app.',
     icon: 'truck',
     color: 'sky',
   },
   {
     id: 'act-4',
     waktu: '09:56',
-    judul: 'Mesin selesai siklus',
-    deskripsi: 'Mesin M-02 • 12,5 kg • Durasi 48 menit wash-dry',
+    judul: 'Sinkronisasi e-Bupot PPh 21',
+    deskripsi: 'API integrasi ke server perpajakan DJP berhasil sinkron 100% tanpa anomali.',
     icon: 'machine',
     color: 'purple',
   },
   {
     id: 'act-5',
     waktu: '09:41',
-    judul: 'Stok berkurang',
-    deskripsi: 'Deterjen • -5,0 kg • Sisa 5,0 kg (Ambang Menipis)',
+    judul: 'Pembaruan Struktur Kontrak PKWT',
+    deskripsi: '4 kontrak diperpanjang otomatis menjadi Karyawan Tetap oleh Divisi HRD.',
     icon: 'box',
     color: 'amber',
   },
 ]
 
-// 10. Tabel Order Terbaru
+// 10. Tabel Pengajuan & Transaksi Payroll Terbaru
 export const orderTerbaruList = [
   {
-    noOrder: 'ORD-250127-0142',
-    pelanggan: 'Budi Santoso',
-    layanan: 'Cuci Kiloan',
-    berat: '5,0 kg',
-    total: 45000,
-    status: 'Diproses',
-    statusVariant: 'info',
+    noOrder: 'PAY-250127-0842',
+    pelanggan: 'Budi Santoso, S.Kom',
+    layanan: 'Gaji Pokok & Tunjangan Tetap',
+    berat: 'Engineering',
+    total: 18500000,
+    status: 'Berhasil Cair',
+    statusVariant: 'success',
     waktu: '10:24',
   },
   {
-    noOrder: 'ORD-250127-0141',
-    pelanggan: 'Siti Rahma',
-    layanan: 'Cuci Satuan (Kemeja)',
-    berat: '3 pcs',
-    total: 36000,
-    status: 'Siap Diambil',
-    statusVariant: 'warning',
+    noOrder: 'CLM-250127-0841',
+    pelanggan: 'Siti Rahmawati, S.E.',
+    layanan: 'Reimburse Perjalanan Dinas',
+    berat: 'Finance & Tax',
+    total: 2450000,
+    status: 'Diproses HR',
+    statusVariant: 'info',
     waktu: '10:20',
   },
   {
-    noOrder: 'ORD-250127-0140',
-    pelanggan: 'Andi Pratama',
-    layanan: 'Cuci Bedcover',
-    berat: '2,5 kg',
-    total: 75000,
-    status: 'Selesai',
+    noOrder: 'INS-250127-0840',
+    pelanggan: 'Andi Pratama, B.B.A.',
+    layanan: 'Bonus & Insentif Kinerja Q4',
+    berat: 'Sales & Marketing',
+    total: 8750000,
+    status: 'Disetujui',
     statusVariant: 'success',
     waktu: '10:18',
   },
   {
-    noOrder: 'ORD-250127-0139',
-    pelanggan: 'Dewi Lestari',
-    layanan: 'Setrika Saja',
-    berat: '10 pcs',
-    total: 50000,
-    status: 'Diproses',
-    statusVariant: 'info',
+    noOrder: 'CLM-250127-0839',
+    pelanggan: 'Dewi Lestari, S.Psi',
+    layanan: 'Klaim Rawat Jalan & Resep',
+    berat: 'People Ops',
+    total: 1250000,
+    status: 'Review Finance',
+    statusVariant: 'warning',
     waktu: '10:02',
   },
   {
-    noOrder: 'ORD-250127-0138',
+    noOrder: 'LMB-250127-0838',
     pelanggan: 'Rizky Maulana',
-    layanan: 'Cuci Ekspres',
-    berat: '4,0 kg',
-    total: 60000,
-    status: 'Selesai',
+    layanan: 'Upah Lembur Server Maintenance',
+    berat: 'DevOps & Infra',
+    total: 3200000,
+    status: 'Berhasil Cair',
     statusVariant: 'success',
     waktu: '09:56',
   },
 ]
-

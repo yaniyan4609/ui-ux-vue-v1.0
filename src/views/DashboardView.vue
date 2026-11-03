@@ -349,12 +349,12 @@ onUnmounted(() => {
         <div>
           <div class="flex items-center gap-2">
             <h1 class="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white tracking-tight leading-none">
-              Dashboard Operasional & Order
+              Dashboard ERP & Payroll Digaji.id
             </h1>
             <BaseBadge variant="success" size="sm" dot pulse>Live Sync</BaseBadge>
           </div>
           <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-            Ringkasan omzet, animasi gelombang metrik, utilisasi mesin, dan stream order hari ini.
+            Ringkasan realisasi payroll, alokasi anggaran SDM per divisi, kepatuhan regulasi, dan stabilitas modul ERP.
           </p>
         </div>
       </div>
@@ -424,10 +424,10 @@ onUnmounted(() => {
       v-else
       class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 anim-fade-up anim-delay-1"
     >
-      <!-- KPI 1: Total Order Hari Ini -->
+      <!-- KPI 1: Total Payroll Batch -->
       <div class="p-3.5 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-700 transition flex flex-col justify-between space-y-2 group">
         <div class="flex items-center justify-between">
-          <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Total Order Hari Ini</span>
+          <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Batch Payroll Bulan Ini</span>
           <div class="w-7 h-7 rounded-lg bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
             <ShoppingBag class="w-3.5 h-3.5" />
           </div>
@@ -435,21 +435,21 @@ onUnmounted(() => {
         <div>
           <div class="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white font-mono leading-none">
             <BaseCountUp :to="kpiSummary.totalOrder.value" suffix=" " />
-            <span class="text-xs font-normal text-neutral-500 font-sans">order</span>
+            <span class="text-xs font-normal text-neutral-500 font-sans">batch</span>
           </div>
           <div class="flex items-center gap-1 text-[10.5px] text-emerald-600 dark:text-emerald-400 font-medium mt-1.5">
             <ArrowUp class="w-3 h-3 stroke-[3]" />
             <span>{{ kpiSummary.totalOrder.growth }}</span>
-            <span class="text-neutral-400 dark:text-neutral-500 font-normal">dari kemarin</span>
+            <span class="text-neutral-400 dark:text-neutral-500 font-normal">dari periode lalu</span>
           </div>
         </div>
       </div>
 
-      <!-- KPI 2: Omzet Hari Ini -->
+      <!-- KPI 2: Realisasi Gaji Disalurkan -->
       <div class="p-3.5 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-700 transition flex flex-col justify-between space-y-2 group">
         <div class="flex items-center justify-between">
-          <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Omzet Hari Ini</span>
-          <div class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+          <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Realisasi Gaji Disalurkan</span>
+          <div class="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
             <Wallet class="w-3.5 h-3.5" />
           </div>
         </div>
@@ -460,15 +460,15 @@ onUnmounted(() => {
           <div class="flex items-center gap-1 text-[10.5px] text-emerald-600 dark:text-emerald-400 font-medium mt-1.5">
             <ArrowUp class="w-3 h-3 stroke-[3]" />
             <span>{{ kpiSummary.omzet.growth }}</span>
-            <span class="text-neutral-400 dark:text-neutral-500 font-normal">dari kemarin</span>
+            <span class="text-neutral-400 dark:text-neutral-500 font-normal">dari bulan lalu</span>
           </div>
         </div>
       </div>
 
-      <!-- KPI 3: Order Diproses -->
+      <!-- KPI 3: Tiket Klaim & Lembur -->
       <div class="p-3.5 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-700 transition flex flex-col justify-between space-y-2 group">
         <div class="flex items-center justify-between">
-          <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Order Diproses</span>
+          <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Klaim & Pengajuan</span>
           <div class="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
             <RefreshCw class="w-3.5 h-3.5" />
           </div>
@@ -476,18 +476,18 @@ onUnmounted(() => {
         <div>
           <div class="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white font-mono leading-none">
             <BaseCountUp :to="kpiSummary.orderDiproses.value" suffix=" " />
-            <span class="text-xs font-normal text-neutral-500 font-sans">order</span>
+            <span class="text-xs font-normal text-neutral-500 font-sans">tiket</span>
           </div>
           <p class="text-[10.5px] text-neutral-400 dark:text-neutral-500 mt-1.5 truncate">
-            Sedang di antrean cuci/setrika
+            Sedang antrean verifikasi HR
           </p>
         </div>
       </div>
 
-      <!-- KPI 4: Pelanggan Aktif -->
+      <!-- KPI 4: Karyawan Aktif -->
       <div class="p-3.5 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-700 transition flex flex-col justify-between space-y-2 group">
         <div class="flex items-center justify-between">
-          <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Pelanggan Aktif</span>
+          <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Total Karyawan Aktif</span>
           <div class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
             <Users class="w-3.5 h-3.5" />
           </div>
@@ -495,20 +495,20 @@ onUnmounted(() => {
         <div>
           <div class="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white font-mono leading-none">
             <BaseCountUp :to="1248" suffix=" " />
-            <span class="text-xs font-normal text-neutral-500 font-sans">org</span>
+            <span class="text-xs font-normal text-neutral-500 font-sans">pegawai</span>
           </div>
           <div class="flex items-center gap-1 text-[10.5px] text-emerald-600 dark:text-emerald-400 font-medium mt-1.5">
             <ArrowUp class="w-3 h-3 stroke-[3]" />
             <span>{{ kpiSummary.pelangganAktif.growth }}</span>
-            <span class="text-neutral-400 dark:text-neutral-500 font-normal">7 hr terakhir</span>
+            <span class="text-neutral-400 dark:text-neutral-500 font-normal">6 cabang aktif</span>
           </div>
         </div>
       </div>
 
-      <!-- KPI 5: Mesin Aktif -->
+      <!-- KPI 5: Sistem ERP & Modul -->
       <div class="p-3.5 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-700 transition flex flex-col justify-between space-y-2 group">
         <div class="flex items-center justify-between">
-          <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Mesin Aktif</span>
+          <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Sistem ERP & Modul</span>
           <div class="w-7 h-7 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
             <Cpu class="w-3.5 h-3.5" />
           </div>
@@ -516,7 +516,7 @@ onUnmounted(() => {
         <div>
           <div class="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white font-mono leading-none">
             <BaseCountUp :to="kpiSummary.mesinAktif.aktif" /> / {{ kpiSummary.mesinAktif.total }}
-            <span class="text-xs font-normal text-neutral-500 font-sans">unit</span>
+            <span class="text-xs font-normal text-neutral-500 font-sans">modul</span>
           </div>
           <p class="text-[10.5px] text-sky-600 dark:text-sky-400 font-medium mt-1.5">
             {{ kpiSummary.mesinAktif.subtitle }}
@@ -524,10 +524,10 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- KPI 6: Stok Menipis -->
+      <!-- KPI 6: Evaluasi PKWT Segera -->
       <div class="p-3.5 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs hover:border-rose-300 dark:hover:border-rose-900/50 transition flex flex-col justify-between space-y-2 group">
         <div class="flex items-center justify-between">
-          <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Stok Menipis</span>
+          <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Evaluasi PKWT</span>
           <div class="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
             <AlertTriangle class="w-3.5 h-3.5" />
           </div>
@@ -535,7 +535,7 @@ onUnmounted(() => {
         <div>
           <div class="text-lg sm:text-xl font-bold text-rose-600 dark:text-rose-400 font-mono leading-none">
             <BaseCountUp :to="kpiSummary.stokMenipis.count" suffix=" " />
-            <span class="text-xs font-normal text-neutral-500 font-sans">item</span>
+            <span class="text-xs font-normal text-neutral-500 font-sans">staf</span>
           </div>
           <div class="flex items-center gap-1 text-[10.5px] text-rose-600 dark:text-rose-400 font-medium mt-1.5 truncate">
             <AlertTriangle class="w-2.5 h-2.5 shrink-0" />
@@ -583,7 +583,7 @@ onUnmounted(() => {
             <div class="flex items-center gap-2">
               <TrendingUp class="w-4 h-4 text-[var(--theme-primary)]" />
               <h2 class="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white">
-                Tren Omzet & Order
+                Tren Realisasi Payroll & Transaksi
               </h2>
             </div>
 
@@ -619,11 +619,11 @@ onUnmounted(() => {
             <div class="flex items-center gap-4">
               <div class="flex items-center gap-1.5">
                 <span class="w-2.5 h-2.5 rounded-full bg-[var(--theme-primary)] inline-block" />
-                <span>Omzet (Rp)</span>
+                <span>Realisasi Gaji (Rp)</span>
               </div>
               <div class="flex items-center gap-1.5">
                 <span class="w-2.5 h-2.5 rounded-full border-2 border-sky-400 bg-white dark:bg-[#141417] inline-block" />
-                <span>Jumlah Order</span>
+                <span>Batch Transaksi</span>
               </div>
             </div>
             <span v-if="isWaveActive" class="text-[10px] text-sky-500 font-mono tracking-tight hidden sm:inline">
@@ -755,16 +755,16 @@ onUnmounted(() => {
               </div>
               <div class="flex items-center gap-2 text-[11px] text-neutral-600 dark:text-neutral-300">
                 <span class="w-2 h-2 rounded-full bg-[var(--theme-primary)] shrink-0" />
-                <span>Omzet:</span>
+                <span>Realisasi Gaji:</span>
                 <span class="font-bold text-neutral-900 dark:text-white font-mono">
                   Rp {{ (currentTren.omzet[activeChartHoverIdx]).toLocaleString('id-ID') }}
                 </span>
               </div>
               <div class="flex items-center gap-2 text-[11px] text-neutral-600 dark:text-neutral-300 mt-0.5">
                 <span class="w-2 h-2 rounded-full bg-sky-500 shrink-0" />
-                <span>Order:</span>
+                <span>Batch Transaksi:</span>
                 <span class="font-bold text-neutral-900 dark:text-white font-mono">
-                  {{ currentTren.order[activeChartHoverIdx] }} order
+                  {{ currentTren.order[activeChartHoverIdx] }} batch
                 </span>
               </div>
             </div>
@@ -806,11 +806,11 @@ onUnmounted(() => {
             <div class="flex items-center gap-2">
               <BarChart3 class="w-4 h-4 text-blue-500" />
               <h2 class="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white">
-                Volume Order per Layanan
+                Distribusi SDM per Divisi
               </h2>
             </div>
             <span class="text-[10.5px] font-semibold text-neutral-400 bg-neutral-100 dark:bg-[#202025] px-2 py-0.5 rounded-md">
-              Hari Ini
+              Aktif
             </span>
           </div>
 
@@ -827,7 +827,7 @@ onUnmounted(() => {
                 </span>
                 <span class="font-bold font-mono text-neutral-900 dark:text-white">
                   <BaseCountUp :to="layanan.count" suffix=" " />
-                  <span class="text-[10px] font-normal text-neutral-400 font-sans">order</span>
+                  <span class="text-[10px] font-normal text-neutral-400 font-sans">staf</span>
                 </span>
               </div>
 
@@ -837,7 +837,7 @@ onUnmounted(() => {
                   class="h-full rounded-full transition-all duration-1000 ease-out"
                   :style="{
                     width: `${layanan.pct}%`,
-                    backgroundColor: layanan.id === 'cuci-kiloan' ? 'var(--theme-primary)' : layanan.color,
+                    backgroundColor: layanan.id === 'tech' ? 'var(--theme-primary)' : layanan.color,
                   }"
                 />
               </div>
@@ -847,10 +847,10 @@ onUnmounted(() => {
           <!-- Axis helper label -->
           <div class="flex items-center justify-between text-[10px] text-neutral-400 font-mono pt-1 border-t border-neutral-100 dark:border-[#27272a]">
             <span>0</span>
-            <span>20</span>
-            <span>40</span>
-            <span>60</span>
-            <span>80 order</span>
+            <span>100</span>
+            <span>200</span>
+            <span>300</span>
+            <span>450 pegawai</span>
           </div>
         </template>
       </div>
@@ -888,10 +888,10 @@ onUnmounted(() => {
             <div class="flex items-center gap-2">
               <PieChart class="w-4 h-4 text-emerald-500" />
               <h2 class="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white">
-                Distribusi Status
+                Status Pengajuan & Klaim
               </h2>
             </div>
-            <BaseBadge variant="neutral" size="sm">142 Total</BaseBadge>
+            <BaseBadge variant="neutral" size="sm">142 Tiket</BaseBadge>
           </div>
 
           <!-- Circular Donut Chart dengan Hover & Smooth Stroke Animation -->
@@ -933,7 +933,7 @@ onUnmounted(() => {
                 <BaseCountUp :to="142" />
               </span>
               <span class="text-[10px] text-neutral-400 tracking-wider uppercase font-semibold mt-0.5">
-                Order
+                Tiket
               </span>
             </div>
           </div>
@@ -972,7 +972,7 @@ onUnmounted(() => {
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 anim-fade-up anim-delay-3">
       
       <!-- ====================================================== -->
-      <!-- KARTU 1: Ringkasan Keuangan                            -->
+      <!-- KARTU 1: Ringkasan Finansial ERP                       -->
       <!-- ====================================================== -->
       <div class="p-4 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex flex-col justify-between space-y-3">
         <template v-if="isLoading">
@@ -993,7 +993,7 @@ onUnmounted(() => {
             <div class="flex items-center gap-2">
               <DollarSign class="w-4 h-4 text-emerald-500" />
               <h3 class="text-xs font-bold text-neutral-900 dark:text-white">
-                Ringkasan Keuangan <span class="font-normal text-neutral-400">(Hari Ini)</span>
+                Finansial & Arus Kas <span class="font-normal text-neutral-400">(Bulan Ini)</span>
               </h3>
             </div>
           </div>
@@ -1001,7 +1001,7 @@ onUnmounted(() => {
           <div class="space-y-2 divide-y divide-neutral-100 dark:divide-[#242428] text-xs">
             <div class="flex items-center justify-between pt-1">
               <span class="flex items-center gap-1.5 text-neutral-500">
-                <ArrowUp class="w-3.5 h-3.5 text-emerald-500" /> Pemasukan
+                <ArrowUp class="w-3.5 h-3.5 text-emerald-500" /> Pendapatan
               </span>
               <span class="font-bold font-mono text-neutral-900 dark:text-white">
                 <BaseCountUp :to="ringkasanKeuangan.pemasukan" prefix="Rp " />
@@ -1010,7 +1010,7 @@ onUnmounted(() => {
 
             <div class="flex items-center justify-between pt-2">
               <span class="flex items-center gap-1.5 text-neutral-500">
-                <ArrowDown class="w-3.5 h-3.5 text-rose-500" /> Pengeluaran
+                <ArrowDown class="w-3.5 h-3.5 text-rose-500" /> Beban Payroll & Ops
               </span>
               <span class="font-bold font-mono text-neutral-900 dark:text-white">
                 <BaseCountUp :to="ringkasanKeuangan.pengeluaran" prefix="Rp " />
@@ -1019,7 +1019,7 @@ onUnmounted(() => {
 
             <div class="flex items-center justify-between pt-2">
               <span class="font-bold text-neutral-800 dark:text-neutral-200">
-                Laba Kotor
+                Arus Kas Bersih (Net)
               </span>
               <div class="text-right">
                 <span class="font-bold font-mono text-sm text-[var(--theme-primary)] block">
@@ -1035,7 +1035,7 @@ onUnmounted(() => {
       </div>
 
       <!-- ====================================================== -->
-      <!-- KARTU 2: Utilisasi Mesin (Gauge Radial)                -->
+      <!-- KARTU 2: Utilisasi Cloud & Modul ERP (Gauge Radial)    -->
       <!-- ====================================================== -->
       <div class="p-4 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex flex-col justify-between space-y-3">
         <template v-if="isLoading">
@@ -1061,10 +1061,10 @@ onUnmounted(() => {
             <div class="flex items-center gap-2">
               <Cpu class="w-4 h-4 text-cyan-500" />
               <h3 class="text-xs font-bold text-neutral-900 dark:text-white">
-                Utilisasi Mesin
+                Cloud & Modul ERP
               </h3>
             </div>
-            <BaseBadge variant="info" size="sm">10 Unit</BaseBadge>
+            <BaseBadge variant="info" size="sm">10 Service</BaseBadge>
           </div>
 
           <div class="flex items-center gap-4">
@@ -1089,7 +1089,7 @@ onUnmounted(() => {
                 <span class="text-xs font-bold font-mono text-neutral-900 dark:text-white leading-none">
                   <BaseCountUp :to="utilisasiMesin.utilisasiPct" suffix="%" />
                 </span>
-                <span class="text-[8px] text-neutral-400 font-semibold">Util</span>
+                <span class="text-[8px] text-neutral-400 font-semibold">SLA</span>
               </div>
             </div>
 
@@ -1097,22 +1097,22 @@ onUnmounted(() => {
             <div class="flex-1 space-y-1 text-xs">
               <div class="flex items-center justify-between">
                 <span class="text-neutral-500 text-[11px] flex items-center gap-1.5">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Mesin Aktif:
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Modul Online:
                 </span>
                 <span class="font-bold text-neutral-900 dark:text-white font-mono">
-                  <BaseCountUp :to="utilisasiMesin.aktifUnit" /> unit
+                  <BaseCountUp :to="utilisasiMesin.aktifUnit" /> modul
                 </span>
               </div>
               <div class="flex items-center justify-between">
-                <span class="text-neutral-500 text-[11px]">Total Siklus:</span>
+                <span class="text-neutral-500 text-[11px]">Permintaan API:</span>
                 <span class="font-bold text-neutral-900 dark:text-white font-mono">
                   <BaseCountUp :to="utilisasiMesin.totalSiklus" suffix="x" />
                 </span>
               </div>
               <div class="flex items-center justify-between">
-                <span class="text-neutral-500 text-[11px]">Total Diproses:</span>
+                <span class="text-neutral-500 text-[11px]">Uptime SLA:</span>
                 <span class="font-bold text-neutral-900 dark:text-white font-mono">
-                  <BaseCountUp :to="utilisasiMesin.totalKg" :decimals="1" suffix=" kg" />
+                  <BaseCountUp :to="utilisasiMesin.totalKg" :decimals="1" suffix="%" />
                 </span>
               </div>
             </div>
@@ -1121,7 +1121,7 @@ onUnmounted(() => {
       </div>
 
       <!-- ====================================================== -->
-      <!-- KARTU 3: Stok & Inventaris (Peringatan)                 -->
+      <!-- KARTU 3: Kepatuhan & Regulasi HR                        -->
       <!-- ====================================================== -->
       <div class="p-4 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex flex-col justify-between space-y-3">
         <template v-if="isLoading">
@@ -1146,14 +1146,14 @@ onUnmounted(() => {
         <template v-else>
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <Package class="w-4 h-4 text-rose-500" />
+              <ShieldCheck class="w-4 h-4 text-emerald-500" />
               <h3 class="text-xs font-bold text-neutral-900 dark:text-white">
-                Stok & Inventaris
+                Kepatuhan & Regulasi HR
               </h3>
             </div>
             <button
               type="button"
-              @click="toast.info('Membuka modul inventaris lengkap...')"
+              @click="toast.info('Membuka modul audit kepatuhan lengkap...')"
               class="text-[10.5px] font-semibold text-[var(--theme-primary)] hover:underline flex items-center gap-0.5 cursor-pointer"
             >
               <span>Semua</span>
@@ -1172,7 +1172,7 @@ onUnmounted(() => {
                   {{ item.nama }}
                 </span>
                 <span class="text-[10px] text-neutral-400 font-mono">
-                  Sisa: {{ item.sisa }}
+                  {{ item.sisa }}
                 </span>
               </div>
               <BaseBadge :variant="item.badgeVariant" size="sm">
@@ -1184,7 +1184,7 @@ onUnmounted(() => {
       </div>
 
       <!-- ====================================================== -->
-      <!-- KARTU 4: Pickup & Delivery + Absensi Karyawan          -->
+      <!-- KARTU 4: Presensi & Distribusi Tim                      -->
       <!-- ====================================================== -->
       <div class="p-4 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex flex-col justify-between space-y-3">
         <template v-if="isLoading">
@@ -1205,29 +1205,29 @@ onUnmounted(() => {
         <template v-else>
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <Truck class="w-4 h-4 text-sky-500" />
+              <Users class="w-4 h-4 text-sky-500" />
               <h3 class="text-xs font-bold text-neutral-900 dark:text-white">
-                Logistik & Tim Hari Ini
+                Presensi & Distribusi Tim
               </h3>
             </div>
           </div>
 
-          <!-- 2 Column Pickup & Delivery dengan CountUp -->
+          <!-- 2 Column WFO & WFH dengan CountUp -->
           <div class="grid grid-cols-2 gap-2 text-xs">
             <div class="p-2 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-100 dark:border-[#242428]">
-              <span class="text-[10px] text-neutral-400 block font-semibold uppercase">Pickup</span>
+              <span class="text-[10px] text-neutral-400 block font-semibold uppercase">WFO (Kantor)</span>
               <span class="font-bold font-mono text-neutral-900 dark:text-white block mt-0.5 text-sm">
                 <BaseCountUp :to="logistikDanKaryawan.pickup.count" suffix=" " />
-                <span class="text-[10px] font-normal text-neutral-500">order</span>
+                <span class="text-[10px] font-normal text-neutral-500">pegawai</span>
               </span>
               <span class="text-[10px] text-emerald-600 font-semibold">{{ logistikDanKaryawan.pickup.growth }}</span>
             </div>
 
             <div class="p-2 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-100 dark:border-[#242428]">
-              <span class="text-[10px] text-neutral-400 block font-semibold uppercase">Delivery</span>
+              <span class="text-[10px] text-neutral-400 block font-semibold uppercase">WFH (Remote)</span>
               <span class="font-bold font-mono text-neutral-900 dark:text-white block mt-0.5 text-sm">
                 <BaseCountUp :to="logistikDanKaryawan.delivery.count" suffix=" " />
-                <span class="text-[10px] font-normal text-neutral-500">order</span>
+                <span class="text-[10px] font-normal text-neutral-500">pegawai</span>
               </span>
               <span class="text-[10px] text-emerald-600 font-semibold">{{ logistikDanKaryawan.delivery.growth }}</span>
             </div>
@@ -1236,7 +1236,7 @@ onUnmounted(() => {
           <!-- Absensi Karyawan Bar dengan Animation -->
           <div class="pt-1.5 border-t border-neutral-100 dark:border-[#27272a] space-y-1">
             <div class="flex items-center justify-between text-xs">
-              <span class="text-neutral-500 text-[11px]">Absensi Karyawan:</span>
+              <span class="text-neutral-500 text-[11px]">Presensi Hari Ini:</span>
               <span class="font-bold font-mono text-neutral-900 dark:text-white text-[11px]">
                 <BaseCountUp :to="logistikDanKaryawan.absensi.hadir" /> / {{ logistikDanKaryawan.absensi.total }} hadir
               </span>
@@ -1291,12 +1291,12 @@ onUnmounted(() => {
             <div class="flex items-center gap-2">
               <Clock class="w-4 h-4 text-[var(--theme-primary)]" />
               <h2 class="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white">
-                Aktivitas Terbaru <span class="font-normal text-neutral-400">(Operasional)</span>
+                Aktivitas Sistem ERP <span class="font-normal text-neutral-400">(Payroll & SDM)</span>
               </h2>
             </div>
             <button
               type="button"
-              @click="toast.info('Menampilkan log seluruh aktivitas sistem...')"
+              @click="toast.info('Menampilkan log audit seluruh aktivitas ERP...')"
               class="text-xs font-semibold text-[var(--theme-primary)] hover:underline flex items-center gap-0.5 cursor-pointer"
             >
               <span>Lihat Semua</span>
@@ -1356,7 +1356,7 @@ onUnmounted(() => {
           <div class="flex items-center gap-2">
             <ShoppingBag class="w-4 h-4 text-blue-500" />
             <h2 class="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white">
-              Order Terbaru
+              Transaksi & Pengajuan Payroll Terbaru
             </h2>
           </div>
           <button
@@ -1374,11 +1374,11 @@ onUnmounted(() => {
           <table class="w-full text-left text-xs">
             <thead class="bg-neutral-50/90 dark:bg-[#18181c] text-neutral-500 dark:text-neutral-400 font-semibold border-b border-neutral-200 dark:border-[#27272a] text-[10.5px]">
               <tr>
-                <th class="py-2 px-3">No. Order</th>
-                <th class="py-2 px-3">Pelanggan</th>
-                <th class="py-2 px-3">Layanan</th>
-                <th class="py-2 px-2.5 text-center">Berat</th>
-                <th class="py-2 px-3 text-right">Total</th>
+                <th class="py-2 px-3">No. Tiket</th>
+                <th class="py-2 px-3">Nama Pegawai</th>
+                <th class="py-2 px-3">Komponen / Klaim</th>
+                <th class="py-2 px-2.5 text-center">Divisi</th>
+                <th class="py-2 px-3 text-right">Nominal</th>
                 <th class="py-2 px-2.5 text-center">Status</th>
                 <th class="py-2 px-2.5 text-center">Aksi</th>
               </tr>
@@ -1461,19 +1461,19 @@ onUnmounted(() => {
       <div v-if="selectedOrder" class="space-y-5 text-xs">
         <div class="p-4 rounded-2xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-100 dark:border-[#27272a] space-y-3">
           <div class="flex items-center justify-between">
-            <span class="text-neutral-400 uppercase font-semibold text-[10px]">Pelanggan</span>
+            <span class="text-neutral-400 uppercase font-semibold text-[10px]">Nama Pegawai</span>
             <span class="text-sm font-bold text-neutral-900 dark:text-white">{{ selectedOrder.pelanggan }}</span>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-neutral-400 uppercase font-semibold text-[10px]">Layanan</span>
+            <span class="text-neutral-400 uppercase font-semibold text-[10px]">Komponen / Klaim</span>
             <span class="font-semibold text-neutral-800 dark:text-neutral-200">{{ selectedOrder.layanan }}</span>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-neutral-400 uppercase font-semibold text-[10px]">Kuantitas</span>
+            <span class="text-neutral-400 uppercase font-semibold text-[10px]">Divisi Kerja</span>
             <span class="font-mono font-bold text-neutral-900 dark:text-white">{{ selectedOrder.berat }}</span>
           </div>
           <div class="flex items-center justify-between pt-2 border-t border-neutral-200 dark:border-[#27272a]">
-            <span class="font-bold text-neutral-900 dark:text-white">Total Biaya</span>
+            <span class="font-bold text-neutral-900 dark:text-white">Nominal Transaksi</span>
             <span class="text-base font-bold font-mono text-[var(--theme-primary)]">
               Rp {{ selectedOrder.total.toLocaleString('id-ID') }}
             </span>
@@ -1482,7 +1482,7 @@ onUnmounted(() => {
 
         <!-- Activity Timeline for Order -->
         <div class="space-y-2">
-          <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Timeline Aktivitas Produksi</span>
+          <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Timeline Jejak Audit Transaksi</span>
           <div class="p-4 rounded-2xl bg-white dark:bg-[#16161a] border border-neutral-200 dark:border-[#27272a]">
             <BaseTimeline :items="getOrderTimeline(selectedOrder)" compact />
           </div>
