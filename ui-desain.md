@@ -460,6 +460,125 @@ Fitur produktivitas tabel data skala enterprise di [`DataKaryawanView.vue`](file
 
 ---
 
+### 4.15 `BaseSlideOver.vue` (Slide-Over Detail Drawer)
+Panel laci (*drawer*) yang meluncur mulus dari sisi kanan layar untuk menyajikan detail tanpa meninggalkan konteks halaman kerja:
+- **Ukuran Fleksibel**: `sm` (max-w-sm), `md` (max-w-lg), `lg` (max-w-2xl), `xl` (max-w-3xl).
+- **Aksesibilitas & Pintasan**: Menutup otomatis dengan tombol `Esc` atau klik area backdrop.
+- **Scrollable Body & Sticky Footer**: Area konten dapat digeser bebas dengan tombol aksi tersemat di bagian bawah.
+
+```vue
+<template>
+  <BaseSlideOver
+    v-model="isDetailOpen"
+    title="Detail Pesanan #ORD-9021"
+    subtitle="PT Mandiri Graha"
+    size="md"
+  >
+    <template #badge>
+      <BaseBadge variant="warning">PROSES</BaseBadge>
+    </template>
+
+    <div class="space-y-4">
+      <!-- Konten detail / timeline -->
+    </div>
+
+    <template #footer="{ close }">
+      <BaseButton variant="outline" size="sm" @click="close">Tutup</BaseButton>
+    </template>
+  </BaseSlideOver>
+</template>
+```
+
+---
+
+### 4.16 `BaseTimeline.vue` (Garis Waktu & Audit Log)
+Komponen jejak audit dan status berurutan dengan konektor vertikal yang rapi:
+- **Varian Status Node**: `primary`, `success`, `warning`, `danger`, `info`, `neutral`.
+- **Ikon Kustom / Otomatis**: Mendukung ikon Lucide kustom atau otomatis disesuaikan dengan varian status.
+- **Slot Kustom**: Memungkinkan penyisipan tombol, bukti lampiran, atau tabel mini di setiap titik waktu.
+
+```vue
+<template>
+  <BaseTimeline
+    :items="[
+      { id: 1, title: 'Pembayaran Lunas', time: '10:30 WIB', variant: 'success', author: 'Payment Gateway' },
+      { id: 2, title: 'Produksi Mesin Cetak', time: '11:15 WIB', variant: 'primary', author: 'Operator' },
+    ]"
+    compact
+  />
+</template>
+```
+
+---
+
+### 4.17 `BaseInvoiceModal.vue` (Faktur Resmi & Cetak Struk `@media print`)
+Komponen pratinjau faktur/invoice penjualan resmi yang siap cetak:
+- **Struktur Standar**: Nomor invoice, tanggal terbit, jatuh tempo, status lunas, rincian biaya, PPN 11%, dan total bayar.
+- **Cetak Ramah Kertas**: Dilengkapi aturan `@media print` scoped sehingga saat dicetak melalui `window.print()`, header, sidebar, dan tombol aksi otomatis disembunyikan.
+
+```vue
+<template>
+  <BaseInvoiceModal
+    v-model="isInvoiceModalOpen"
+    :invoice-data="dataInvoice"
+  />
+</template>
+```
+
+---
+
+### 4.18 `BaseFileUploader.vue` (Drag & Drop File Upload)
+Komponen pengunggah berkas mandiri dengan area seret & lepas:
+- **Indikator Visual Dinamis**: Border putus-putus beranimasi dan beriak lembut saat berkas ditarik di atasnya.
+- **Pratinjau Miniatur**: Menampilkan gambar asli untuk file foto/gambar, dan ikon warna tematik untuk PDF, Excel/CSV, ZIP, atau dokumen teks.
+- **Validasi Berkas**: Validasi ukuran maksimal (MB) dan format ekstensi (`accept`).
+
+```vue
+<template>
+  <BaseFileUploader
+    v-model="uploadedFiles"
+    label="Unggah Berkas Pendukung"
+    hint="Format berkas: JPG, PNG, atau PDF (maks. 5 MB)"
+    accept="image/*,.pdf"
+    :max-size-m-b="5"
+  />
+</template>
+```
+
+---
+
+### 4.19 `BaseCsvImporter.vue` (Wizard Impor Data CSV Klien)
+Modal multi-tahap (3 langkah) untuk mengimpor berkas CSV ke dalam state tabel aplikasi secara instan:
+1. **Langkah 1 (Unggah)**: Drag & drop atau pemilih file CSV lokal.
+2. **Langkah 2 (Pemetaan Kolom)**: Parser cerdas membaca delimiter (`,` atau `;`), mendeteksi header secara otomatis, dan menyediakan dropdown pencocokan kolom CSV dengan field data sistem.
+3. **Langkah 3 (Pratinjau & Selesai)**: Menampilkan 4 baris data teratas hasil pemetaan dan tombol konfirmasi impor.
+
+```vue
+<template>
+  <BaseCsvImporter
+    v-model="isImporterOpen"
+    title="Impor Data Karyawan dari CSV"
+    :target-fields="[
+      { key: 'nama', label: 'Nama Lengkap', required: true },
+      { key: 'jabatan', label: 'Jabatan', required: true },
+      { key: 'gaji', label: 'Gaji Pokok', required: false },
+    ]"
+    @imported="handleDataImported"
+  />
+</template>
+```
+
+---
+
+### 4.20 `KanbanView.vue` (Papan Alur Kanban Pipeline)
+Halaman papan Kanban visual di rute `/pesanan/kanban`:
+- **4 Kolom Tahapan Alur**: `Menunggu Pembayaran`, `Antrean Produksi`, `Quality Control`, dan `Selesai & Dikirim`.
+- **Drag & Drop Native HTML5**: Geser kartu antar kolom tanpa dependensi library eksternal.
+- **Metrik Kolom**: Counter jumlah order dan akumulasi total nominal Rupiah per kolom.
+- **Aksi Cepat Kartu**: Buka rincian lengkap di `BaseSlideOver.vue` atau cetak faktur langsung di `BaseInvoiceModal.vue`.
+
+---
+
 ## 5. Standar Desain Dashboard & Visualisasi SVG (Zero Library)
 
 Dashboard operasional di [`DashboardView.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/views/DashboardView.vue) dibangun menggunakan pure SVG interaktif berkinerja tinggi tanpa library chart eksternal:

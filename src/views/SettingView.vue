@@ -14,6 +14,11 @@ import MobileModal from '../components/ui/MobileModal.vue'
 import ConfirmationModal from '../components/ui/ConfirmationModal.vue'
 import BaseDatePicker from '../components/ui/BaseDatePicker.vue'
 import BaseEmptyState from '../components/ui/BaseEmptyState.vue'
+import BaseFileUploader from '../components/ui/BaseFileUploader.vue'
+import BaseTimeline from '../components/ui/BaseTimeline.vue'
+import BaseSlideOver from '../components/ui/BaseSlideOver.vue'
+import BaseInvoiceModal from '../components/ui/BaseInvoiceModal.vue'
+import BaseCsvImporter from '../components/ui/BaseCsvImporter.vue'
 import { useToast } from '../composables/useToast'
 import { useBackground } from '../composables/useBackground'
 import { useThemeColor } from '../composables/useThemeColor'
@@ -39,6 +44,10 @@ import {
   Sparkles,
   Calendar,
   FolderSearch,
+  Upload,
+  Printer,
+  Eye,
+  FileSpreadsheet,
 } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -135,6 +144,16 @@ const demoCountVal = ref(7850000)
 const demoSkelToggle = ref(false)
 const demoSingleDate = ref('2025-01-27')
 const demoRangeDate = ref({ start: '2025-01-20', end: '2025-01-27' })
+const demoUploadedFiles = ref([])
+const demoSlideOverOpen = ref(false)
+const demoInvoiceOpen = ref(false)
+const demoCsvOpen = ref(false)
+
+const demoTimelineItems = [
+  { id: 1, title: 'Pembayaran Dikonfirmasi Lunas', description: 'Metode transfer QRIS BCA terverifikasi.', time: '10:30 WIB', variant: 'success', author: 'Payment Gateway' },
+  { id: 2, title: 'File RIP Masuk Antrean Mesin', description: 'Resolusi 1200 DPI, profil CMYK disesuaikan.', time: '11:15 WIB', variant: 'primary', author: 'Operator Offset' },
+  { id: 3, title: 'Pemeriksaan Quality Control', description: 'Hasil cetak dan presisi potong lolos uji 100%.', time: '13:00 WIB', variant: 'info', author: 'Tim QC' },
+]
 
 // Modals Showcase State (Moved from Beranda)
 const isDesktopModalOpen = ref(false)
@@ -456,6 +475,75 @@ const handleSavePassword = () => {
                   compact
                   @action="toast.info('Aksi unggah dokumen baru berhasil dipicu!', 'BaseEmptyState')"
                 />
+              </div>
+            </div>
+          </div>
+
+          <!-- Showcase Komponen Enterprise: FileUploader, Timeline, SlideOver, Invoice -->
+          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417] shadow-2xs space-y-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-sm font-bold text-neutral-900 dark:text-white flex items-center gap-2">
+                  <Upload class="w-4 h-4 text-[var(--theme-primary)]" />
+                  <span>Komponen Enterprise: FileUploader, Timeline & Drawer</span>
+                </h2>
+                <p class="text-xs text-neutral-500 mt-0.5">
+                  Komponen drag & drop berkas, garis waktu jejak audit (timeline), slide-over drawer, dan faktur cetak resmi.
+                </p>
+              </div>
+              <BaseBadge variant="success" size="sm">Enterprise Ready</BaseBadge>
+            </div>
+
+            <!-- Grid 2 Kolom: FileUploader vs Timeline -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Live BaseFileUploader -->
+              <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-200/80 dark:border-[#242428] space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-neutral-800 dark:text-neutral-200">1. BaseFileUploader (Drag & Drop)</span>
+                  <BaseBadge variant="neutral" size="sm">Maks 5 MB</BaseBadge>
+                </div>
+                <BaseFileUploader
+                  v-model="demoUploadedFiles"
+                  label="Unggah Berkas Pendukung"
+                  hint="Seret berkas gambar atau PDF ke sini"
+                  accept="image/*,.pdf,.xlsx"
+                  :max-size-m-b="5"
+                />
+              </div>
+
+              <!-- Live BaseTimeline -->
+              <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-200/80 dark:border-[#242428] space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-neutral-800 dark:text-neutral-200">2. BaseTimeline (Jejak Audit Aktivitas)</span>
+                  <BaseBadge variant="primary" size="sm">Audit Log</BaseBadge>
+                </div>
+                <div class="p-3 rounded-xl bg-white dark:bg-[#141417] border border-neutral-200/80 dark:border-[#242428]">
+                  <BaseTimeline :items="demoTimelineItems" compact />
+                </div>
+              </div>
+            </div>
+
+            <!-- Interactive Trigger Demos: Slide-Over, Invoice & CSV Importer -->
+            <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-200/80 dark:border-[#242428] space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-neutral-800 dark:text-neutral-200">3. Demo Langsung Slide-Over Drawer & Faktur Cetak</span>
+                <span class="text-[11px] text-neutral-400">Klik tombol di bawah untuk menguji</span>
+              </div>
+              <div class="flex items-center gap-2.5 flex-wrap">
+                <BaseButton variant="outline" size="sm" @click="demoSlideOverOpen = true">
+                  <Eye class="w-3.5 h-3.5" />
+                  <span>Buka Slide-Over Drawer</span>
+                </BaseButton>
+
+                <BaseButton variant="outline" size="sm" @click="demoInvoiceOpen = true">
+                  <Printer class="w-3.5 h-3.5" />
+                  <span>Buka Faktur Invoice Resmi</span>
+                </BaseButton>
+
+                <BaseButton variant="outline" size="sm" @click="demoCsvOpen = true">
+                  <FileSpreadsheet class="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Buka Wizard Impor CSV</span>
+                </BaseButton>
               </div>
             </div>
           </div>
@@ -1070,6 +1158,47 @@ const handleSavePassword = () => {
       confirm-text="Hapus"
       cancel-text="Batal"
       @confirm="toast.error('Data berhasil dihapus dari sistem.', 'Dihapus')"
+    />
+
+    <!-- Demo Slide-Over Drawer -->
+    <BaseSlideOver
+      v-model="demoSlideOverOpen"
+      title="Panel Slide-Over Drawer"
+      subtitle="Drawer mulus dari sisi kanan layar"
+      size="md"
+    >
+      <template #badge>
+        <BaseBadge variant="success" size="sm">Live Demo</BaseBadge>
+      </template>
+
+      <div class="space-y-4 text-xs text-neutral-600 dark:text-neutral-300">
+        <p>
+          Komponen <code>BaseSlideOver.vue</code> sangat cocok untuk melihat detail pesanan, profil lengkap pengguna, atau log tanpa meninggalkan halaman saat ini.
+        </p>
+
+        <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[#161619] border border-neutral-200 dark:border-[#27272a] space-y-2">
+          <span class="font-bold text-neutral-900 dark:text-white">Aktivitas Terkini:</span>
+          <BaseTimeline :items="demoTimelineItems" compact />
+        </div>
+      </div>
+
+      <template #footer="{ close }">
+        <BaseButton variant="outline" size="sm" @click="close">Tutup</BaseButton>
+        <BaseButton variant="primary" size="sm" @click="close(); toast.success('Aksi drawer berhasil dijalankan!')">
+          Simpan Data
+        </BaseButton>
+      </template>
+    </BaseSlideOver>
+
+    <!-- Demo Invoice Modal -->
+    <BaseInvoiceModal
+      v-model="demoInvoiceOpen"
+    />
+
+    <!-- Demo CSV Importer Modal -->
+    <BaseCsvImporter
+      v-model="demoCsvOpen"
+      @imported="toast.success('Simulasi data CSV berhasil diimpor!')"
     />
   </div>
 </template>

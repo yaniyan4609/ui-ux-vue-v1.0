@@ -13,6 +13,10 @@ import BaseSwitch from '../components/ui/BaseSwitch.vue'
 import BaseBadge from '../components/ui/BaseBadge.vue'
 import BasePagination from '../components/ui/BasePagination.vue'
 import BaseDropdownMenu from '../components/ui/BaseDropdownMenu.vue'
+import BaseSlideOver from '../components/ui/BaseSlideOver.vue'
+import BaseTimeline from '../components/ui/BaseTimeline.vue'
+import BaseCsvImporter from '../components/ui/BaseCsvImporter.vue'
+import BaseFileUploader from '../components/ui/BaseFileUploader.vue'
 import { useToast } from '../composables/useToast'
 import { karyawanList } from '../data/karyawanData'
 import {
@@ -42,6 +46,8 @@ import {
   ShieldCheck,
   Download,
   CheckSquare,
+  Upload,
+  Eye,
 } from 'lucide-vue-next'
 
 const toast = useToast()
@@ -438,8 +444,96 @@ const handleResetDefault = () => {
   toast.info('Data telah dikembalikan ke daftar awal.')
 }
 
+// CSV Importer State
+const isCsvImporterOpen = ref(false)
+const targetFieldsForImport = [
+  { key: 'nama', label: 'Nama Lengkap', required: true },
+  { key: 'nip', label: 'NIP Pegawai', required: false },
+  { key: 'jabatan', label: 'Jabatan / Posisi', required: true },
+  { key: 'divisi', label: 'Divisi', required: false },
+  { key: 'email', label: 'Email Kantor', required: false },
+  { key: 'telepon', label: 'Nomor Telepon', required: false },
+  { key: 'gaji', label: 'Gaji Pokok', required: false },
+  { key: 'status', label: 'Status Pegawai', required: false },
+]
+
+const handleCsvImported = (importedRows) => {
+  if (!importedRows || importedRows.length === 0) return
+
+  let count = 0
+  importedRows.forEach((row, idx) => {
+    if (!row.nama) return
+    listKaryawan.value.unshift({
+      id: Date.now() + idx,
+      nip: row.nip || 'EMP-' + Math.floor(1000 + Math.random() * 9000),
+      nama: row.nama,
+      jabatan: row.jabatan || 'Staf Operasional',
+      divisi: row.divisi || 'Operasional',
+      email: row.email || `${row.nama.toLowerCase().replace(/\s+/g, '.')}@digaji.id`,
+      telepon: row.telepon || '0812-' + Math.floor(10000000 + Math.random() * 90000000),
+      gaji: Number(row.gaji) || 5500000,
+      tunjangan: 750000,
+      status: row.status || 'Tetap',
+      tanggalMasuk: '2025-01-27',
+      lokasi: 'Jakarta Pusat',
+      bpjs: true,
+      avatar: row.nama
+        .split(' ')
+        .map((w) => w[0])
+        .slice(0, 2)
+        .join('')
+        .toUpperCase(),
+    })
+    count++
+  })
+
+  toast.success(`Berhasil mengimpor ${count} data pegawai baru dari CSV!`, 'Impor CSV Berhasil')
+}
+
+// Slide-Over Detail Drawer State
+const isSlideOverOpen = ref(false)
+const selectedEmployee = ref(null)
+
+const openEmployeeDetail = (emp) => {
+  selectedEmployee.value = emp
+  isSlideOverOpen.value = true
+}
+
+// Sample Employee Timeline
+const getEmployeeTimeline = (emp) => [
+  {
+    id: 1,
+    title: 'Penyesuaian Gaji Pokok Berkala',
+    description: `Kenaikan kompensasi disetujui sebesar Rp ${(emp.gaji || 0).toLocaleString('id-ID')} per bulan.`,
+    time: '15 Jan 2025',
+    variant: 'success',
+    author: 'HR Management',
+  },
+  {
+    id: 2,
+    title: `Promosi Jabatan: ${emp.jabatan}`,
+    description: `Ditempatkan pada Divisi ${emp.divisi} di kantor ${emp.lokasi}.`,
+    time: '01 Des 2024',
+    variant: 'primary',
+    author: 'Direksi Operasional',
+  },
+  {
+    id: 3,
+    title: 'Verifikasi Berkas & Onboarding Tuntas',
+    description: `NIP resmi ${emp.nip} diterbitkan, kepesertaan BPJS Ketenagakerjaan aktif.`,
+    time: emp.tanggalMasuk || '10 Jan 2024',
+    variant: 'info',
+    author: 'HR Staff',
+  },
+]
+
 // Action items for BaseDropdownMenu
 const getRowActionItems = (item) => [
+  {
+    label: 'Lihat Profil & Timeline',
+    icon: Eye,
+    action: () => openEmployeeDetail(item),
+  },
   {
     label: 'Ubah Data Pegawai',
     icon: Pencil,
@@ -481,6 +575,11 @@ const getRowActionItems = (item) => [
 
       <!-- Action Buttons -->
       <div class="flex items-center gap-2 shrink-0">
+        <BaseButton variant="outline" size="sm" @click="isCsvImporterOpen = true" title="Impor data dari berkas CSV">
+          <Upload class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+          <span class="hidden sm:inline">Impor CSV</span>
+        </BaseButton>
+
         <BaseButton variant="outline" size="sm" @click="exportToCSV()" title="Ekspor seluruh data ke file CSV">
           <Download class="w-3.5 h-3.5 text-neutral-500" />
           <span class="hidden sm:inline">Ekspor CSV</span>
@@ -1087,6 +1186,14 @@ const getRowActionItems = (item) => [
           :maxlength="250"
         />
 
+        <!-- Berkas Dokumen & Pasfoto (BaseFileUploader) -->
+        <BaseFileUploader
+          label="Unggah Pasfoto / Dokumen Pendukung (Opsional)"
+          hint="Format berkas: JPG, PNG, atau PDF (maks. 5 MB)"
+          accept="image/*,.pdf"
+          :multiple="false"
+        />
+
         <!-- Baris 7: Switch BPJS Asuransi (BaseSwitch) -->
         <div class="p-3.5 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-200/80 dark:border-[#26262a]">
           <BaseSwitch
@@ -1129,5 +1236,114 @@ const getRowActionItems = (item) => [
       cancel-text="Batal"
       @confirm="handleBatchDeleteConfirm"
     />
+
+    <!-- ======================================================== -->
+    <!-- WIZARD IMPOR DATA CSV (BaseCsvImporter.vue)             -->
+    <!-- ======================================================== -->
+    <BaseCsvImporter
+      v-model="isCsvImporterOpen"
+      title="Impor Data Pegawai dari Berkas CSV"
+      :target-fields="targetFieldsForImport"
+      @imported="handleCsvImported"
+    />
+
+    <!-- ======================================================== -->
+    <!-- SLIDE-OVER DETAIL PEGAWAI & TIMELINE (BaseSlideOver.vue) -->
+    <!-- ======================================================== -->
+    <BaseSlideOver
+      v-model="isSlideOverOpen"
+      :title="selectedEmployee?.nama || 'Profil Pegawai'"
+      :subtitle="selectedEmployee ? `${selectedEmployee.nip} • ${selectedEmployee.jabatan}` : ''"
+      size="md"
+    >
+      <template #badge>
+        <BaseBadge
+          v-if="selectedEmployee"
+          :variant="getStatusBadgeVariant(selectedEmployee.status)"
+          size="sm"
+        >
+          {{ selectedEmployee.status }}
+        </BaseBadge>
+      </template>
+
+      <div v-if="selectedEmployee" class="space-y-5 text-xs">
+        <!-- Avatar & Header Identity Card -->
+        <div class="p-4 rounded-2xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-200 dark:border-[#27272a] flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-bold text-base flex items-center justify-center shrink-0 shadow-xs">
+            {{ selectedEmployee.avatar }}
+          </div>
+          <div class="min-w-0">
+            <h4 class="font-bold text-sm sm:text-base text-neutral-900 dark:text-white truncate">
+              {{ selectedEmployee.nama }}
+            </h4>
+            <div class="flex items-center gap-2 mt-0.5 text-neutral-500 text-[11px]">
+              <span>{{ selectedEmployee.divisi }}</span>
+              <span>&bull;</span>
+              <span>{{ selectedEmployee.lokasi }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact & Profile Metadata Grid -->
+        <div class="space-y-2">
+          <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Kontak & Kepegawaian</span>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417]">
+              <span class="text-neutral-400 text-[10px] block">Email Kantor:</span>
+              <span class="font-semibold text-neutral-900 dark:text-white truncate block">{{ selectedEmployee.email }}</span>
+            </div>
+            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417]">
+              <span class="text-neutral-400 text-[10px] block">Nomor Telepon:</span>
+              <span class="font-semibold text-neutral-900 dark:text-white font-mono block">{{ selectedEmployee.telepon }}</span>
+            </div>
+            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417]">
+              <span class="text-neutral-400 text-[10px] block">Tanggal Bergabung:</span>
+              <span class="font-semibold text-neutral-900 dark:text-white block">{{ selectedEmployee.tanggalMasuk }}</span>
+            </div>
+            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417]">
+              <span class="text-neutral-400 text-[10px] block">Asuransi BPJS:</span>
+              <span class="font-semibold text-emerald-600 dark:text-emerald-400 block">
+                {{ selectedEmployee.bpjs ? 'Aktif (Kesehatan & TK)' : 'Tidak Terdaftar' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compensation Payroll Card -->
+        <div class="p-4 rounded-2xl bg-white dark:bg-[#16161a] border border-neutral-200 dark:border-[#27272a] space-y-2.5 shadow-2xs">
+          <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Kompensasi Bulanan</span>
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-neutral-500">Gaji Pokok:</span>
+            <span class="font-mono font-bold text-neutral-900 dark:text-white">{{ formatRupiah(selectedEmployee.gaji) }}</span>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-neutral-500">Tunjangan Kinerja:</span>
+            <span class="font-mono font-bold text-neutral-900 dark:text-white">{{ formatRupiah(selectedEmployee.tunjangan) }}</span>
+          </div>
+          <div class="pt-2 border-t border-neutral-100 dark:border-[#242428] flex items-center justify-between text-sm">
+            <span class="font-bold text-neutral-900 dark:text-white">Take Home Pay:</span>
+            <span class="font-mono font-bold text-[var(--theme-primary)]">
+              {{ formatRupiah((selectedEmployee.gaji || 0) + (selectedEmployee.tunjangan || 0)) }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Career History Timeline Component -->
+        <div class="space-y-2 pt-1">
+          <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Jejak Karier & Riwayat Payroll</span>
+          <div class="p-4 rounded-2xl bg-neutral-50/50 dark:bg-[#16161a] border border-neutral-200 dark:border-[#27272a]">
+            <BaseTimeline :items="getEmployeeTimeline(selectedEmployee)" compact />
+          </div>
+        </div>
+      </div>
+
+      <template #footer="{ close }">
+        <BaseButton variant="outline" size="sm" @click="close">Tutup</BaseButton>
+        <BaseButton variant="primary" size="sm" @click="openEditModal(selectedEmployee); close();">
+          <Pencil class="w-3.5 h-3.5" />
+          <span>Edit Data</span>
+        </BaseButton>
+      </template>
+    </BaseSlideOver>
   </div>
 </template>

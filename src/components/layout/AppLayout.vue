@@ -22,6 +22,9 @@ onMounted(() => {
 })
 
 const activeMenuId = computed(() => {
+  if (route.path.startsWith('/pesanan')) {
+    return 'pesanan'
+  }
   if (route.path.startsWith('/data')) {
     return 'data'
   }

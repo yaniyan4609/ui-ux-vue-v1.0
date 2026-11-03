@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import DashboardView from '../views/DashboardView.vue'
+import KanbanView from '../views/KanbanView.vue'
 import DataView from '../views/DataView.vue'
 import DataKaryawanView from '../views/DataKaryawanView.vue'
 import SettingView from '../views/SettingView.vue'
@@ -9,6 +10,15 @@ const routes = [
     path: '/',
     name: 'Beranda',
     component: DashboardView,
+  },
+  {
+    path: '/pesanan',
+    redirect: '/pesanan/kanban',
+  },
+  {
+    path: '/pesanan/kanban',
+    name: 'PesananKanban',
+    component: KanbanView,
   },
   {
     path: '/data',

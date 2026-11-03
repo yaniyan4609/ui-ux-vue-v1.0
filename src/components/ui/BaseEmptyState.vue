@@ -77,3 +77,4 @@ const effectiveIcon = computed(() => props.icon || Search)
     </div>
   </div>
 </template>
+

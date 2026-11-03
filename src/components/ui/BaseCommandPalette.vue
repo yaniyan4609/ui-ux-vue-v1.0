@@ -20,6 +20,7 @@ import {
   X,
   FileText,
   PlusCircle,
+  KanbanSquare,
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -56,6 +57,14 @@ const commands = [
     icon: LayoutDashboard,
     badge: 'Halaman',
     action: () => router.push('/'),
+  },
+  {
+    id: 'nav-pesanan-kanban',
+    title: 'Buka Kanban Pipeline Pesanan',
+    category: 'Navigasi',
+    icon: KanbanSquare,
+    badge: 'Halaman',
+    action: () => router.push('/pesanan/kanban'),
   },
   {
     id: 'nav-data-gunung',
@@ -442,3 +451,4 @@ onUnmounted(() => {
     </Transition>
   </Teleport>
 </template>
+

@@ -1,4 +1,4 @@
-import { Home, Database, Settings, Sliders, Palette, Shield, Bell, Layers, Mountain, Users } from 'lucide-vue-next'
+import { Home, Database, Settings, Sliders, Palette, Shield, Bell, Layers, Mountain, Users, KanbanSquare } from 'lucide-vue-next'
 
 export const menuItems = [
   {
@@ -7,6 +7,15 @@ export const menuItems = [
     icon: Home,
     route: '/',
     submenus: [],
+  },
+  {
+    id: 'pesanan',
+    label: 'Pesanan',
+    icon: KanbanSquare,
+    route: '/pesanan/kanban',
+    submenus: [
+      { id: 'kanban', label: 'Kanban Pipeline', icon: KanbanSquare, route: '/pesanan/kanban' },
+    ],
   },
   {
     id: 'data',

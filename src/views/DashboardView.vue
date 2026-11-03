@@ -7,6 +7,9 @@ import BaseModal from '../components/ui/BaseModal.vue'
 import BaseSkeleton from '../components/ui/BaseSkeleton.vue'
 import BaseCountUp from '../components/ui/BaseCountUp.vue'
 import BaseDatePicker from '../components/ui/BaseDatePicker.vue'
+import BaseSlideOver from '../components/ui/BaseSlideOver.vue'
+import BaseInvoiceModal from '../components/ui/BaseInvoiceModal.vue'
+import BaseTimeline from '../components/ui/BaseTimeline.vue'
 import { useToast } from '../composables/useToast'
 import {
   kpiSummary,
@@ -105,16 +108,64 @@ watch(selectedTrenPeriod, () => {
 
 // Quick Detail Modal State for Order Row
 const selectedOrder = ref(null)
-const isOrderModalOpen = ref(false)
+const isOrderSlideOverOpen = ref(false)
+const isInvoiceModalOpen = ref(false)
+const invoiceModalData = ref(null)
 
 const openOrderDetail = (order) => {
   selectedOrder.value = order
-  isOrderModalOpen.value = true
+  isOrderSlideOverOpen.value = true
 }
 
 const handlePrintNota = (order) => {
-  toast.info(`Mencetak nota ${order.noOrder} untuk ${order.pelanggan}...`, 'Cetak Nota')
+  invoiceModalData.value = {
+    noInvoice: 'INV-' + (order.noOrder ? order.noOrder.replace('#', '') : '2025-0842'),
+    tanggal: '27 Jan 2025',
+    jatuhTempo: '03 Feb 2025',
+    status: order.status === 'Selesai' ? 'LUNAS' : 'PENDING',
+    metodePembayaran: 'QRIS / Transfer Bank Mandiri',
+    customer: {
+      nama: order.pelanggan || 'Pelanggan Walk-in',
+      kontak: 'PIC Pemesan',
+      telepon: '0812-8877-6655',
+      alamat: 'Jl. Percetakan Negara No. 45, Jakarta Pusat',
+    },
+    items: [
+      {
+        nama: order.layanan,
+        spesifikasi: `Kuantitas ${order.berat}, Pengerjaan Standar Operasional`,
+        qty: 1,
+        harga: order.total,
+        total: order.total,
+      },
+    ],
+    subtotal: order.total,
+    diskon: 0,
+    ppn: Math.round(order.total * 0.11),
+    totalBayar: Math.round(order.total * 1.11),
+    catatan: 'Terima kasih telah mempercayai layanan percetakan & cetak cepat Digaji.id.',
+  }
+  isInvoiceModalOpen.value = true
 }
+
+const getOrderTimeline = (order) => [
+  {
+    id: 1,
+    title: `Order Masuk: ${order.noOrder}`,
+    description: `Order layanan ${order.layanan} (${order.berat}) senilai Rp ${order.total.toLocaleString('id-ID')} dicatat sistem.`,
+    time: order.waktu || 'Hari ini',
+    variant: 'primary',
+    author: 'Kasir Front Office',
+  },
+  {
+    id: 2,
+    title: 'Status Produksi: ' + order.status,
+    description: 'Pekerjaan dialokasikan ke mesin cetak dan antrean operator.',
+    time: '20 menit lalu',
+    variant: order.status === 'Selesai' ? 'success' : 'warning',
+    author: 'Operator Mesin',
+  },
+]
 
 // ========================================================
 // 3. SVG CHART HELPERS & WAVE ANIMATION (Bergelombang Naik-Turun)
@@ -1393,52 +1444,70 @@ onUnmounted(() => {
     </div>
 
     <!-- ======================================================== -->
-    <!-- MODAL QUICK DETAIL ORDER (INTERACTIVE POPUP)             -->
+    <!-- SLIDE-OVER QUICK DETAIL ORDER (BaseSlideOver.vue)        -->
     <!-- ======================================================== -->
-    <BaseModal
-      v-model="isOrderModalOpen"
-      :title="selectedOrder ? `Detail Order: ${selectedOrder.noOrder}` : 'Detail Order'"
+    <BaseSlideOver
+      v-model="isOrderSlideOverOpen"
+      :title="selectedOrder ? `Rincian Order ${selectedOrder.noOrder}` : 'Rincian Order'"
+      :subtitle="selectedOrder?.pelanggan"
       size="md"
     >
-      <div v-if="selectedOrder" class="space-y-4">
-        <div class="p-3.5 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-100 dark:border-[#27272a] space-y-2">
+      <template #badge>
+        <BaseBadge v-if="selectedOrder" :variant="selectedOrder.statusVariant" size="sm">
+          {{ selectedOrder.status }}
+        </BaseBadge>
+      </template>
+
+      <div v-if="selectedOrder" class="space-y-5 text-xs">
+        <div class="p-4 rounded-2xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-100 dark:border-[#27272a] space-y-3">
           <div class="flex items-center justify-between">
-            <span class="text-xs text-neutral-400 uppercase font-semibold">Pelanggan</span>
+            <span class="text-neutral-400 uppercase font-semibold text-[10px]">Pelanggan</span>
             <span class="text-sm font-bold text-neutral-900 dark:text-white">{{ selectedOrder.pelanggan }}</span>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-xs text-neutral-400 uppercase font-semibold">Layanan</span>
-            <span class="text-xs font-semibold text-neutral-800 dark:text-neutral-200">{{ selectedOrder.layanan }}</span>
+            <span class="text-neutral-400 uppercase font-semibold text-[10px]">Layanan</span>
+            <span class="font-semibold text-neutral-800 dark:text-neutral-200">{{ selectedOrder.layanan }}</span>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-xs text-neutral-400 uppercase font-semibold">Kuantitas / Berat</span>
-            <span class="text-xs font-mono font-bold text-neutral-900 dark:text-white">{{ selectedOrder.berat }}</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span class="text-xs text-neutral-400 uppercase font-semibold">Status Pengerjaan</span>
-            <BaseBadge :variant="selectedOrder.statusVariant">{{ selectedOrder.status }}</BaseBadge>
+            <span class="text-neutral-400 uppercase font-semibold text-[10px]">Kuantitas</span>
+            <span class="font-mono font-bold text-neutral-900 dark:text-white">{{ selectedOrder.berat }}</span>
           </div>
           <div class="flex items-center justify-between pt-2 border-t border-neutral-200 dark:border-[#27272a]">
-            <span class="text-xs font-bold text-neutral-900 dark:text-white">Total Tagihan</span>
+            <span class="font-bold text-neutral-900 dark:text-white">Total Biaya</span>
             <span class="text-base font-bold font-mono text-[var(--theme-primary)]">
               Rp {{ selectedOrder.total.toLocaleString('id-ID') }}
             </span>
           </div>
         </div>
 
-        <div class="flex items-center justify-end gap-2 pt-2">
-          <BaseButton variant="outline" size="sm" @click="handlePrintNota(selectedOrder)">
-            <Printer class="w-3.5 h-3.5" />
-            <span>Cetak Nota</span>
-          </BaseButton>
-
-          <BaseButton variant="primary" size="sm" @click="isOrderModalOpen = false; toast.success('Status order berhasil diperbarui!')">
-            <Check class="w-3.5 h-3.5" />
-            <span>Selesai & Tutup</span>
-          </BaseButton>
+        <!-- Activity Timeline for Order -->
+        <div class="space-y-2">
+          <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Timeline Aktivitas Produksi</span>
+          <div class="p-4 rounded-2xl bg-white dark:bg-[#16161a] border border-neutral-200 dark:border-[#27272a]">
+            <BaseTimeline :items="getOrderTimeline(selectedOrder)" compact />
+          </div>
         </div>
       </div>
-    </BaseModal>
+
+      <template #footer="{ close }">
+        <BaseButton variant="outline" size="sm" @click="close">
+          Tutup
+        </BaseButton>
+        <BaseButton variant="primary" size="sm" @click="handlePrintNota(selectedOrder); close();">
+          <Printer class="w-3.5 h-3.5" />
+          <span>Cetak Faktur</span>
+        </BaseButton>
+      </template>
+    </BaseSlideOver>
+
+    <!-- ======================================================== -->
+    <!-- FAKTUR / INVOICE PRINT MODAL (BaseInvoiceModal.vue)      -->
+    <!-- ======================================================== -->
+    <BaseInvoiceModal
+      v-if="invoiceModalData"
+      v-model="isInvoiceModalOpen"
+      :invoice-data="invoiceModalData"
+    />
 
   </div>
 </template>
