@@ -31,7 +31,8 @@ const isCommandPaletteOpen = ref(false)
 // 'form' (Frame 1) | 'loading' (Frames 2-4) | 'expanding' | 'authenticated' | 'collapsing'
 const authStage = ref(isAuthenticated.value ? 'authenticated' : 'form')
 const isExpanded = ref(isAuthenticated.value)
-const buttonProgress = ref(0)
+const isTimelineActive = ref(false)
+const isDashboardMounted = ref(isAuthenticated.value)
 const showPassword = ref(false)
 
 // Form State
@@ -46,6 +47,7 @@ onMounted(() => {
   if (isAuthenticated.value) {
     authStage.value = 'authenticated'
     isExpanded.value = true
+    isDashboardMounted.value = true
   }
 })
 
@@ -56,47 +58,40 @@ watch(isLoggingOut, (loggingOut) => {
   }
 })
 
-// Trigger Timeline Animation (Frames 2, 3, 4)
+// Trigger Hardware-Accelerated Timeline Animation (Frames 2, 3, 4)
+// Menggunakan CSS Transition murni untuk 0% CPU loop (super ringan di device low-end)
 const startLoginFlow = (provider = 'Standard') => {
   if (authStage.value === 'loading' || authStage.value === 'expanding') return
 
   authStage.value = 'loading'
-  buttonProgress.value = 0
+  isTimelineActive.value = false
 
-  const startTime = performance.now()
-  const duration = 1600 // 1.6s smooth progression across frames 2, 3, 4
+  // Trigger CSS Hardware-Accelerated width transition pada frame berikutnya
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      isTimelineActive.value = true
+    })
+  })
 
-  const updateProgress = (currentTime) => {
-    const elapsed = currentTime - startTime
-    const fraction = Math.min(elapsed / duration, 1)
-
-    // Smooth ease-in-out curve
-    const eased = fraction < 0.5
-      ? 2 * fraction * fraction
-      : 1 - Math.pow(-2 * fraction + 2, 2) / 2
-
-    buttonProgress.value = Math.round(eased * 100)
-
-    if (fraction < 1) {
-      requestAnimationFrame(updateProgress)
-    } else {
-      buttonProgress.value = 100
-      // Frame 4 reached (100% full bar): short pause then morph/expand card
-      setTimeout(() => {
-        expandToDashboard(provider)
-      }, 250)
-    }
-  }
-
-  requestAnimationFrame(updateProgress)
+  // Setelah 1.6s (Frame 4 100% tercapai): jeda 200ms lalu lakukan morphing expansion
+  setTimeout(() => {
+    expandToDashboard(provider)
+  }, 1800)
 }
 
-// Morphing Card Expansion from small card to full Dasar Kedua
+// Morphing Card Expansion dari card kecil ke full Dasar Kedua
 const expandToDashboard = async (provider) => {
   authStage.value = 'expanding'
   isExpanded.value = true
 
-  // Card transition takes 700ms
+  // OPTIMASI KRUSIAL LOW-END:
+  // Tunda mounting konten dashboard berat (tabel & chart) sampai kartu mencapai 75% ekspansi (~480ms)
+  // Ini mencegah browser melakukan Layout Thrashing / Reflow berulang di setiap frame pada CPU lemah!
+  setTimeout(() => {
+    isDashboardMounted.value = true
+  }, 480)
+
+  // Card transition selesai pada 700ms
   setTimeout(async () => {
     await login(loginForm.value.identifier)
     authStage.value = 'authenticated'
@@ -108,11 +103,12 @@ const expandToDashboard = async (provider) => {
 const collapseToLogin = () => {
   authStage.value = 'collapsing'
   isExpanded.value = false
+  isDashboardMounted.value = false // Unmount seketika agar saat mengecil tidak ada kalkulasi reflow
+  isTimelineActive.value = false
 
   setTimeout(() => {
     finishLogout()
     authStage.value = 'form'
-    buttonProgress.value = 0
   }, 700)
 }
 
@@ -193,13 +189,14 @@ const baseLayerStyle = computed(() => {
       class="flex-1 min-h-0 flex items-center justify-center overflow-hidden relative transition-all duration-700"
       :class="isExpanded ? 'p-0 sm:px-1.5 md:px-2 lg:px-2.5 sm:pb-2' : 'p-3 sm:p-4'"
     >
-      <!-- THE DASAR KEDUA CARD -->
+      <!-- THE DASAR KEDUA CARD (Hardware Layer Promoted with will-change & adaptive shadow) -->
       <div
-        class="relative bg-white dark:bg-[#121214] shadow-2xl transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden flex"
+        class="relative bg-white dark:bg-[#121214] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden flex will-change-[width,height] transform-gpu"
         :class="[
           isExpanded
             ? 'w-full h-full max-w-full max-h-full rounded-t-[32px] sm:rounded-2xl lg:rounded-3xl border-t-2 sm:border-2 border-neutral-300 dark:border-[#27272a] border-x-0 sm:border-x-2 border-b-0 sm:border-b-2'
-            : 'w-[calc(100vw-32px)] max-w-[390px] sm:max-w-[410px] h-[490px] sm:h-[510px] max-h-[92vh] rounded-3xl border-2 border-neutral-200 dark:border-[#27272a]'
+            : 'w-[calc(100vw-32px)] max-w-[390px] sm:max-w-[410px] h-[490px] sm:h-[510px] max-h-[92vh] rounded-3xl border-2 border-neutral-200 dark:border-[#27272a]',
+          authStage === 'expanding' ? 'shadow-md' : 'shadow-2xl'
         ]"
       >
 
@@ -211,7 +208,7 @@ const baseLayerStyle = computed(() => {
         <!-- ==================================================== -->
         <div
           v-if="authStage !== 'authenticated'"
-          class="absolute inset-0 z-20 w-full h-full flex flex-col justify-between p-6 sm:p-7 bg-white dark:bg-[#121214] transition-all duration-400 ease-out select-none"
+          class="absolute inset-0 z-20 w-full h-full flex flex-col justify-between p-6 sm:p-7 bg-white dark:bg-[#121214] transition-all duration-400 ease-out select-none will-change-[opacity]"
           :class="authStage === 'expanding' ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'"
         >
           <!-- -------------------------------------------------- -->
@@ -310,11 +307,11 @@ const baseLayerStyle = computed(() => {
             <!-- STATE B: CIRCLE LOADING ENTERPRISE (FRAMES 2, 3, 4) -->
             <div
               v-else
-              class="flex flex-col items-center justify-center my-auto transition-all duration-300"
+              class="flex flex-col items-center justify-center my-auto transition-all duration-300 will-change-[transform,opacity]"
             >
               <!-- Geometris Presisi SVG Circular Loader (Rapi, Elegan, Kelas Enterprise) -->
               <div class="relative w-36 h-36 sm:w-40 sm:h-40 flex items-center justify-center">
-                <svg class="w-full h-full -rotate-90" viewBox="0 0 120 120">
+                <svg class="w-full h-full -rotate-90 transform-gpu" viewBox="0 0 120 120">
                   <!-- Jalur Lingkaran Latar Belakang -->
                   <circle
                     cx="60"
@@ -336,7 +333,7 @@ const baseLayerStyle = computed(() => {
                     stroke-linecap="round"
                     stroke-dasharray="314.16"
                     stroke-dashoffset="220"
-                    class="animate-spin origin-center"
+                    class="animate-spin origin-center will-change-transform"
                     style="animation-duration: 1.4s;"
                   />
                 </svg>
@@ -367,20 +364,20 @@ const baseLayerStyle = computed(() => {
               ]"
               @click="authStage === 'form' && startLoginFlow('Standard')"
             >
-              <!-- Timeline fill bar bergerak dari kiri ke kanan (Warna Mengikuti Theme) -->
+              <!-- Timeline fill bar bergerak dari kiri ke kanan (CSS Hardware-Accelerated: 0% CPU overhead) -->
               <div
                 v-if="authStage !== 'form' && authStage !== 'collapsing'"
-                class="absolute left-0 top-0 bottom-0 bg-[var(--theme-primary)] transition-[width] duration-75 ease-linear"
-                :style="{ width: `${buttonProgress}%` }"
+                class="absolute left-0 top-0 bottom-0 bg-[var(--theme-primary)] will-change-[width] transition-[width] ease-[cubic-bezier(0.25,1,0.5,1)]"
+                :class="isTimelineActive ? 'w-full duration-[1600ms]' : 'w-0 duration-0'"
               />
 
               <!-- Label "Masuk" di tengah tombol persis wireframe -->
               <span
-                class="relative z-10 font-semibold text-sm transition-colors"
+                class="relative z-10 font-semibold text-sm transition-colors duration-300"
                 :class="[
                   authStage === 'form' || authStage === 'collapsing'
                     ? 'text-[var(--theme-primary-text)]'
-                    : (buttonProgress > 50 ? 'text-[var(--theme-primary-text)]' : 'text-neutral-800 dark:text-neutral-200')
+                    : (isTimelineActive ? 'text-[var(--theme-primary-text)] delay-300' : 'text-neutral-800 dark:text-neutral-200')
                 ]"
               >
                 Masuk
@@ -410,11 +407,12 @@ const baseLayerStyle = computed(() => {
 
         <!-- ==================================================== -->
         <!-- VIEW B: DASHBOARD CONTAINER (EXPANDED DASAR KEDUA)   -->
-        <!-- Tampil saat authStage === 'authenticated'             -->
+        <!-- Tampil saat isDashboardMounted === true               -->
+        <!-- Lazy mounted untuk mencegah reflow storm di low-end  -->
         <!-- ==================================================== -->
         <div
-          v-if="authStage === 'authenticated' || authStage === 'expanding'"
-          class="flex-1 min-h-0 flex overflow-hidden w-full relative transition-opacity duration-500"
+          v-if="isDashboardMounted"
+          class="flex-1 min-h-0 flex overflow-hidden w-full relative transition-opacity duration-300"
           :class="authStage === 'authenticated' ? 'opacity-100' : 'opacity-0'"
         >
           <!-- Kolom MENU (Primary Rail: Beranda & Setting) -->

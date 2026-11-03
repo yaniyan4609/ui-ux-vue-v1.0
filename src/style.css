@@ -197,11 +197,17 @@ html.dark[data-theme-color="terracotta"] {
 /* Outgoing view stays underneath */
 ::view-transition-old(root) {
   z-index: 1 !important;
+  will-change: opacity;
 }
 
 /* Incoming view is ALWAYS on top, expanding outward as a circle */
+/* Isolasi GPU layer promotion & contain: paint mencegah repaint di layer bawah */
 ::view-transition-new(root) {
   z-index: 9999 !important;
+  contain: paint;
+  will-change: clip-path;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 /* ======================================================== */

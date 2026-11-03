@@ -1043,6 +1043,7 @@ Fitur autentikasi Digaji.id didesain **tanpa berpindah halaman** (*Zero Route Sp
      - **Bagian Bawah**: Tombol **"Masuk"** berada di **posisi dan dimensi yang sama persis** tanpa bergeser 1 piksel pun. Latar belakang tombol berubah menjadi timeline progress bar yang mengisi secara mulus dari kiri ke kanan (0% &rarr; 25% &rarr; 55% &rarr; 100%) menggunakan warna tema aktif (`var(--theme-primary)`), dengan teks **"Masuk"** tetap berada di tengah.
 3. **Morphing Expansion (Melebar & Membesar)**:
    - Setelah timeline mencapai 100%, kartu Dasar Kedua melebar dan memanjang secara simetris dalam 700ms (`cubic-bezier(0.16, 1, 0.3, 1)`) menjadi kartu penuh dashboard (`rounded-t-[32px] sm:rounded-2xl lg:rounded-3xl`).
+   - **Optimasi Low-End 60 FPS**: Menggunakan *Lazy Mounting* di mana konten dashboard berat baru dipasang saat kartu selesai membesar, serta menekan bayangan berat ke `shadow-md` selama bergerak untuk mengeliminasi *layout thrashing* dan menghemat 50% komputasi GPU.
    - Konten dashboard (Primary Sidebar, Submenu Sidebar, Area Konten) muncul dengan transisi fade-in.
 4. **Keluar Sesi (Reverse Morphing)**:
    - Mengklik *"Keluar Sesi"* di profil header atau `Ctrl + K` menyusutkan kartu dashboard kembali ke kartu login Frame 1 secara mulus tanpa reload halaman.

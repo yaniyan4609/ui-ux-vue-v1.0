@@ -13,14 +13,37 @@ export function useTheme() {
     }
   }
 
+  // Deteksi perangkat spesifikasi rendah (Low-End Hardware)
+  // Menghindari stuttering clip-path pada GPU dengan bandwidth sempit
+  const isLowEndDevice = () => {
+    if (typeof window === 'undefined') return false
+    const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (prefersReducedMotion) return true
+
+    const cores = navigator.hardwareConcurrency || 4
+    const memory = navigator.deviceMemory || 4 // dalam GB (Chromium/Android)
+    return cores < 4 || memory < 4
+  }
+
   const toggleTheme = async (event) => {
     const isAppearanceTransition =
+      typeof document !== 'undefined' &&
       document.startViewTransition &&
       !window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     if (!isAppearanceTransition) {
       isDark.value = !isDark.value
       applyTheme(isDark.value)
+      return
+    }
+
+    // Pada perangkat low-end, gunakan transisi crossfade native ringan tanpa kalkulasi clip-path berat
+    if (isLowEndDevice()) {
+      document.startViewTransition(async () => {
+        isDark.value = !isDark.value
+        applyTheme(isDark.value)
+        await nextTick()
+      })
       return
     }
 
@@ -43,9 +66,9 @@ export function useTheme() {
 
     await transition.ready
 
-    // Animasi Circular Reveal / Wipe identik di kedua arah (Light->Dark & Dark->Light)
-    // Durasi diatur 850ms dengan kurva yang lebih tenang dan halus (tidak terburu-buru)
-    document.documentElement.animate(
+    // Animasi Circular Reveal dioptimasi ke 650ms dengan kurva GPU-friendly
+    // Mencegah fill-rate starvation dan memory bandwidth bottleneck
+    const animation = document.documentElement.animate(
       {
         clipPath: [
           `circle(0px at ${x}px ${y}px)`,
@@ -53,11 +76,17 @@ export function useTheme() {
         ],
       },
       {
-        duration: 850,
-        easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+        duration: 650,
+        easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
         pseudoElement: '::view-transition-new(root)',
       }
     )
+
+    try {
+      await animation.finished
+    } catch {
+      // ignore
+    }
   }
 
   const initTheme = () => {
