@@ -15,6 +15,9 @@ import {
   Sun,
   Moon,
   Check,
+  Cpu,
+  LayoutDashboard,
+  Layers,
 } from 'lucide-vue-next'
 import { useBackground } from '../composables/useBackground'
 import { useTheme } from '../composables/useTheme'
@@ -52,8 +55,44 @@ const registerForm = ref({
 
 const showPassword = ref(false)
 const isSubmitting = ref(false)
-const isExpanding = ref(false)
-const welcomeName = ref('')
+const welcomeName = ref('Admin Digaji.id')
+
+// ========================================================
+// 3 FASE AUTENTIKASI:
+// 1. 'form'      -> Menampilkan form input login / register
+// 2. 'loading'   -> Card tetap kecil, menampilkan animasi loading & timeline kiri ke kanan
+// 3. 'expanding' -> Card kecil melebar & membesar menjadi card besar Dasar 2 dashboard!
+// ========================================================
+const authPhase = ref('form')
+const timelineProgress = ref(0) // 0 - 100%
+
+// Step Data untuk Timeline dari Kiri ke Kanan
+const timelineSteps = [
+  {
+    id: 1,
+    label: 'Kredensial',
+    title: 'Memverifikasi Kredensial...',
+    desc: 'Memeriksa hak akses dan token keamanan akun.',
+  },
+  {
+    id: 2,
+    label: 'Modul ERP',
+    title: 'Sinkronisasi Modul ERP & Payroll...',
+    desc: 'Menghubungkan data penggajian, karyawan, dan presensi.',
+  },
+  {
+    id: 3,
+    label: 'Workspace',
+    title: 'Ruang Kerja Siap!',
+    desc: 'Membuka dasbor live sync dan kartu kerja utama.',
+  },
+]
+
+const activeStepInfo = computed(() => {
+  if (timelineProgress.value < 40) return timelineSteps[0]
+  if (timelineProgress.value < 85) return timelineSteps[1]
+  return timelineSteps[2]
+})
 
 onMounted(() => {
   initBackground()
@@ -88,7 +127,40 @@ const fillDemo = (acc) => {
   toast.success(`Akun demo ${acc.label} terisi. Silakan klik Masuk!`)
 }
 
-// Handle Login Submit with Morphing Expansion
+// Logika Timeline Progress + Morphing Card Expansion
+const runTimelineAndExpansion = async () => {
+  // 1. Masuk ke fase Loading (Card tetap kecil)
+  authPhase.value = 'loading'
+  timelineProgress.value = 0
+
+  // Jalankan animasi timeline progress mengalir dari kiri ke kanan (durasi total ~1.4 detik)
+  const duration = 1400 // ms
+  const interval = 25 // ms
+  const step = 100 / (duration / interval)
+
+  await new Promise((resolve) => {
+    const timer = setInterval(() => {
+      timelineProgress.value = Math.min(100, timelineProgress.value + step)
+      if (timelineProgress.value >= 100) {
+        clearInterval(timer)
+        resolve()
+      }
+    }, interval)
+  })
+
+  // Jeda halus sejenak (200ms) agar pengguna melihat tanda centang siap
+  await new Promise((r) => setTimeout(r, 200))
+
+  // 2. Masuk ke fase EXPANDING: Card kecil melebar & membesar menjadi card besar dashboard!
+  authPhase.value = 'expanding'
+
+  // Setelah kartu membesar penuh (~700ms), pindah rute ke dashboard '/'
+  setTimeout(() => {
+    router.push('/')
+  }, 720)
+}
+
+// Handle Login Submit
 const handleLogin = async () => {
   if (!loginForm.value.email || !loginForm.value.password) {
     toast.error('Harap masukkan email dan kata sandi!')
@@ -98,7 +170,7 @@ const handleLogin = async () => {
   isSubmitting.value = true
 
   // Simulasi validasi cepat
-  await new Promise((r) => setTimeout(r, 450))
+  await new Promise((r) => setTimeout(r, 350))
 
   await login(loginForm.value)
   welcomeName.value = loginForm.value.email.includes('hr')
@@ -107,18 +179,14 @@ const handleLogin = async () => {
     ? 'Budi Santoso'
     : 'Admin Digaji.id'
 
-  toast.success('Autentikasi berhasil!')
+  toast.success('Kredensial diverifikasi!')
+  isSubmitting.value = false
 
-  // Mulai animasi pembesaran kartu (Morphing Card Expansion)
-  isExpanding.value = true
-
-  // Berpindah ke Dashboard setelah animasi ekspansi mencapai ukuran penuh
-  setTimeout(() => {
-    router.push('/')
-  }, 650)
+  // Jalankan animasi timeline lalu perbesaran kartu
+  await runTimelineAndExpansion()
 }
 
-// Handle Register Submit with Morphing Expansion
+// Handle Register Submit
 const handleRegister = async () => {
   if (!registerForm.value.name || !registerForm.value.email || !registerForm.value.password) {
     toast.error('Harap isi semua kolom wajib!')
@@ -132,18 +200,14 @@ const handleRegister = async () => {
 
   isSubmitting.value = true
 
-  await new Promise((r) => setTimeout(r, 550))
+  await new Promise((r) => setTimeout(r, 450))
   await register(registerForm.value)
   welcomeName.value = registerForm.value.name
 
   toast.success('Pendaftaran akun berhasil!')
+  isSubmitting.value = false
 
-  // Mulai animasi pembesaran kartu
-  isExpanding.value = true
-
-  setTimeout(() => {
-    router.push('/')
-  }, 650)
+  await runTimelineAndExpansion()
 }
 </script>
 
@@ -201,16 +265,16 @@ const handleRegister = async () => {
       <div
         class="transition-all ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden bg-white dark:bg-[#121214] border-2 border-neutral-300 dark:border-[#27272a] shadow-2xl relative"
         :class="[
-          isExpanding
-            ? 'fixed inset-1.5 sm:inset-2 lg:inset-2.5 rounded-t-[32px] sm:rounded-2xl lg:rounded-3xl z-50 flex items-center justify-center duration-650'
+          authPhase === 'expanding'
+            ? 'fixed inset-0 sm:inset-1.5 md:inset-2 lg:inset-2.5 rounded-t-[32px] sm:rounded-2xl lg:rounded-3xl z-50 flex items-center justify-center duration-700'
             : 'w-full max-w-[440px] sm:max-w-[460px] rounded-3xl duration-300'
         ]"
       >
         <!-- ==================================================== -->
-        <!-- STATE 1: ISI FORMULIR LOGIN / REGISTER               -->
+        <!-- STATE 1: ISI FORMULIR LOGIN / REGISTER (Awal)        -->
         <!-- ==================================================== -->
         <div
-          v-if="!isExpanding"
+          v-if="authPhase === 'form'"
           class="p-6 sm:p-7 flex flex-col justify-between space-y-5"
         >
           <!-- Card Header & Badge -->
@@ -460,29 +524,160 @@ const handleRegister = async () => {
         </div>
 
         <!-- ==================================================== -->
-        <!-- STATE 2: OVERLAY SUKSES SAAT MEMBESAR (MORPHING)     -->
+        <!-- STATE 2: LOADING & TIMELINE (Card Tetap Kecil)       -->
+        <!-- Animasi timeline berjalan dari kiri ke kanan         -->
         <!-- ==================================================== -->
         <div
-          v-else
-          class="flex flex-col items-center justify-center p-8 text-center space-y-4 animate-fade-in"
+          v-else-if="authPhase === 'loading'"
+          class="p-6 sm:p-8 flex flex-col items-center justify-center text-center space-y-6 animate-fade-in"
         >
-          <!-- Pulsing Success Ring -->
-          <div class="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center shadow-lg animate-bounce">
-            <CheckCircle2 class="w-8 h-8" />
+          <!-- Logo Orbit Animasi -->
+          <div class="relative flex items-center justify-center my-2">
+            <div class="w-16 h-16 rounded-2xl bg-[var(--theme-primary-soft)] text-[var(--theme-primary)] border border-[var(--theme-primary)]/30 flex items-center justify-center shadow-lg">
+              <div class="w-7 h-7 rounded-lg bg-[var(--theme-primary)] animate-pulse" />
+            </div>
+            <!-- Decorative Spinning Ring -->
+            <div
+              class="absolute -inset-2.5 rounded-3xl border-2 border-dashed border-[var(--theme-primary)]/40 animate-spin"
+              style="animation-duration: 8s;"
+            />
           </div>
 
-          <div>
-            <h2 class="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white">
-              Selamat Datang, {{ welcomeName }}!
+          <!-- Judul & Keterangan Step Aktif -->
+          <div class="space-y-1">
+            <h2 class="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white transition-all">
+              {{ activeStepInfo.title }}
             </h2>
-            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-sm">
-              Autentikasi terverifikasi. Membuka kartu ruang kerja ERP & Dashboard...
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 max-w-xs mx-auto">
+              {{ activeStepInfo.desc }}
             </p>
           </div>
 
-          <!-- Loading Shimmer Progress Line -->
-          <div class="w-48 h-1.5 rounded-full bg-neutral-200 dark:bg-[#25252b] overflow-hidden">
-            <div class="h-full bg-[var(--theme-primary)] rounded-full animate-pulse w-full" />
+          <!-- TIMELINE PROGRESS DARI KIRI KE KANAN -->
+          <div class="w-full space-y-3 pt-2">
+            <!-- 3 Step Checkpoint Nodes -->
+            <div class="relative flex items-center justify-between px-2">
+              <!-- Garis Latar Abu-abu -->
+              <div class="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-1 bg-neutral-200 dark:bg-[#25252b] z-0 rounded-full" />
+
+              <!-- Garis Progress Aktif Berjalan Mengalir dari Kiri ke Kanan -->
+              <div
+                class="absolute left-6 top-1/2 -translate-y-1/2 h-1 bg-[var(--theme-primary)] z-0 rounded-full transition-all duration-150 ease-out"
+                :style="{ width: `calc(${timelineProgress}% * 0.82)` }"
+              />
+
+              <!-- Node 1: Kredensial -->
+              <div class="relative z-10 flex flex-col items-center">
+                <div
+                  class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-200"
+                  :class="timelineProgress >= 15 ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm scale-110' : 'bg-neutral-200 dark:bg-[#27272f] text-neutral-400'"
+                >
+                  <Check v-if="timelineProgress >= 38" class="w-3.5 h-3.5 stroke-[3]" />
+                  <span v-else>1</span>
+                </div>
+                <span class="text-[10px] font-semibold text-neutral-600 dark:text-neutral-300 mt-1.5">
+                  Kredensial
+                </span>
+              </div>
+
+              <!-- Node 2: Modul ERP -->
+              <div class="relative z-10 flex flex-col items-center">
+                <div
+                  class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-200"
+                  :class="timelineProgress >= 60 ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm scale-110' : 'bg-neutral-200 dark:bg-[#27272f] text-neutral-400'"
+                >
+                  <Check v-if="timelineProgress >= 80" class="w-3.5 h-3.5 stroke-[3]" />
+                  <span v-else>2</span>
+                </div>
+                <span class="text-[10px] font-semibold text-neutral-600 dark:text-neutral-300 mt-1.5">
+                  Modul ERP
+                </span>
+              </div>
+
+              <!-- Node 3: Workspace Siap -->
+              <div class="relative z-10 flex flex-col items-center">
+                <div
+                  class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-200"
+                  :class="timelineProgress >= 100 ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm scale-110' : 'bg-neutral-200 dark:bg-[#27272f] text-neutral-400'"
+                >
+                  <Check v-if="timelineProgress >= 100" class="w-3.5 h-3.5 stroke-[3]" />
+                  <span v-else>3</span>
+                </div>
+                <span class="text-[10px] font-semibold text-neutral-600 dark:text-neutral-300 mt-1.5">
+                  Siap
+                </span>
+              </div>
+            </div>
+
+            <!-- Glowing Bottom Progress Bar Mengalir dari Kiri ke Kanan -->
+            <div class="h-2 w-full rounded-full bg-neutral-200 dark:bg-[#202025] overflow-hidden p-0.5 relative">
+              <div
+                class="h-full rounded-full bg-gradient-to-r from-[var(--theme-primary)] to-emerald-500 transition-all duration-150 ease-out relative"
+                :style="{ width: `${timelineProgress}%` }"
+              >
+                <!-- Shimmer highlight -->
+                <div class="absolute inset-0 bg-white/30 animate-pulse" />
+              </div>
+            </div>
+
+            <!-- Persentase & Status -->
+            <div class="flex items-center justify-between text-[11px] font-mono text-neutral-400 px-1 pt-1">
+              <span>Proses Autentikasi</span>
+              <span class="font-bold text-[var(--theme-primary)]">{{ Math.round(timelineProgress) }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================================================== -->
+        <!-- STATE 3: CARD MEMBESAR (MORPHING KE DASHBOARD)       -->
+        <!-- Card melebar jadi card besar seperti di dashboard    -->
+        <!-- ==================================================== -->
+        <div
+          v-else-if="authPhase === 'expanding'"
+          class="w-full h-full flex flex-col justify-between p-6 sm:p-10 animate-fade-in relative select-none"
+        >
+          <!-- Silhouette Outline Sidebar & Header Preview -->
+          <div class="flex items-center justify-between border-b border-neutral-200/80 dark:border-[#26262c] pb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-[var(--theme-primary)] text-[var(--theme-primary-text)] flex items-center justify-center font-bold">
+                <CheckCircle2 class="w-5 h-5" />
+              </div>
+              <div>
+                <h2 class="text-base sm:text-lg font-bold text-neutral-900 dark:text-white leading-tight">
+                  Selamat Datang, {{ welcomeName }}!
+                </h2>
+                <p class="text-xs text-neutral-500 dark:text-neutral-400">
+                  Memperluas kanvas kerja ERP & Payroll Digaji.id...
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                Live Sync
+              </span>
+            </div>
+          </div>
+
+          <!-- Expanding Content Shimmer Skeleton Preview -->
+          <div class="flex-1 my-6 flex flex-col justify-center items-center text-center space-y-4">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center shadow-xl animate-bounce">
+              <Sparkles class="w-7 h-7" />
+            </div>
+            <div class="space-y-1">
+              <h3 class="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white">
+                Membuka Dashboard Utama...
+              </h3>
+              <p class="text-xs text-neutral-400 max-w-sm">
+                Mengalihkan kartu autentikasi ke ruang kerja penuh Dasar Kedua.
+              </p>
+            </div>
+          </div>
+
+          <!-- Footer Status -->
+          <div class="text-center text-[11px] text-neutral-400 font-mono">
+            PT Digaji.id — Sistem Manajemen ERP & Penggajian Terpadu
           </div>
         </div>
       </div>
@@ -499,7 +694,7 @@ const handleRegister = async () => {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: scale(0.96);
+    transform: scale(0.97);
   }
   to {
     opacity: 1;
@@ -507,6 +702,6 @@ const handleRegister = async () => {
   }
 }
 .animate-fade-in {
-  animation: fadeIn 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 250ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 </style>
