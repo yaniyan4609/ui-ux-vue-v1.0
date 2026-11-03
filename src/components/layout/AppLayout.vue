@@ -99,6 +99,8 @@ const baseLayerStyle = computed(() => {
         <PrimarySidebar
           :items="menuItems"
           :active-id="activeMenuId"
+          :submenu-collapsed="submenuCollapsed"
+          @open-submenu="submenuCollapsed = false"
           class="hidden lg:flex"
         />
 

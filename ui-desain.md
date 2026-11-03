@@ -54,9 +54,14 @@ Navigasi aplikasi mengadopsi sistem **Dual-Sidebar Rail**:
 
 ### Desktop Sidebar Rail
 1. **Primary Rail (`PrimarySidebar.vue`)**:
-   - Kolom sempit (`w-20 sm:w-22`) berisi pill vertikal item menu utama: **Beranda**, **Data**, **Setting**.
+   - Kolom sempit (`w-20 sm:w-22`) berisi pill vertikal item menu utama: **Beranda**, **Pesanan**, **Data**, **Setting**.
    - Setiap item menampilkan ikon Lucide di atas teks label ringkas.
    - Status aktif ditandai dengan background warna tema (`var(--theme-primary)`), teks putih/kontras, dan garis indikator samping.
+   - **Flyout Submenu on Hover (Saat Submenu Ditutup)**:
+     - Ketika kolom submenu dilipat (*collapsed*), mengarahkan kursor mouse (*hover*) ke salah satu tombol menu utama yang memiliki sub-menu akan memunculkan **kartu melayang (*floating popover card*)** di sebelah kanannya.
+     - Kartu menampilkan header menu, badge jumlah menu, tombol cepat buka permanen, dan seluruh daftar sub-menu berikon dengan indikator aktif rute.
+     - Pengguna dapat langsung mengklik sub-menu tujuan secara instan tanpa perlu repot membuka kembali kolom submenu lebar-lebar.
+     - Dilengkapi *safe hover bridge* dan jeda debouncing halus (160ms) agar kartu tidak berkedip atau tertutup saat kursor berpindah dari tombol menu ke dalam kartu.
 2. **Submenu Sidebar (`SubmenuSidebar.vue`)**:
    - Muncul otomatis jika menu aktif memiliki sub-menu (misal: menu **Setting** atau **Data**).
    - Dilengkapi **Sliding Active Pill**: background indikator aktif meluncur mulus ke atas/bawah menggunakan animasi kurva `cubic-bezier(0.16, 1, 0.3, 1)`.
