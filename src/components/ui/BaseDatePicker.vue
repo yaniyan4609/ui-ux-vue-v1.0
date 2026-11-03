@@ -87,6 +87,22 @@ const formatDisplay = (str) => {
 const displayValue = computed(() => {
   if (props.range) {
     if (selectedRangeStart.value && selectedRangeEnd.value) {
+      const s = selectedRangeStart.value.split('-')
+      const e = selectedRangeEnd.value.split('-')
+      if (s.length === 3 && e.length === 3) {
+        const sYear = s[0]
+        const sMonth = monthNames[parseInt(s[1], 10) - 1]?.slice(0, 3)
+        const sDay = parseInt(s[2], 10)
+        const eYear = e[0]
+        const eMonth = monthNames[parseInt(e[1], 10) - 1]?.slice(0, 3)
+        const eDay = parseInt(e[2], 10)
+
+        if (sYear === eYear && sMonth === eMonth) {
+          return `${sDay} – ${eDay} ${eMonth} ${eYear}`
+        } else if (sYear === eYear) {
+          return `${sDay} ${sMonth} – ${eDay} ${eMonth} ${eYear}`
+        }
+      }
       return `${formatDisplay(selectedRangeStart.value)} — ${formatDisplay(selectedRangeEnd.value)}`
     }
     if (selectedRangeStart.value) {

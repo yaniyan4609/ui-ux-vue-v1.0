@@ -433,8 +433,10 @@ onUnmounted(() => {
           </div>
         </div>
         <div>
-          <div class="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white font-mono leading-none">
-            <BaseCountUp :to="kpiSummary.totalOrder.value" suffix=" " />
+          <div class="flex items-baseline gap-1.5 leading-none">
+            <span class="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white font-mono">
+              <BaseCountUp :to="kpiSummary.totalOrder.value" />
+            </span>
             <span class="text-xs font-normal text-neutral-500 font-sans">batch</span>
           </div>
           <div class="flex items-center gap-1 text-[10.5px] text-emerald-600 dark:text-emerald-400 font-medium mt-1.5">
@@ -454,8 +456,10 @@ onUnmounted(() => {
           </div>
         </div>
         <div>
-          <div class="text-base sm:text-lg font-bold text-neutral-900 dark:text-white font-mono leading-none">
-            <BaseCountUp :to="kpiSummary.omzet.value" prefix="Rp " />
+          <div class="flex items-baseline leading-none">
+            <span class="text-base sm:text-lg font-bold text-neutral-900 dark:text-white font-mono">
+              <BaseCountUp :to="kpiSummary.omzet.value" prefix="Rp " />
+            </span>
           </div>
           <div class="flex items-center gap-1 text-[10.5px] text-emerald-600 dark:text-emerald-400 font-medium mt-1.5">
             <ArrowUp class="w-3 h-3 stroke-[3]" />
@@ -474,8 +478,10 @@ onUnmounted(() => {
           </div>
         </div>
         <div>
-          <div class="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white font-mono leading-none">
-            <BaseCountUp :to="kpiSummary.orderDiproses.value" suffix=" " />
+          <div class="flex items-baseline gap-1.5 leading-none">
+            <span class="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white font-mono">
+              <BaseCountUp :to="kpiSummary.orderDiproses.value" />
+            </span>
             <span class="text-xs font-normal text-neutral-500 font-sans">tiket</span>
           </div>
           <p class="text-[10.5px] text-neutral-400 dark:text-neutral-500 mt-1.5 truncate">
@@ -493,8 +499,10 @@ onUnmounted(() => {
           </div>
         </div>
         <div>
-          <div class="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white font-mono leading-none">
-            <BaseCountUp :to="1248" suffix=" " />
+          <div class="flex items-baseline gap-1.5 leading-none">
+            <span class="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white font-mono">
+              <BaseCountUp :to="1248" />
+            </span>
             <span class="text-xs font-normal text-neutral-500 font-sans">pegawai</span>
           </div>
           <div class="flex items-center gap-1 text-[10.5px] text-emerald-600 dark:text-emerald-400 font-medium mt-1.5">
@@ -514,8 +522,10 @@ onUnmounted(() => {
           </div>
         </div>
         <div>
-          <div class="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white font-mono leading-none">
-            <BaseCountUp :to="kpiSummary.mesinAktif.aktif" /> / {{ kpiSummary.mesinAktif.total }}
+          <div class="flex items-baseline gap-1.5 leading-none">
+            <span class="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white font-mono">
+              <BaseCountUp :to="kpiSummary.mesinAktif.aktif" /> / {{ kpiSummary.mesinAktif.total }}
+            </span>
             <span class="text-xs font-normal text-neutral-500 font-sans">modul</span>
           </div>
           <p class="text-[10.5px] text-sky-600 dark:text-sky-400 font-medium mt-1.5">
@@ -533,8 +543,10 @@ onUnmounted(() => {
           </div>
         </div>
         <div>
-          <div class="text-lg sm:text-xl font-bold text-rose-600 dark:text-rose-400 font-mono leading-none">
-            <BaseCountUp :to="kpiSummary.stokMenipis.count" suffix=" " />
+          <div class="flex items-baseline gap-1.5 leading-none">
+            <span class="text-lg sm:text-xl font-bold text-rose-600 dark:text-rose-400 font-mono">
+              <BaseCountUp :to="kpiSummary.stokMenipis.count" />
+            </span>
             <span class="text-xs font-normal text-neutral-500 font-sans">staf</span>
           </div>
           <div class="flex items-center gap-1 text-[10.5px] text-rose-600 dark:text-rose-400 font-medium mt-1.5 truncate">
@@ -560,12 +572,15 @@ onUnmounted(() => {
       <div class="lg:col-span-5 p-4 sm:p-4.5 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex flex-col justify-between space-y-3">
         <!-- Skeleton Chart 1 -->
         <template v-if="isLoading">
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-2">
               <BaseSkeleton variant="circular" width="16px" height="16px" />
               <BaseSkeleton width="130px" height="15px" />
             </div>
-            <BaseSkeleton width="90px" height="24px" class="rounded-lg" />
+            <div class="flex items-center gap-1.5 shrink-0">
+              <BaseSkeleton width="34px" height="34px" class="rounded-xl" />
+              <BaseSkeleton width="150px" height="34px" class="rounded-xl" />
+            </div>
           </div>
           <div class="flex items-center gap-4">
             <BaseSkeleton width="70px" height="12px" />
@@ -578,31 +593,30 @@ onUnmounted(() => {
 
         <!-- Real Chart 1 dengan Gelombang Interaktif -->
         <template v-else>
-          <!-- Chart Header -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-            <div class="flex items-center gap-2">
-              <TrendingUp class="w-4 h-4 text-[var(--theme-primary)]" />
-              <h2 class="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white">
-                Tren Realisasi Payroll & Transaksi
+          <!-- Chart Header (1 Single Horizontal Row) -->
+          <div class="flex items-center justify-between gap-2 min-w-0">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <TrendingUp class="w-4 h-4 text-[var(--theme-primary)] shrink-0" />
+              <h2 class="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white truncate" title="Tren Realisasi Payroll">
+                Tren Realisasi Payroll
               </h2>
             </div>
 
-            <!-- Periode Controls & Wave Toggle -->
-            <div class="flex items-center gap-2 flex-wrap">
-              <!-- Wave Toggle Button -->
+            <!-- Periode Controls & Wave Toggle (Icon Saja & 1 Horizontal Line) -->
+            <div class="flex items-center gap-1.5 shrink-0">
+              <!-- Wave Toggle Button (Icon Saja) -->
               <button
                 type="button"
                 @click="toggleWave"
-                class="p-1 px-2 h-8.5 rounded-xl border border-neutral-200 dark:border-[#27272a] text-[10.5px] font-medium flex items-center gap-1 transition cursor-pointer"
-                :class="isWaveActive ? 'bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 border-sky-300 dark:border-sky-800' : 'bg-neutral-100 dark:bg-[#18181b] text-neutral-500'"
-                title="Beralih Animasi Gelombang Beriak"
+                class="w-8.5 h-8.5 rounded-xl border flex items-center justify-center transition cursor-pointer shrink-0"
+                :class="isWaveActive ? 'bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 border-sky-300 dark:border-sky-800' : 'bg-neutral-100 dark:bg-[#18181b] text-neutral-400 border-neutral-200 dark:border-[#27272a] hover:text-neutral-600 dark:hover:text-neutral-200'"
+                :title="isWaveActive ? 'Matikan Animasi Gelombang' : 'Aktifkan Animasi Gelombang'"
               >
-                <Waves class="w-3 h-3" :class="isWaveActive ? 'animate-pulse' : ''" />
-                <span class="hidden sm:inline">{{ isWaveActive ? 'Gelombang On' : 'Gelombang Off' }}</span>
+                <Waves class="w-4 h-4" :class="isWaveActive ? 'animate-pulse' : ''" />
               </button>
 
               <!-- BaseDatePicker Range Mode -->
-              <div class="w-48 sm:w-56 shrink-0">
+              <div class="w-38 sm:w-44 shrink-0">
                 <BaseDatePicker
                   v-model="dashboardDateRange"
                   range

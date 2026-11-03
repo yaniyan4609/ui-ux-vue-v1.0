@@ -148,3 +148,4 @@ const getDefaultIcon = (variant = 'neutral') => {
     </div>
   </div>
 </template>
+
