@@ -1029,20 +1029,21 @@ Fitur autentikasi Digaji.id didesain **tanpa berpindah halaman** (*Zero Route Sp
 +---------------------------------------------------------------------------------------------------+
 ```
 
-#### Alur Animasi & Desain UI Kartu Login:
-1. **Frame 1 (Form Masuk Polished UI)**:
-   - Kartu Dasar Kedua berukuran elegan (`max-w-[430px] sm:max-w-[460px] h-[590px] sm:h-[620px] rounded-3xl`) mengapung di tengah layar.
-   - **Header**: Badge *Akses Keamanan Enterprise* + Judul *"Masuk ke Akun Anda / Daftarkan Perusahaan"* + Subtitle.
-   - **Tab Switcher**: Tab kapsul modern *Masuk Sesi* vs *Daftar Baru*.
-   - **Input Fields**: Input bersudut lengkung dengan ikon leading (`Mail`, `Lock`, `User`, `Building2`), focus ring warna tema, dan toggle mata show/hide password.
-   - **Action Buttons**: Tombol utama *"Masuk ke Dashboard ERP"* dengan hover glow, tombol *"Masuk dengan Akun Google"* resmi, serta **3 Akun Demo Cepat 1-Klik** (`👑 Admin`, `💼 HR Lead`, `👤 Staf`).
-2. **Frames 2, 3, 4 (Lingkaran LOADING & Tombol Timeline)**:
-   - Form bertransisi mulus di dalam kartu yang sama:
-     - **Bagian Atas**: Lingkaran besar dengan teks **LOADING** tipografi premium mono tracking lebar, cincin ganda aksen berputar halus, serta teks status aktif real-time (*Memverifikasi Kredensial...* &rarr; *Sinkronisasi Modul ERP...* &rarr; *Ruang Kerja Siap!*).
-     - **Bagian Bawah**: Tombol "Masuk" bertransformasi menjadi wadah timeline progress bar dengan gradien tema & shimmer highlight mengisi dari kiri ke kanan (0% &rarr; 25% &rarr; 55% &rarr; 100%), didukung 3 indikator fase step aktif.
+#### Alur Animasi & Desain UI Kartu Login (Enterprise Precision, No AI Slop):
+1. **Frame 1 (Formulir Masuk Ringkas & Presisi)**:
+   - Kartu Dasar Kedua berukuran presisi (`max-w-[390px] sm:max-w-[410px] h-[490px] sm:h-[510px] rounded-3xl`) mengapung rapi di tengah Dasar Pertama.
+   - **Header**: Judul *"Masuk ke Akun Anda"* + Subtitle bersih *"Silakan masukkan kredensial akun Anda untuk melanjutkan"*. Tanpa tab switcher, tanpa tombol demo yang berantakan.
+   - **Input Fields**: Input bersudut rounded-xl dengan ikon leading (`Mail` untuk username/email, `Lock` untuk kata sandi) dan toggle mata show/hide password.
+   - **Tombol Aksi**:
+     - Tombol utama **"Masuk"** dengan warna tema aktif (`var(--theme-primary)`).
+     - Tombol **"Google"** dengan ikon lingkaran resmi sesuai wireframe.
+2. **Frames 2, 3, 4 (Enterprise Circular Loader & Timeline "Masuk")**:
+   - Transisi in-place di kartu yang sama:
+     - **Bagian Atas**: Lingkaran SVG loader geometris kelas enterprise berputar halus dengan warna tema aktif (`var(--theme-primary)`) dan teks tipografi monospace **"LOADING"** (`tracking-[0.28em]`) di tengahnya tanpa ornamen berlebih (Zero AI Slop).
+     - **Bagian Bawah**: Tombol **"Masuk"** berada di **posisi dan dimensi yang sama persis** tanpa bergeser 1 piksel pun. Latar belakang tombol berubah menjadi timeline progress bar yang mengisi secara mulus dari kiri ke kanan (0% &rarr; 25% &rarr; 55% &rarr; 100%) menggunakan warna tema aktif (`var(--theme-primary)`), dengan teks **"Masuk"** tetap berada di tengah.
 3. **Morphing Expansion (Melebar & Membesar)**:
-   - Setelah progress 100%, kartu Dasar Kedua melebar dan memanjang dalam 700ms (`cubic-bezier(0.16, 1, 0.3, 1)`) menjadi kartu penuh dashboard (`rounded-t-[32px] sm:rounded-2xl lg:rounded-3xl`).
-   - Layout dashboard (Primary Sidebar, Submenu Sidebar, Area Konten) muncul dengan transisi fade-in.
+   - Setelah timeline mencapai 100%, kartu Dasar Kedua melebar dan memanjang secara simetris dalam 700ms (`cubic-bezier(0.16, 1, 0.3, 1)`) menjadi kartu penuh dashboard (`rounded-t-[32px] sm:rounded-2xl lg:rounded-3xl`).
+   - Konten dashboard (Primary Sidebar, Submenu Sidebar, Area Konten) muncul dengan transisi fade-in.
 4. **Keluar Sesi (Reverse Morphing)**:
    - Mengklik *"Keluar Sesi"* di profil header atau `Ctrl + K` menyusutkan kartu dashboard kembali ke kartu login Frame 1 secara mulus tanpa reload halaman.
 
