@@ -23,7 +23,8 @@ const toast = useToast()
 const { bgType, solidColor, imageUrl, initBackground } = useBackground()
 const { isAuthenticated, isLoggingOut, login, finishLogout } = useAuth()
 
-const submenuCollapsed = ref(false)
+// Default desktop: sub menu tertutup (collapsed) sesuai preferensi pengguna
+const submenuCollapsed = ref(true)
 const mobileDrawerOpen = ref(false)
 const isCommandPaletteOpen = ref(false)
 

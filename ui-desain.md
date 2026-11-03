@@ -63,9 +63,9 @@ Navigasi aplikasi mengadopsi sistem **Dual-Sidebar Rail**:
      - Pengguna dapat langsung mengklik sub-menu tujuan secara instan tanpa perlu repot membuka kembali kolom submenu lebar-lebar.
      - Dilengkapi *safe hover bridge* dan jeda debouncing halus (160ms) agar kartu tidak berkedip atau tertutup saat kursor berpindah dari tombol menu ke dalam kartu.
 2. **Submenu Sidebar (`SubmenuSidebar.vue`)**:
-   - Muncul otomatis jika menu aktif memiliki sub-menu (misal: menu **Setting** atau **Data**).
+   - Berada dalam status **tertutup secara default (*collapsed by default*)** di desktop agar area kerja utama lebih luas dan lega.
    - Dilengkapi **Sliding Active Pill**: background indikator aktif meluncur mulus ke atas/bawah menggunakan animasi kurva `cubic-bezier(0.16, 1, 0.3, 1)`.
-   - Dapat dilipat (*collapse*) menggunakan tombol panah di header submenu atau floating button `>` di garis pembatas antar kolom.
+   - Dapat dibuka/tutup menggunakan tombol panah di header submenu, floating button `>` di garis pembatas antar kolom, atau diakses instan via *Hover Flyout Card*.
 
 ### Mobile Drawer (100% Wireframe Compliant)
 - **Mepet Penuh Atas-Bawah**: Panel drawer mobile membentang penuh dari atas ke bawah (`inset-y-0 left-0 h-full rounded-r-[32px] sm:rounded-r-[36px]`).
