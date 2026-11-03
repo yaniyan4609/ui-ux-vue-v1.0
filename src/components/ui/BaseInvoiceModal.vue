@@ -100,9 +100,11 @@ const handlePrint = () => {
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-neutral-200 dark:border-[#27272a]">
         <div>
           <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-xl bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-bold flex items-center justify-center text-sm shadow-xs">
-              D
-            </div>
+            <img
+              src="/logo-digaji.png"
+              alt="Digaji.id Logo"
+              class="w-8 h-8 rounded-xl object-contain shadow-xs shrink-0"
+            />
             <span class="font-bold text-base sm:text-lg text-neutral-900 dark:text-white tracking-tight">
               {{ invoiceData.perusahaan?.nama || 'Digaji.id Printing' }}
             </span>

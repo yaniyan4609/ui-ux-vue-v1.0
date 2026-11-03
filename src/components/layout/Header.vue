@@ -137,22 +137,21 @@ onUnmounted(() => {
 
       <router-link
         to="/"
-        class="group flex items-center gap-2.5 transition-transform"
+        class="group flex items-center transition-transform hover:opacity-90 py-0.5"
+        title="Digaji.id"
       >
-        <!-- Logo Box Bersudut Lengkung -->
-        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border-2 border-neutral-700 dark:border-neutral-300 bg-white dark:bg-[#18181b] flex items-center justify-center text-neutral-800 dark:text-neutral-100 shadow-2xs group-hover:scale-105 transition-all shrink-0">
-          <div class="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-md bg-[var(--theme-primary)]" />
-        </div>
-
-        <!-- Garis Pemisah Vertikal | -->
-        <span class="text-neutral-300 dark:text-neutral-700 font-light text-base sm:text-lg select-none">
-          |
-        </span>
-
-        <!-- Nama Brand: Digaji.id -->
-        <span class="font-bold text-sm sm:text-base tracking-tight text-neutral-900 dark:text-[#f4f4f5]">
-          Digaji.id
-        </span>
+        <!-- Logo Tulisan Digaji.id (Light Mode) -->
+        <img
+          src="/logo-tulisan-digaji.png"
+          alt="Digaji.id Logo"
+          class="h-7 sm:h-7.5 w-auto object-contain dark:hidden transition-transform group-hover:scale-[1.02]"
+        />
+        <!-- Logo Tulisan Digaji.id (Dark Mode) -->
+        <img
+          src="/logo-tulisan-digaji-dark.png"
+          alt="Digaji.id Logo"
+          class="h-7 sm:h-7.5 w-auto object-contain hidden dark:block transition-transform group-hover:scale-[1.02]"
+        />
       </router-link>
     </div>
 

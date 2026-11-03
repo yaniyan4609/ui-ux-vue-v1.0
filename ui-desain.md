@@ -33,7 +33,7 @@ Aplikasi ini mengadopsi prinsip desain modular berjenjang **2 Layer**:
   - `solid`: Warna solid kustom (HEX).
   - `image`: URL gambar latar bertekstur/wallpaper.
 - **Header Topbar**: Menempel di Dasar Pertama:
-  - Sisi Kiri: `Logo Box` bersudut melengkung + Garis vertikal `|` + Nama brand `Digaji.id`.
+  - Sisi Kiri: Logo resmi `Digaji.id` (`logo-tulisan-digaji.png` untuk Light Mode, dan `logo-tulisan-digaji-dark.png` untuk Dark Mode).
   - Sisi Kanan: Single button switch tema (Sun/Moon dengan animasi lingkaran View Transition API), Lonceng Notifikasi, dan Avatar Profil.
   - **Aturan Navigasi Mobile**: Tombol toggle navigasi mobile terletak di header topbar pojok kiri atas (bersebelahan dengan logo Digaji.id) untuk aksesibilitas yang cepat, bersih, dan natural bagi jempol pengguna smartphone.
 

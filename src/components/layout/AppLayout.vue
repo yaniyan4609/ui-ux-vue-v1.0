@@ -222,8 +222,15 @@ const baseLayerStyle = computed(() => {
               v-if="authStage === 'form' || authStage === 'collapsing'"
               class="space-y-4 my-auto"
             >
-              <!-- Header Title & Subtitle -->
+              <!-- Header Title & Subtitle dengan Logo Brand -->
               <div class="text-center space-y-1">
+                <div class="flex justify-center mb-1.5">
+                  <img
+                    src="/logo-digaji.png"
+                    alt="Digaji.id"
+                    class="w-10 h-10 rounded-2xl shadow-sm hover:scale-105 transition-transform"
+                  />
+                </div>
                 <h1 class="text-xl font-bold tracking-tight text-neutral-900 dark:text-white">
                   Masuk ke Akun Anda
                 </h1>
