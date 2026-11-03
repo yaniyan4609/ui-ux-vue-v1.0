@@ -254,6 +254,43 @@ const isDayInRange = (dateStr) => {
   return current > start && current < end
 }
 
+// Day State Classes dengan Pemisahan Mutlak (Mencegah Konflik Spesifisitas Tailwind di Dark & Light Mode)
+const getDayClass = (day) => {
+  const isSelected = isDaySelected(day.dateStr)
+  const inRange = isDayInRange(day.dateStr)
+
+  // 1. Tanggal Terpilih (Prioritas Utama: Kontras 100% Maksimal Mengikuti Token Tema)
+  if (isSelected) {
+    let rounded = 'rounded-lg'
+    if (props.range) {
+      if (selectedRangeStart.value === day.dateStr && selectedRangeEnd.value) {
+        rounded = 'rounded-l-lg rounded-r-none'
+      } else if (selectedRangeEnd.value === day.dateStr) {
+        rounded = 'rounded-r-lg rounded-l-none'
+      }
+    }
+    return `bg-[var(--theme-primary)] !text-[var(--theme-primary-text)] font-bold shadow-sm z-10 scale-105 ${rounded}`
+  }
+
+  // 2. Rentang Tanggal (Date Range di antara start & end)
+  if (inRange) {
+    return 'bg-[var(--theme-primary-soft)] !text-[var(--theme-primary)] font-bold rounded-none'
+  }
+
+  // 3. Hari Ini (Today) belum dipilih
+  if (day.isToday) {
+    return 'ring-1.5 ring-inset ring-[var(--theme-primary)] !text-[var(--theme-primary)] font-bold bg-[var(--theme-primary-soft)]/30 hover:bg-[var(--theme-primary-soft)]/60 rounded-lg'
+  }
+
+  // 4. Hari Biasa Bulan Ini (Teks Tegas & Sangat Kontras: Hitam Pekat di Light, Putih Terang di Dark)
+  if (day.isCurrentMonth) {
+    return 'text-neutral-900 dark:text-[#f4f4f5] font-semibold hover:bg-neutral-100 dark:hover:bg-[#24242a] rounded-lg'
+  }
+
+  // 5. Tanggal Luar Bulan (Filler Days - Muted Halus)
+  return 'text-neutral-400 dark:text-neutral-600 font-normal hover:bg-neutral-50 dark:hover:bg-[#202025] rounded-lg'
+}
+
 // Quick Presets
 const applyPreset = (daysOffset) => {
   const end = new Date()
@@ -495,33 +532,19 @@ onUnmounted(() => {
             </span>
           </div>
 
-          <!-- Days Grid (42 Cells) dengan Kontras Tinggi & Huruf Jelas -->
-          <div class="grid grid-cols-7 gap-1 text-center text-xs">
+          <!-- Days Grid (42 Cells) dengan Kontras Tinggi & Huruf Jelas Bebas Konflik Class -->
+          <div class="grid grid-cols-7 gap-1 text-center text-xs" @mouseleave="hoverDate = null">
             <button
               v-for="day in calendarDays"
               :key="day.dateStr"
               type="button"
               @click="handleDayClick(day)"
               @mouseenter="hoverDate = day.dateStr"
-              class="h-8 w-8 mx-auto rounded-lg flex items-center justify-center font-mono text-xs transition-all cursor-pointer relative"
-              :class="[
-                // Warna Angka Tanggal: Bulan Aktif (Tegas & Kontras) vs Luar Bulan (Sekunder)
-                day.isCurrentMonth
-                  ? 'text-neutral-900 dark:text-[#f4f4f5] font-semibold'
-                  : 'text-neutral-400 dark:text-neutral-500 font-normal',
-                
-                // Hari Terpilih (Selected)
-                isDaySelected(day.dateStr)
-                  ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-bold shadow-sm z-10 scale-105 rounded-lg'
-                  : isDayInRange(day.dateStr)
-                  ? 'bg-[var(--theme-primary-soft)] text-[var(--theme-primary)] font-bold rounded-none'
-                  : 'hover:bg-neutral-100 dark:hover:bg-[#24242a] hover:text-neutral-900 dark:hover:text-white',
-                
-                // Hari Ini (Today) tapi belum dipilih
-                day.isToday && !isDaySelected(day.dateStr)
-                  ? 'ring-1.5 ring-inset ring-[var(--theme-primary)] text-[var(--theme-primary)] font-bold bg-[var(--theme-primary-soft)]/20'
-                  : '',
-              ]"
+              class="h-8 w-8 mx-auto flex items-center justify-center font-mono text-xs transition-all cursor-pointer relative"
+              :class="getDayClass(day)"
+              :style="{
+                color: isDaySelected(day.dateStr) ? 'var(--theme-primary-text)' : undefined
+              }"
             >
               {{ day.dayNumber }}
             </button>

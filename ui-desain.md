@@ -411,7 +411,7 @@ Pusat komando dan pencarian cepat berbasis pintasan keyboard (`Ctrl + K` / `Cmd 
 Komponen pemilih tanggal enterprise tanpa dependensi eksternal:
 - **Mode Fleksibel**: Mendukung pemilihan tanggal tunggal (*single date*) atau rentang tanggal (*date range*).
 - **Auto-Placement Pintar (*Dynamic Alignment*)**: Ketika trigger berada di paruh kanan layar (misal: kolom kedua modal form atau toolbar kanan), kalender otomatis menempel ke kanan (`right-0`) dan melebar ke kiri agar tidak terpotong tepi layar/modal. Sebaliknya jika di kiri, melebar ke kanan (`left-0`).
-- **Kontras Tinggi di Dark & Light Mode**: Angka tanggal bulan aktif ditampilkan tegas (`text-neutral-900` di Light Mode, `text-[#f4f4f5]` di Dark Mode, `font-semibold`), hari di luar bulan tetap terbaca jelas (`text-neutral-400 dark:text-neutral-500`), dan tanggal hari ini ditandai dengan *ring outline* warna tema aktif.
+- **Kontras Tinggi di Dark & Light Mode**: Angka tanggal bulan aktif ditampilkan tegas (`text-neutral-900` di Light Mode, `text-[#f4f4f5]` di Dark Mode, `font-semibold`), hari di luar bulan tetap terbaca jelas (`text-neutral-400 dark:text-neutral-600`), dan tanggal hari ini ditandai dengan *ring outline* warna tema aktif. Tanggal yang dipilih (*selected*) terisolasi dari konflik spesifisitas Tailwind dengan teks kontras 100% (`var(--theme-primary-text)`: putih pekat di Light Mode, gelap pekat di Dark Mode).
 - **Preset Instan Cepat**: Pilihan "Hari Ini", "7 Hari Terakhir", "30 Hari Terakhir", dan "Bulan Ini".
 - **Format Tampilan Indonesia**: Menampilkan label ramah pengguna (contoh: `27 Jan 2025` atau `21 Jan 2025 - 27 Jan 2025`), sementara `v-model` menyimpan format ISO standar `YYYY-MM-DD`.
 
