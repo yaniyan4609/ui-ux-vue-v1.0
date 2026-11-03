@@ -579,6 +579,39 @@ Halaman papan Kanban visual di rute `/pesanan/kanban`:
 
 ---
 
+### 4.21 `ConfirmationModal.vue` (Modal Konfirmasi Universal)
+Komponen dialog konfirmasi tindakan penting (Simpan, Hapus, Peringatan, atau Berhasil):
+- **4 Varian Tipe**: `delete` (merah bahaya), `save` (biru simpan), `warning` (kuning waspada), `success` (hijau sukses).
+- **Badge & Ikon Tematik**: Ikon dan badge warna otomatis menyesuaikan varian tipe.
+- **Dukungan Mobile Responsive**: Di desktop tampil sebagai dialog tengah dengan backdrop blur, di mobile tampil ramah sentuhan dengan tombol aksi berukuran penuh.
+
+```vue
+<script setup>
+import { ref } from 'vue'
+import ConfirmationModal from '@/components/ui/ConfirmationModal.vue'
+
+const isDeleteModalOpen = ref(false)
+
+const handleConfirmDelete = () => {
+  // Jalankan logika hapus data di sini
+}
+</script>
+
+<template>
+  <ConfirmationModal
+    v-model="isDeleteModalOpen"
+    type="delete"
+    title="Hapus Data Karyawan"
+    message="Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan."
+    confirm-text="Ya, Hapus Data"
+    cancel-text="Batal"
+    @confirm="handleConfirmDelete"
+  />
+</template>
+```
+
+---
+
 ## 5. Standar Desain Dashboard & Visualisasi SVG (Zero Library)
 
 Dashboard operasional di [`DashboardView.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/views/DashboardView.vue) dibangun menggunakan pure SVG interaktif berkinerja tinggi tanpa library chart eksternal:
@@ -588,9 +621,29 @@ Dashboard operasional di [`DashboardView.vue`](file:///c:/Users/yaniy/OneDrive/D
   $$y_{\text{anim}} = y_{\text{base}} + \sin(\text{phase} + i \times 0.85) \times \text{amplitude}$$
 - Menggunakan `requestAnimationFrame` pada 60 FPS.
 - **Otomatis Pause saat Hover**: Ketika kursor diarahkan ke dalam diagram untuk membaca tooltip, gelombang otomatis dijeda agar data mudah dibaca.
-- Dilengkapi tombol toggle manual **"Gelombang On / Off"**.
+- **Tombol Gelombang Icon-Only**: Tombol toggle gelombang menggunakan tombol kotak icon-only (`w-8.5 h-8.5 rounded-xl border`) dengan ikon `Waves` animasi `animate-pulse` saat aktif dan tooltip informatif.
 
-### 2. Standar Visualisasi Lainnya
+### 2. Standar Header Diagram 1 Garis Horizontal
+Header kartu diagram diatur agar **selalu 1 baris horizontal** tanpa patah/wrapping pada layar desktop maupun laptop:
+- Wadah luar: `flex items-center justify-between gap-2 min-w-0`
+- Judul sisi kiri: `flex items-center gap-1.5 min-w-0` dengan teks berkelas `truncate`
+- Kontrol sisi kanan: `flex items-center gap-1.5 shrink-0` (berisi tombol gelombang icon-only + wrapper datepicker `w-38 sm:w-44 shrink-0`)
+- **Format Tanggal Compact di `BaseDatePicker`**: Bila rentang tanggal berada dalam bulan dan tahun yang sama, otomatis diformat ringkas (contoh: `21 – 27 Jan 2025` alih-alih `21 Jan 2025 — 27 Jan 2025`) sehingga tidak terpotong elipsis.
+
+### 3. Standar Tipografi Angka & Satuan KPI Card (Anti-Collapsing)
+Agar angka dari `BaseCountUp` dan label satuan (seperti `batch`, `tiket`, `pegawai`, `modul`, `staf`) tidak menempel rapat akibat browser whitespace collapsing:
+```html
+<div class="flex items-baseline gap-1.5 leading-none">
+  <span class="text-lg sm:text-xl font-bold font-mono">
+    <BaseCountUp :to="142" />
+  </span>
+  <span class="text-xs font-normal text-neutral-500 font-sans">batch</span>
+</div>
+```
+- Menggunakan flexbox `items-baseline` untuk meratakan garis dasar font antara angka dan teks.
+- Menggunakan `gap-1.5` (6px) untuk kepastian jarak fisik yang konsisten di semua browser.
+
+### 4. Standar Visualisasi Lainnya
 - **Horizontal Bar Chart**: Bar memanjang dinamis dengan transisi CSS `transition-all duration-1000 ease-out`.
 - **Radial Gauge & Donut Chart**: Menggunakan `circle` SVG dengan `stroke-dasharray` dan `stroke-dashoffset`.
 
@@ -622,4 +675,624 @@ Dashboard operasional di [`DashboardView.vue`](file:///c:/Users/yaniy/OneDrive/D
    - Area isi formulir pada `MobileModal` wajib mengizinkan `touch-auto select-auto` agar pengguna smartphone dapat menggeser form dan mengisi input tanpa terblokir gesture penutup sheet.
 5. **Aturan Integritas Desain**:
    - Jangan menambahkan library charting atau UI bloated (seperti Bootstrap, Vuetify, Chart.js) ke dalam proyek. Semua base UI telah tersedia lengkap di folder `src/components/ui/`.
+
+---
+
+## 8. Katalog Halaman & Standar Arsitektur Halaman (*Page Design Patterns*)
+
+Setiap halaman di folder `src/views/` mengikuti pola tata letak berjenjang yang konsisten agar mudah dipelihara dan memberikan pengalaman pengguna yang seragam.
+
+```
++-----------------------------------------------------------------------------------+
+| 1. HEADER HALAMAN                                                                 |
+|    - Breadcrumb / Navigasi Mini                                                   |
+|    - Judul Halaman (H1) + Badge Live Status                                       |
+|    - Deskripsi Singkat Halaman                                                    |
+|    - Tombol Aksi Utama (Refresh, Export, Tambah Data)                             |
++-----------------------------------------------------------------------------------+
+| 2. RINGKASAN KPI / STATISTIK CEPAT (6 Cards Grid)                                 |
+|    - Grid: 2 kolom (mobile), 3 kolom (tablet), 6 kolom (desktop)                  |
+|    - BaseCountUp + Label Satuan (gap-1.5) + Indikator Tren Pertumbuhan            |
++-----------------------------------------------------------------------------------+
+| 3. BILAH FILTER & PENCARIAN (Toolbar)                                             |
+|    - Input Search (BaseInput dengan icon Search)                                  |
+|    - Dropdown Filter (Status, Divisi/Kategori, Rentang Tanggal)                   |
+|    - Tombol Aksi Tambahan (Impor CSV, Ekspor Excel)                               |
++-----------------------------------------------------------------------------------+
+| 4. AREA KONTEN UTAMA                                                              |
+|    - Mode Tabel (DataView / DataKaryawanView): Sticky Header + Multi-select       |
+|    - Mode Kanban (KanbanView): 4 Kolom Drag & Drop HTML5                          |
+|    - Mode Dashboard (DashboardView): SVG Wave Chart + Bar + Donut                 |
++-----------------------------------------------------------------------------------+
+| 5. BILAH AKSI MASAL TERAPUNG (Hanya muncul jika >= 1 baris dicentang)             |
+|    - Fixed Bottom Center: Jumlah Terpilih | Ekspor CSV | Hapus Massal | Batal     |
++-----------------------------------------------------------------------------------+
+| 6. KONTROL PAGINASI & METRIK FOOTER                                               |
+|    - BasePagination: Menampilkan item per halaman + navigasi halaman              |
++-----------------------------------------------------------------------------------+
+```
+
+### 8.1 Ringkasan Halaman yang Sudah Dibangun
+
+| Halaman | Rute | File View | Fitur Utama |
+|---|---|---|---|
+| **Dashboard ERP & Payroll** | `/` | [`DashboardView.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/views/DashboardView.vue) | 6 KPI stat cards, SVG real-time wave chart beriak, horizontal bar alokasi budget divisi, donut chart distribusi status pegawai, audit log realtime, simulasi skeleton loading. |
+| **Data Karyawan & Payroll** | `/data/karyawan` | [`DataKaryawanView.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/views/DataKaryawanView.vue) | Tabel CRUD enterprise, multi-select checkbox, floating bulk action bar, wizard impor CSV, modal form tambah/edit adaptif, slide-over detail karyawan, modal konfirmasi hapus massal. |
+| **Data Gunung Jawa** | `/data` | [`DataView.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/views/DataView.vue) | Tabel master data 159 gunung di Jawa, filter provinsi & status aktif, pencarian instan, sorting multi-kolom, modal tambah/edit dan pratinjau detail. |
+| **Papan Alur Kanban** | `/pesanan/kanban` | [`KanbanView.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/views/KanbanView.vue) | Pipeline alur kerja 4 kolom, drag & drop HTML5 native antar status, badge prioritas, akumulasi nilai rupiah per kolom, laci slide-over detail order, pratinjau invoice cetak. |
+| **Pusat Pengaturan** | `/setting` | [`SettingView.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/views/SettingView.vue) | Kustomisasi Dasar Pertama (pola latar, palet warna), konfigurasi Dasar Kedua (gaya sudut & margin card), preferensi akun & keamanan, serta pengaturan notifikasi sistem. |
+
+---
+
+### 8.2 Contoh Template Boilerplate Halaman Baru (*Standard Page Template*)
+
+Gunakan struktur di bawah ini sebagai acuan saat membuat halaman baru:
+
+```vue
+<script setup>
+import { ref, computed } from 'vue'
+import { Plus, Download, RefreshCw, Filter } from 'lucide-vue-next'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseInput from '@/components/ui/BaseInput.vue'
+import BaseBadge from '@/components/ui/BaseBadge.vue'
+import BaseModal from '@/components/ui/BaseModal.vue'
+import ConfirmationModal from '@/components/ui/ConfirmationModal.vue'
+
+// State Halaman
+const searchQuery = ref('')
+const isAddModalOpen = ref(false)
+const isDeleteModalOpen = ref(false)
+const selectedItem = ref(null)
+
+// Data Dummy / API
+const items = ref([
+  { id: 1, nama: 'Operasional Wilayah Barat', status: 'Aktif', kode: 'OPS-01' },
+  { id: 2, nama: 'Distribusi Sentral Jakarta', status: 'Pending', kode: 'OPS-02' },
+])
+
+const filteredItems = computed(() => {
+  if (!searchQuery.value) return items.value
+  return items.value.filter(item =>
+    item.nama.toLowerCase().includes(searchQuery.value.toLowerCase())
+  )
+})
+</script>
+
+<template>
+  <div class="space-y-4 sm:space-y-5 p-3.5 sm:p-5">
+    <!-- 1. Header Halaman -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white">
+            Kelola Divisi Operasional
+          </h1>
+          <BaseBadge variant="success" size="sm" dot>Live</BaseBadge>
+        </div>
+        <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+          Daftar seluruh unit divisi kerja aktif dan status operasional sistem.
+        </p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 self-start sm:self-center">
+        <BaseButton variant="outline" size="sm">
+          <Download class="w-3.5 h-3.5" />
+          <span>Ekspor</span>
+        </BaseButton>
+        <BaseButton variant="primary" size="sm" @click="isAddModalOpen = true">
+          <Plus class="w-3.5 h-3.5" />
+          <span>Tambah Divisi</span>
+        </BaseButton>
+      </div>
+    </div>
+
+    <!-- 2. Toolbar Filter & Search -->
+    <div class="p-3 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex items-center justify-between gap-3">
+      <div class="w-full sm:w-72">
+        <BaseInput
+          v-model="searchQuery"
+          placeholder="Cari divisi..."
+          size="sm"
+          clearable
+        />
+      </div>
+    </div>
+
+    <!-- 3. Tabel Data Konten -->
+    <div class="rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs text-left">
+          <thead class="bg-neutral-50 dark:bg-[#18181b] border-b border-neutral-200 dark:border-[#27272a] text-neutral-500 font-semibold uppercase text-[11px]">
+            <tr>
+              <th class="py-2.5 px-3.5 text-center w-12">No</th>
+              <th class="py-2.5 px-3">Kode</th>
+              <th class="py-2.5 px-3">Nama Divisi</th>
+              <th class="py-2.5 px-3">Status</th>
+              <th class="py-2.5 px-3 text-right">Aksi</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-neutral-100 dark:divide-[#202024]">
+            <tr v-for="(item, idx) in filteredItems" :key="item.id" class="hover:bg-neutral-50 dark:hover:bg-[#18181b]/60 transition">
+              <td class="py-2.5 px-3.5 text-center text-neutral-400 font-mono">{{ idx + 1 }}</td>
+              <td class="py-2.5 px-3 font-mono font-semibold">{{ item.kode }}</td>
+              <td class="py-2.5 px-3 font-medium text-neutral-900 dark:text-white">{{ item.nama }}</td>
+              <td class="py-2.5 px-3">
+                <BaseBadge :variant="item.status === 'Aktif' ? 'success' : 'warning'" size="sm">
+                  {{ item.status }}
+                </BaseBadge>
+              </td>
+              <td class="py-2.5 px-3 text-right">
+                <BaseButton variant="ghost" size="sm" @click="selectedItem = item; isDeleteModalOpen = true">
+                  Hapus
+                </BaseButton>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 4. Modal Formulir Tambah Data (Auto-Adaptive) -->
+    <BaseModal
+      v-model="isAddModalOpen"
+      title="Tambah Divisi Baru"
+      subtitle="Masukkan detail identitas unit divisi kerja baru"
+      size="md"
+    >
+      <div class="space-y-3.5">
+        <BaseInput label="Nama Divisi" required placeholder="Contoh: Logistik Sentral" />
+        <BaseInput label="Kode Divisi" required placeholder="Contoh: LOG-01" />
+      </div>
+
+      <template #footer="{ close }">
+        <BaseButton variant="outline" size="sm" @click="close">Batal</BaseButton>
+        <BaseButton variant="primary" size="sm" @click="close">Simpan Divisi</BaseButton>
+      </template>
+    </BaseModal>
+
+    <!-- 5. Modal Konfirmasi Hapus -->
+    <ConfirmationModal
+      v-model="isDeleteModalOpen"
+      type="delete"
+      title="Hapus Divisi"
+      :message="`Apakah Anda yakin ingin menghapus divisi ${selectedItem?.nama}?`"
+      confirm-text="Ya, Hapus"
+      @confirm="isDeleteModalOpen = false"
+    />
+  </div>
+</template>
+```
+
+---
+
+### 8.3 Pola Row Selection & Floating Bulk Action Bar (Multi-Select Checkbox)
+
+Fitur untuk memilih banyak baris data sekaligus dan menjalankan aksi massal (*bulk actions*):
+
+```vue
+<script setup>
+import { ref, computed } from 'vue'
+import { Trash2, Download, X } from 'lucide-vue-next'
+import BaseButton from '@/components/ui/BaseButton.vue'
+
+const items = ref([
+  { id: 101, nama: 'Budi Santoso' },
+  { id: 102, nama: 'Siti Rahma' },
+  { id: 103, nama: 'Ahmad Fauzi' },
+])
+
+const selectedIds = ref([])
+
+// Checkbox Header: Pilih Semua
+const isAllSelected = computed(() => {
+  return items.value.length > 0 && items.value.every(item => selectedIds.value.includes(item.id))
+})
+
+const toggleSelectAll = () => {
+  if (isAllSelected.value) {
+    selectedIds.value = []
+  } else {
+    selectedIds.value = items.value.map(item => item.id)
+  }
+}
+
+// Checkbox Baris: Pilih Satu
+const toggleSelect = (id) => {
+  const idx = selectedIds.value.indexOf(id)
+  if (idx !== -1) {
+    selectedIds.value.splice(idx, 1)
+  } else {
+    selectedIds.value.push(id)
+  }
+}
+
+const clearSelection = () => {
+  selectedIds.value = []
+}
+</script>
+
+<template>
+  <!-- Tabel dengan Checkbox -->
+  <table>
+    <thead>
+      <tr>
+        <th class="w-10 text-center">
+          <input
+            type="checkbox"
+            :checked="isAllSelected"
+            @change="toggleSelectAll"
+            class="rounded border-neutral-300 text-[var(--theme-primary)] focus:ring-[var(--theme-primary)] cursor-pointer"
+          />
+        </th>
+        <th>No</th>
+        <th>Nama</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="(item, idx) in items" :key="item.id">
+        <td class="text-center">
+          <input
+            type="checkbox"
+            :checked="selectedIds.includes(item.id)"
+            @change="toggleSelect(item.id)"
+            class="rounded border-neutral-300 text-[var(--theme-primary)] focus:ring-[var(--theme-primary)] cursor-pointer"
+          />
+        </td>
+        <td>{{ idx + 1 }}</td>
+        <td>{{ item.nama }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Floating Bulk Action Toolbar (Terapung di Bawah Layar) -->
+  <Transition
+    enter-active-class="transition duration-200 ease-out"
+    enter-from-class="opacity-0 translate-y-6"
+    enter-to-class="opacity-100 translate-y-0"
+    leave-active-class="transition duration-150 ease-in"
+    leave-from-class="opacity-100 translate-y-0"
+    leave-to-class="opacity-0 translate-y-6"
+  >
+    <div
+      v-if="selectedIds.length > 0"
+      class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-[#18181c]/95 backdrop-blur-md border border-neutral-300 dark:border-[#383842] shadow-2xl rounded-2xl px-4 py-2.5 flex items-center gap-3 text-xs will-change-transform max-w-[calc(100vw-32px)]"
+    >
+      <div class="flex items-center gap-2 pr-2 border-r border-neutral-200 dark:border-[#2a2a30]">
+        <span class="w-5 h-5 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] flex items-center justify-center font-bold text-[11px]">
+          {{ selectedIds.length }}
+        </span>
+        <span class="font-semibold text-neutral-800 dark:text-neutral-200 hidden sm:inline">Data Terpilih</span>
+      </div>
+
+      <!-- Ekspor Terpilih -->
+      <BaseButton variant="outline" size="sm" @click="handleExportSelected">
+        <Download class="w-3.5 h-3.5" />
+        <span class="hidden sm:inline">Ekspor</span>
+      </BaseButton>
+
+      <!-- Hapus Massal -->
+      <BaseButton variant="danger" size="sm" @click="handleDeleteSelected">
+        <Trash2 class="w-3.5 h-3.5" />
+        <span>Hapus ({{ selectedIds.length }})</span>
+      </BaseButton>
+
+      <!-- Batal Pilih -->
+      <button
+        type="button"
+        @click="clearSelection"
+        class="p-1 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition cursor-pointer"
+        title="Batal Pilih"
+      >
+        <X class="w-4 h-4" />
+      </button>
+    </div>
+  </Transition>
+</template>
+```
+
+---
+
+## 9. Sistem Modal Dialog Lengkap: Desktop vs Mobile (*Adaptive Modal Guide*)
+
+Di aplikasi Digaji.id, seluruh modal dialog menggunakan arsitektur **Auto-Adaptive**. Pengembang **tidak perlu** membuat dua komponen modal terpisah untuk desktop dan mobile.
+
+### 9.1 Perilaku Adaptif Otomatis
+
+```
+                  Ukuran Layar Terdeteksi (Breakpoint 768px)
+                                      |
+                 +--------------------+--------------------+
+                 |                                         |
+          Layar Desktop (>= 768px)                  Layar Mobile (< 768px)
+                 |                                         |
+     [ Centered Modal Dialog ]                    [ iOS-Style Bottom Sheet ]
+     - Melayang di tengah layar                   - Menempel di bawah (bottom-0)
+     - Backdrop blur lembut                       - Drag handle geser ke bawah
+     - Border rounded keliling                    - Sudut lengkung atas (rounded-t)
+     - Tombol Close (X) kanan atas                - Touch-friendly scrollable area
+     - Ukuran: sm, md, lg, xl, full               - Sticky action footer di bawah
+```
+
+---
+
+### 9.2 Contoh 1: Modal Form Tambah/Edit Data (`BaseModal.vue`)
+
+Komponen form modal lengkap dengan input teks, mata uang Rupiah otomatis, dropdown pencarian, dan sticky footer:
+
+```vue
+<script setup>
+import { ref } from 'vue'
+import BaseModal from '@/components/ui/BaseModal.vue'
+import BaseInput from '@/components/ui/BaseInput.vue'
+import BaseCurrencyInput from '@/components/ui/BaseCurrencyInput.vue'
+import BaseSearchableSelect from '@/components/ui/BaseSearchableSelect.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+
+const isOpen = ref(false)
+const form = ref({
+  nama: '',
+  jabatan: '',
+  gajiPokok: 12500000,
+  divisi: '',
+})
+
+const divisiOptions = [
+  { value: 'Engineering', label: 'Engineering' },
+  { value: 'Product', label: 'Product & Design' },
+  { value: 'Finance', label: 'Finance & Tax' },
+]
+
+const handleSave = () => {
+  // Simpan data ke API / State
+  isOpen.value = false
+}
+</script>
+
+<template>
+  <BaseButton variant="primary" @click="isOpen = true">
+    Buka Formulir Pegawai
+  </BaseButton>
+
+  <BaseModal
+    v-model="isOpen"
+    title="Formulir Data Pegawai"
+    subtitle="Lengkapi data identitas dan remunerasi karyawan"
+    size="md"
+  >
+    <!-- Body Formulir (Scrollable touch-friendly di HP) -->
+    <div class="space-y-4">
+      <BaseInput
+        v-model="form.nama"
+        label="Nama Lengkap"
+        required
+        placeholder="Contoh: Raden Wijaya"
+      />
+
+      <BaseSearchableSelect
+        v-model="form.divisi"
+        label="Divisi Kerja"
+        required
+        :options="divisiOptions"
+        placeholder="Pilih divisi..."
+      />
+
+      <BaseCurrencyInput
+        v-model="form.gajiPokok"
+        label="Gaji Pokok"
+        required
+        terbilang
+        hint="Nominal netto per bulan sebelum tunjangan."
+      />
+    </div>
+
+    <!-- Sticky Footer Aksi -->
+    <template #footer="{ close }">
+      <BaseButton variant="outline" size="sm" @click="close">
+        Batal
+      </BaseButton>
+      <BaseButton variant="primary" size="sm" @click="handleSave">
+        Simpan Data
+      </BaseButton>
+    </template>
+  </BaseModal>
+</template>
+```
+
+---
+
+### 9.3 Contoh 2: Modal Konfirmasi Tindakan & Hapus Data (`ConfirmationModal.vue`)
+
+Digunakan untuk tindakan penting yang memerlukan kepastian pengguna (*destructive action* atau *confirm commit*):
+
+```vue
+<script setup>
+import { ref } from 'vue'
+import ConfirmationModal from '@/components/ui/ConfirmationModal.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+
+const isConfirmDeleteOpen = ref(false)
+
+const executeDelete = () => {
+  // Eksekusi API hapus
+}
+</script>
+
+<template>
+  <!-- Tombol Pemicu -->
+  <BaseButton variant="danger" size="sm" @click="isConfirmDeleteOpen = true">
+    Hapus Karyawan
+  </BaseButton>
+
+  <!-- Dialog Konfirmasi -->
+  <ConfirmationModal
+    v-model="isConfirmDeleteOpen"
+    type="delete"
+    title="Konfirmasi Hapus Data"
+    message="Apakah Anda yakin ingin menghapus data ini secara permanen? Data yang dihapus tidak dapat dipulihkan kembali."
+    confirm-text="Ya, Hapus Sekarang"
+    cancel-text="Batalkan"
+    @confirm="executeDelete"
+  />
+</template>
+```
+
+---
+
+### 9.4 Contoh 3: Modal Pratinjau Faktur & Siap Cetak (`BaseInvoiceModal.vue`)
+
+Menampilkan lembar tagihan resmi yang otomatis disesuaikan untuk cetak printer `@media print`:
+
+```vue
+<script setup>
+import { ref } from 'vue'
+import BaseInvoiceModal from '@/components/ui/BaseInvoiceModal.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+
+const isInvoiceOpen = ref(false)
+const invoiceData = ref({
+  id: 'ORD-9021',
+  customer: 'PT Surya Kencana Abadi',
+  email: 'finance@suryakencana.co.id',
+  phone: '0812-3456-7890',
+  address: 'Jl. Sudirman No. 45, Jakarta Selatan',
+  service: 'Paket Payroll Enterprise 150 Staf',
+  items: [
+    { name: 'Lisensi Modul Payroll Cloud', qty: 1, price: 12500000 },
+    { name: 'Modul Integrasi BPJS & PPh 21', qty: 1, price: 3500000 },
+  ],
+  status: 'PROSES',
+  paymentStatus: 'LUNAS',
+  date: '2025-01-28',
+  dueDate: '2025-02-15',
+})
+</script>
+
+<template>
+  <BaseButton variant="outline" size="sm" @click="isInvoiceOpen = true">
+    Lihat Faktur Resmi
+  </BaseButton>
+
+  <BaseInvoiceModal
+    v-model="isInvoiceOpen"
+    :invoice-data="invoiceData"
+  />
+</template>
+```
+
+---
+
+### 9.5 Contoh 4: Laci Samping Detail Data (`BaseSlideOver.vue`)
+
+Menyajikan informasi rinci, histori audit, atau log waktu tanpa menutup konteks layar tabel:
+
+```vue
+<script setup>
+import { ref } from 'vue'
+import BaseSlideOver from '@/components/ui/BaseSlideOver.vue'
+import BaseTimeline from '@/components/ui/BaseTimeline.vue'
+import BaseBadge from '@/components/ui/BaseBadge.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+
+const isDrawerOpen = ref(false)
+const auditLogs = [
+  { id: 1, title: 'Realisasi Payroll Disetujui', time: 'Hari ini, 09:30 WIB', variant: 'success', author: 'Direktur Keuangan' },
+  { id: 2, title: 'Draft Batch Payroll Dibuat', time: 'Kemarin, 16:45 WIB', variant: 'primary', author: 'HR Payroll Admin' },
+]
+</script>
+
+<template>
+  <BaseButton variant="outline" size="sm" @click="isDrawerOpen = true">
+    Buka Rincian Log
+  </BaseButton>
+
+  <BaseSlideOver
+    v-model="isDrawerOpen"
+    title="Rincian Batch Payroll #BTH-01"
+    subtitle="Periode Januari 2025"
+    size="md"
+  >
+    <template #badge>
+      <BaseBadge variant="success" dot>Terverifikasi</BaseBadge>
+    </template>
+
+    <div class="space-y-4">
+      <div class="p-3 rounded-xl bg-neutral-50 dark:bg-[#18181b] border border-neutral-200 dark:border-[#27272a]">
+        <span class="text-xs text-neutral-500">Total Anggaran Payroll:</span>
+        <div class="text-lg font-bold font-mono text-neutral-900 dark:text-white mt-0.5">
+          Rp 384.500.000
+        </div>
+      </div>
+
+      <div>
+        <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-3">
+          Jejak Audit Persetujuan
+        </h3>
+        <BaseTimeline :items="auditLogs" />
+      </div>
+    </div>
+
+    <template #footer="{ close }">
+      <BaseButton variant="outline" size="sm" @click="close">Tutup</BaseButton>
+    </template>
+  </BaseSlideOver>
+</template>
+```
+
+---
+
+### 9.6 Contoh 5: Wizard Impor Data CSV 3-Tahap (`BaseCsvImporter.vue`)
+
+Memungkinkan pengguna mengimpor ribuan baris data CSV lokal ke sistem dengan pemetaan kolom interaktif:
+
+```vue
+<script setup>
+import { ref } from 'vue'
+import BaseCsvImporter from '@/components/ui/BaseCsvImporter.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import { UploadCloud } from 'lucide-vue-next'
+
+const isImporterOpen = ref(false)
+
+const targetColumns = [
+  { key: 'nama', label: 'Nama Lengkap', required: true },
+  { key: 'nip', label: 'Nomor Induk Pegawai (NIP)', required: true },
+  { key: 'jabatan', label: 'Jabatan', required: true },
+  { key: 'gaji', label: 'Gaji Pokok', required: false },
+]
+
+const handleImportedData = (dataRows) => {
+  console.log('Data CSV berhasil diimpor:', dataRows)
+}
+</script>
+
+<template>
+  <BaseButton variant="outline" size="sm" @click="isImporterOpen = true">
+    <UploadCloud class="w-3.5 h-3.5" />
+    <span>Impor Data CSV</span>
+  </BaseButton>
+
+  <BaseCsvImporter
+    v-model="isImporterOpen"
+    title="Impor Data Karyawan Massal"
+    :target-fields="targetColumns"
+    @imported="handleImportedData"
+  />
+</template>
+```
+
+---
+
+## 10. Tabel Komparasi Antarmuka: Desktop vs Layar Mobile
+
+| Fitur / Komponen | Perilaku di Layar Desktop ($\ge 768\text{px}$) | Perilaku di Layar Mobile ($< 768\text{px}$) |
+|---|---|---|
+| **Modal (`BaseModal`)** | Centered pop-up dialog melayang di tengah layar dengan backdrop blur. | Bertransformasi menjadi iOS-style Bottom Sheet menempel di bawah dengan drag handle. |
+| **Navigasi Sidebar** | Dual-rail sidebar permanen (Primary Menu Rail + Submenu Rail meluncur). | Drawer samping layar penuh dari kiri, dibuka via floating squircle button pojok bawah. |
+| **Header Diagram SVG** | 1 garis horizontal (`justify-between`), tombol gelombang icon-only + date range compact. | Tetap 1 garis horizontal compact dengan ikon gelombang square dan datepicker responsif. |
+| **Bilah Aksi Masal (Bulk Bar)** | Bar terapung di bawah tengah layar dengan label teks lengkap dan tombol aksi. | Bar terapung responsif dengan `max-w-[calc(100vw-32px)]`, teks diringkas, tombol tetap mudah diklik. |
+| **Tabel Data Enterprise** | Kolom lengkap terlihat langsung, horizontal scroll halus bila melebihi kontainer. | Mendukung swipe horizontal, kolom NIP/kontak dilipat ringkas di bawah nama pegawai. |
+| **Drawer Detail (`BaseSlideOver`)** | Panel laci meluncur mulus dari sisi kanan layar (`max-w-lg`). | Meluncur menutupi layar dari kanan atau bawah dengan tombol tutup mudah dijangkau jempol. |
+| **Filter & Pencarian** | Input pencarian dan filter dropdown berjejer rapi dalam 1 baris toolbar. | Input pencarian lebar penuh (100%), filter tersusun rapi atau dilipat dalam dropdown ringkas. |
+
 
