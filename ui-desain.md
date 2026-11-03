@@ -721,7 +721,7 @@ Setiap halaman di folder `src/views/` mengikuti pola tata letak berjenjang yang 
 | Halaman | Rute | File View | Fitur Utama |
 |---|---|---|---|
 | **Dashboard ERP & Payroll** | `/` | [`DashboardView.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/views/DashboardView.vue) | 6 KPI stat cards, SVG real-time wave chart beriak, horizontal bar alokasi budget divisi, donut chart distribusi status pegawai, audit log realtime, simulasi skeleton loading. |
-| **Login & Register (Morphing Card)** | `/login`, `/register` | [`LoginView.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/views/LoginView.vue) | Autentikasi sesi & registrasi perusahaan, demo akun instan 1-klik, kartu berubah ke animasi loading dengan timeline progress kiri ke kanan (Kredensial &rarr; Modul ERP &rarr; Workspace), disusul animasi kartu kecil melebar dan membesar (*Morphing Card Expansion*) ke ukuran penuh Dasar Kedua dashboard. |
+| **Login In-Place (Morphing Card)** | Terintegrasi di `/` (Single Screen) | [`AppLayout.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/components/layout/AppLayout.vue) | Autentikasi in-place tanpa navigasi/pindah halaman (*Zero Route Split*). Menampilkan kartu login terpusat (Frame 1), beralih ke lingkaran LOADING & timeline progress horizontal pada tombol "Masuk" (Frame 2-4: 0% &rarr; 100%), lalu kartu morphing melebar menjadi card besar dashboard. |
 | **Data Karyawan & Payroll** | `/data/karyawan` | [`DataKaryawanView.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/views/DataKaryawanView.vue) | Tabel CRUD enterprise, multi-select checkbox, floating bulk action bar, wizard impor CSV, modal form tambah/edit adaptif, slide-over detail karyawan, modal konfirmasi hapus massal. |
 | **Data Gunung Jawa** | `/data` | [`DataView.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/views/DataView.vue) | Tabel master data 159 gunung di Jawa, filter provinsi & status aktif, pencarian instan, sorting multi-kolom, modal tambah/edit dan pratinjau detail. |
 | **Papan Alur Kanban** | `/pesanan/kanban` | [`KanbanView.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/views/KanbanView.vue) | Pipeline alur kerja 4 kolom, drag & drop HTML5 native antar status, badge prioritas, akumulasi nilai rupiah per kolom, laci slide-over detail order, pratinjau invoice cetak. |
@@ -995,6 +995,48 @@ const clearSelection = () => {
   </Transition>
 </template>
 ```
+
+---
+
+### 8.4 Arsitektur Single-Screen Morphing Auth (Sesuai Wireframe 4-Frame)
+
+Fitur autentikasi Digaji.id didesain **tanpa berpindah halaman** (*Zero Route Splitting / Single-Screen Experience*). Menggunakan arsitektur 2 Layer (Dasar Pertama sebagai background backdrop dan Dasar Kedua sebagai kartu yang bermutasi/morphing):
+
+```
++---------------------------------------------------------------------------------------------------+
+| LAYER 1: DASAR PERTAMA (Backdrop Grid / Dots / Solid / Image) + Header Logo & Theme Switcher      |
+|                                                                                                   |
+|  [FRAME 1: FORM MASUK]        [FRAME 2: 25% TIMELINE]     [FRAME 3: 55% TIMELINE]    [FRAME 4: 100%]     |
+|  +------------------------+  +-----------------------+  +-----------------------+  +--------------------+ |
+|  |   Masuk ke Akun Anda   |  |                       |  |                       |  |                    | |
+|  |                        |  |       /-------\       |  |       /-------\       |  |      /-------\     | |
+|  | Username / email       |  |      | LOADING |      |  |      | LOADING |      |  |     | LOADING |    | |
+|  | [____________________] |  |       \-------/       |  |       \-------/       |  |      \-------/     | |
+|  | Kata Sandi             |  |                       |  |                       |  |                    | |
+|  | [____________________] |  |                       |  |                       |  |                    | |
+|  | [        Masuk       ] |  | [==|                ] |  | [========|           ] |  | [================] | |
+|  |       (o) Google       |  |       (Masuk 25%)     |  |       (Masuk 55%)     |  |     (Masuk 100%)   | |
+|  +------------------------+  +-----------------------+  +-----------------------+  +--------------------+ |
+|             |                            |                          |                         |           |
+|             +----------------------------+--------------------------+-------------------------+           |
+|                                                      |                                                    |
+|                                         CARD MELEBAR & MEMBESAR                                           |
+|                            (transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)])                |
+|                                                      v                                                    |
+|  +-----------------------------------------------------------------------------------------------------+  |
+|  | LAYER 2: DASAR KEDUA (KARTU BESAR DASHBOARD: PRIMARY SIDEBAR + SUBMENU + MAIN CONTENT AREA)         |  |
+|  +-----------------------------------------------------------------------------------------------------+  |
++---------------------------------------------------------------------------------------------------+
+```
+
+#### Alur Animasi & Transisi:
+1. **Frame 1 (Form Masuk)**: Kartu Dasar Kedua berukuran ringkas (`w-[390px] h-[510px] rounded-3xl`) berada tepat di tengah layar Dasar Pertama. Memuat judul "Masuk ke Akun Anda", input username/email/hp, input kata sandi (dengan toggle mata), tombol "Masuk", dan tombol "Google".
+2. **Frame 2, 3, 4 (Loading Circle & Button Timeline)**: Begitu tombol Masuk diklik, form bertransisi di tempat (*in-place*) menjadi:
+   - Bagian atas: Lingkaran besar dengan teks **LOADING** di tengahnya serta cincin aksen halus berputar.
+   - Bagian bawah: Tombol "Masuk" bertransformasi menjadi wadah timeline progress bar yang mengisi dari kiri ke kanan (0% &rarr; 25% &rarr; 55% &rarr; 100%).
+3. **Morphing Expansion (Melebar & Membesar)**: Setelah timeline mencapai 100%, kartu Dasar Kedua melebar dan memanjang secara simetris dalam 700ms (`cubic-bezier(0.16, 1, 0.3, 1)`) menjadi kartu penuh dashboard (`rounded-t-[32px] sm:rounded-2xl lg:rounded-3xl`).
+4. **Dashboard Reveal**: Begitu kartu melebar, layout dashboard (Sidebar Rail, Submenu Rail, Area Konten) muncul secara mulus dengan transisi fade-in.
+5. **Keluar Sesi (Reverse Morphing)**: Saat pengguna mengklik "Keluar Sesi" di header profil, kartu besar secara mulus mengkerut (*reverse morphing*) kembali ke kartu kecil Frame 1 tanpa reload atau navigasi URL.
 
 ---
 

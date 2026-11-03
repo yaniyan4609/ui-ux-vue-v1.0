@@ -1,12 +1,9 @@
 <script setup>
-import { computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { onMounted } from 'vue'
 import AppLayout from './components/layout/AppLayout.vue'
-import ToastContainer from './components/ui/ToastContainer.vue'
 import { useTheme } from './composables/useTheme'
 import { useThemeColor } from './composables/useThemeColor'
 
-const route = useRoute()
 const { initTheme } = useTheme()
 const { initThemeColor } = useThemeColor()
 
@@ -14,21 +11,10 @@ onMounted(() => {
   initTheme()
   initThemeColor()
 })
-
-const isAuthPage = computed(() => {
-  return route.path === '/login' || route.path === '/register'
-})
 </script>
 
 <template>
-  <!-- Halaman Auth (Login / Register): Langsung Tampil dengan Layer 1 & Morphing Layer 2 -->
-  <div v-if="isAuthPage">
-    <router-view />
-    <ToastContainer />
-  </div>
-
-  <!-- Halaman Utama Aplikasi: Dibungkus dengan AppLayout Dual-Sidebar & Dasar 2 -->
-  <AppLayout v-else>
+  <AppLayout>
     <router-view v-slot="{ Component }">
       <Transition
         enter-active-class="transition duration-200 ease-out"

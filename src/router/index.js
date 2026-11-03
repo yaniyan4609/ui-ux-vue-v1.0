@@ -4,19 +4,8 @@ import KanbanView from '../views/KanbanView.vue'
 import DataView from '../views/DataView.vue'
 import DataKaryawanView from '../views/DataKaryawanView.vue'
 import SettingView from '../views/SettingView.vue'
-import LoginView from '../views/LoginView.vue'
 
 const routes = [
-  {
-    path: '/login',
-    name: 'Login',
-    component: LoginView,
-  },
-  {
-    path: '/register',
-    name: 'Register',
-    component: LoginView,
-  },
   {
     path: '/',
     name: 'Beranda',
@@ -73,6 +62,14 @@ const routes = [
     path: '/setting/keamanan',
     name: 'SettingKeamanan',
     component: SettingView,
+  },
+  {
+    path: '/login',
+    redirect: '/',
+  },
+  {
+    path: '/register',
+    redirect: '/',
   },
   {
     path: '/:pathMatch(.*)*',

@@ -1,5 +1,4 @@
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { useToast } from './useToast'
 
 const currentUser = ref({
@@ -10,26 +9,26 @@ const currentUser = ref({
   company: 'PT Digaji Indonesia',
 })
 
-const isAuthenticated = ref(true)
+// Default false agar user langsung melihat tampilan wireframe login saat membuka aplikasi
+const isAuthenticated = ref(false)
+const isLoggingOut = ref(false)
 
 export function useAuth() {
-  const router = useRouter()
   const toast = useToast()
 
-  const login = async (credentials) => {
-    // Simulasi autentikasi
-    if (credentials.email.includes('hr')) {
+  const login = async (identifier = 'admin@digaji.id') => {
+    if (identifier.includes('hr')) {
       currentUser.value = {
         name: 'Sarah HR Manager',
-        email: credentials.email,
+        email: identifier,
         role: 'HR & Payroll Lead',
         avatar: '',
         company: 'PT Digaji Indonesia',
       }
-    } else if (credentials.email.includes('staf')) {
+    } else if (identifier.includes('staf')) {
       currentUser.value = {
         name: 'Budi Santoso',
-        email: credentials.email,
+        email: identifier,
         role: 'Staf Operasional',
         avatar: '',
         company: 'PT Digaji Indonesia',
@@ -37,7 +36,7 @@ export function useAuth() {
     } else {
       currentUser.value = {
         name: 'Admin Digaji.id',
-        email: credentials.email || 'admin@digaji.id',
+        email: identifier || 'admin@digaji.id',
         role: 'Super Admin',
         avatar: '',
         company: 'PT Digaji Indonesia',
@@ -45,33 +44,40 @@ export function useAuth() {
     }
 
     isAuthenticated.value = true
+    try {
+      sessionStorage.setItem('digaji_auth', 'true')
+    } catch {
+      // ignore
+    }
     return true
   }
 
-  const register = async (data) => {
-    currentUser.value = {
-      name: data.name || 'Pengguna Baru',
-      email: data.email,
-      role: 'Administrator Perusahaan',
-      avatar: '',
-      company: data.company || 'PT Mitra Baru',
+  const startLogout = () => {
+    isLoggingOut.value = true
+  }
+
+  const finishLogout = () => {
+    isAuthenticated.value = false
+    isLoggingOut.value = false
+    try {
+      sessionStorage.removeItem('digaji_auth')
+    } catch {
+      // ignore
     }
-    isAuthenticated.value = true
-    return true
+    toast.info('Sesi telah berakhir. Kembali ke form masuk.')
   }
 
   const logout = () => {
-    isAuthenticated.value = false
-    toast.info('Sesi telah berakhir. Silakan masuk kembali.')
-    router.push('/login')
+    startLogout()
   }
 
   return {
     currentUser,
     isAuthenticated,
+    isLoggingOut,
     login,
-    register,
+    startLogout,
+    finishLogout,
     logout,
   }
 }
-

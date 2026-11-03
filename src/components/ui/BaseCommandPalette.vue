@@ -22,7 +22,9 @@ import {
   PlusCircle,
   KanbanSquare,
   LogIn,
+  LogOut,
 } from 'lucide-vue-next'
+import { useAuth } from '../../composables/useAuth'
 
 const props = defineProps({
   modelValue: {
@@ -36,6 +38,7 @@ const emit = defineEmits(['update:modelValue', 'action'])
 const router = useRouter()
 const { isDark, toggleTheme } = useTheme()
 const { setThemeColor } = useThemeColor()
+const { logout, isAuthenticated } = useAuth()
 const toast = useToast()
 
 const searchQuery = ref('')
@@ -92,12 +95,12 @@ const commands = [
     action: () => router.push('/setting'),
   },
   {
-    id: 'nav-login',
-    title: 'Buka Halaman Login & Register (Morphing Card)',
-    category: 'Navigasi',
-    icon: LogIn,
+    id: 'act-logout',
+    title: 'Keluar Sesi / Uji Animasi Login (Morphing Card)',
+    category: 'Aksi Cepat',
+    icon: LogOut,
     badge: 'Auth',
-    action: () => router.push('/login'),
+    action: () => logout(),
   },
   {
     id: 'nav-setting-bg',

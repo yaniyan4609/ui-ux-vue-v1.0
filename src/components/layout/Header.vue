@@ -32,7 +32,7 @@ const props = defineProps({
 const emit = defineEmits(['open-search', 'toggle-sidebar'])
 
 const { isDark, toggleTheme } = useTheme()
-const { currentUser, logout } = useAuth()
+const { currentUser, logout, isAuthenticated } = useAuth()
 const toast = useToast()
 
 const userMenuOpen = ref(false)
@@ -123,6 +123,7 @@ onUnmounted(() => {
     <div class="flex items-center gap-2 sm:gap-3">
       <!-- Tombol Toggle Sidebar Mobile (Pojok Kiri Atas) -->
       <button
+        v-if="isAuthenticated"
         type="button"
         @click="emit('toggle-sidebar')"
         class="lg:hidden w-8.5 h-8.5 rounded-xl border border-neutral-300 dark:border-[#27272a] bg-white dark:bg-[#18181b] flex items-center justify-center text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#27272a] transition cursor-pointer shadow-2xs active:scale-95 shrink-0"
@@ -156,7 +157,7 @@ onUnmounted(() => {
     </div>
 
     <!-- Tengah: Quick Command Palette Trigger (Ctrl + K) -->
-    <div class="flex-1 max-w-xs md:max-w-sm mx-3 hidden sm:block">
+    <div v-if="isAuthenticated" class="flex-1 max-w-xs md:max-w-sm mx-3 hidden sm:block">
       <button
         type="button"
         @click="emit('open-search')"
@@ -176,6 +177,7 @@ onUnmounted(() => {
     <div class="flex items-center gap-2 sm:gap-2.5">
       <!-- Search Mobile Icon Button -->
       <button
+        v-if="isAuthenticated"
         type="button"
         @click="emit('open-search')"
         class="sm:hidden w-8 h-8 rounded-xl border border-neutral-300 dark:border-[#27272a] bg-white dark:bg-[#18181b] flex items-center justify-center text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#27272a] transition cursor-pointer shadow-2xs"
@@ -203,7 +205,7 @@ onUnmounted(() => {
       </button>
 
       <!-- 2. Icon Lonceng Popover Notification Center -->
-      <div class="relative">
+      <div v-if="isAuthenticated" class="relative">
         <button
           type="button"
           @click="notificationOpen = !notificationOpen; userMenuOpen = false"
@@ -332,7 +334,7 @@ onUnmounted(() => {
       </div>
 
       <!-- 3. Profile Avatar & Dropdown -->
-      <div class="relative">
+      <div v-if="isAuthenticated" class="relative">
         <button
           type="button"
           @click="userMenuOpen = !userMenuOpen; notificationOpen = false"
@@ -377,6 +379,15 @@ onUnmounted(() => {
             </button>
           </div>
         </Transition>
+      </div>
+
+      <!-- Badge Mode Tamu jika belum login -->
+      <div
+        v-if="!isAuthenticated"
+        class="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-xl border border-neutral-300 dark:border-[#27272a] bg-white/60 dark:bg-[#18181b]/60 backdrop-blur-xs text-xs font-medium text-neutral-600 dark:text-neutral-400"
+      >
+        <div class="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+        <span>Mode Masuk</span>
       </div>
 
     </div>
