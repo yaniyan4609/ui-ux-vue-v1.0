@@ -83,7 +83,11 @@ const baseLayerStyle = computed(() => {
     :style="baseLayerStyle"
   >
     <!-- Topbar: Logo | Digaji.id di kiri, Theme Icon | Lonceng | Profile di kanan -->
-    <Header @open-search="isCommandPaletteOpen = true" />
+    <Header
+      :mobile-drawer-open="mobileDrawerOpen"
+      @toggle-sidebar="mobileDrawerOpen = !mobileDrawerOpen"
+      @open-search="isCommandPaletteOpen = true"
+    />
 
     <!-- ======================================================== -->
     <!-- 2. DASAR KEDUA (Layer 2 - Floating Card Besar)           -->
@@ -191,51 +195,6 @@ const baseLayerStyle = computed(() => {
         />
       </div>
     </Transition>
-
-    <!-- ======================================================== -->
-    <!-- 3. FLOATING SIDEBAR TOGGLE BUTTON DI BAWAH KIRI          -->
-    <!-- Icon Panel Sidebar Persis Gambar 2 (PanelLeftClose/Open) -->
-    <!-- ======================================================== -->
-    <button
-      type="button"
-      @click="mobileDrawerOpen = !mobileDrawerOpen"
-      class="lg:hidden fixed bottom-7 left-6 sm:bottom-8 sm:left-7 z-60 w-11 h-11 rounded-2xl border-2 border-neutral-300 dark:border-[#383842] bg-white dark:bg-[#18181b] shadow-xl text-neutral-800 dark:text-neutral-100 flex items-center justify-center cursor-pointer active:scale-90 transition-all select-none hover:border-neutral-400 dark:hover:border-neutral-500"
-      :class="mobileDrawerOpen ? 'ring-2 ring-[var(--theme-primary)] text-[var(--theme-primary)]' : ''"
-      title="Buka/Tutup Sidebar"
-      aria-label="Toggle Sidebar"
-    >
-      <!-- Saat terbuka: Icon persis Gambar 2 (media_1793628109257_5bee3696.png: divider di kiri + chevron <) -->
-      <svg
-        v-if="mobileDrawerOpen"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2.4"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="w-6 h-6 text-[var(--theme-primary)] transition-transform duration-200"
-      >
-        <rect x="3" y="3" width="18" height="18" rx="4.5" />
-        <line x1="8" y1="3" x2="8" y2="21" />
-        <path d="M15.5 8.5 L12 12 L15.5 15.5" />
-      </svg>
-
-      <!-- Saat tertutup: Icon persis Gambar 1 (media_1793627647321_a56e7b01.png: chevron > + divider di kanan) -->
-      <svg
-        v-else
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2.4"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="w-6 h-6 text-neutral-800 dark:text-neutral-100 transition-transform duration-200"
-      >
-        <rect x="3" y="3" width="18" height="18" rx="4.5" />
-        <line x1="16" y1="3" x2="16" y2="21" />
-        <path d="M8.5 8.5 L12 12 L8.5 15.5" />
-      </svg>
-    </button>
 
     <!-- Global Toast Component -->
     <ToastContainer />

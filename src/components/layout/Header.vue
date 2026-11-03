@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import {
+  Menu,
+  X,
   Bell,
   User,
   Sun,
@@ -19,7 +21,14 @@ import {
 import { useTheme } from '../../composables/useTheme'
 import { useToast } from '../../composables/useToast'
 
-const emit = defineEmits(['open-search'])
+const props = defineProps({
+  mobileDrawerOpen: {
+    type: Boolean,
+    default: false,
+  },
+})
+
+const emit = defineEmits(['open-search', 'toggle-sidebar'])
 
 const { isDark, toggleTheme } = useTheme()
 const toast = useToast()
@@ -108,8 +117,21 @@ onUnmounted(() => {
     ref="headerRef"
     class="w-full px-2.5 sm:px-3 lg:px-4 py-2 sm:py-2.5 flex items-center justify-between select-none z-30"
   >
-    <!-- Kiri: Logo | Digaji.id (Bersih tanpa hamburger) -->
+    <!-- Kiri: Mobile Sidebar Toggle + Logo | Digaji.id -->
     <div class="flex items-center gap-2 sm:gap-3">
+      <!-- Tombol Toggle Sidebar Mobile (Pojok Kiri Atas) -->
+      <button
+        type="button"
+        @click="emit('toggle-sidebar')"
+        class="lg:hidden w-8.5 h-8.5 rounded-xl border border-neutral-300 dark:border-[#27272a] bg-white dark:bg-[#18181b] flex items-center justify-center text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#27272a] transition cursor-pointer shadow-2xs active:scale-95 shrink-0"
+        :class="mobileDrawerOpen ? 'ring-2 ring-[var(--theme-primary)] text-[var(--theme-primary)] border-[var(--theme-primary)]' : ''"
+        title="Buka / Tutup Menu Sidebar"
+        aria-label="Toggle Sidebar"
+      >
+        <X v-if="mobileDrawerOpen" class="w-4.5 h-4.5" />
+        <Menu v-else class="w-4.5 h-4.5" />
+      </button>
+
       <router-link
         to="/"
         class="group flex items-center gap-2.5 transition-transform"

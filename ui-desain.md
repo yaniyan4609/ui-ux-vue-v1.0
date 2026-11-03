@@ -35,7 +35,7 @@ Aplikasi ini mengadopsi prinsip desain modular berjenjang **2 Layer**:
 - **Header Topbar**: Menempel di Dasar Pertama:
   - Sisi Kiri: `Logo Box` bersudut melengkung + Garis vertikal `|` + Nama brand `Digaji.id`.
   - Sisi Kanan: Single button switch tema (Sun/Moon dengan animasi lingkaran View Transition API), Lonceng Notifikasi, dan Avatar Profil.
-  - **Aturan**: Hamburger menu di header **dihilangkan**; toggle navigasi mobile dialihkan ke floating button di pojok bawah.
+  - **Aturan Navigasi Mobile**: Tombol toggle navigasi mobile terletak di header topbar pojok kiri atas (bersebelahan dengan logo Digaji.id) untuk aksesibilitas yang cepat, bersih, dan natural bagi jempol pengguna smartphone.
 
 ### Layer 2: Dasar Kedua (`Base Layer 2 - Floating Card`)
 - **Fungsi**: Wadah (*container*) utama seluruh konten aplikasi.
@@ -74,12 +74,11 @@ Navigasi aplikasi mengadopsi sistem **Dual-Sidebar Rail**:
   - Tutup: Meluncur keluar dari kanan ke kiri (`translate-x-0` $\rightarrow$ `-translate-x-full`).
   - Backdrop gelap independen dengan animasi *fade-in/fade-out*.
 - **Kolom Menu Kapsul**: Kolom `PrimarySidebar` di mobile menggunakan mode `capsule` (`rounded-[26px] bg-neutral-100/90 dark:bg-[#1a1a1e] h-[calc(100%-24px)] my-3 ml-3`), presisi mengikuti sketsa Wireframe.
-- **Floating Toggle Button**:
-  - Terletak di pojok kiri bawah layar: `fixed bottom-7 left-6 sm:bottom-8 sm:left-7 z-60`.
-  - Berbentuk squircle dengan border 2px dan efek klik `active:scale-90`.
-  - **Ikon Khusus**:
-    - Saat Tertutup: Ikon squircle dengan panah `>` di kiri dan garis vertikal di kanan.
-    - Saat Terbuka: Ikon squircle dengan garis vertikal di kiri dan panah `<` di kanan.
+- **Toggle Button Mobile (Pojok Kiri Atas)**:
+  - Terletak di header topbar sebelah kiri (bersebelahan dengan logo): `w-8.5 h-8.5 rounded-xl border border-neutral-300 dark:border-[#27272a]`.
+  - Menggunakan ikon `Menu` (hamburger) saat tertutup, dan ikon `X` saat terbuka.
+  - Efek klik `active:scale-95` dan outline ring berwarna tema saat aktif.
+  - Bebas dari tumpang tindih elemen konten bawah (*clean viewport*).
 
 ---
 
@@ -1293,7 +1292,7 @@ const handleImportedData = (dataRows) => {
 | Fitur / Komponen | Perilaku di Layar Desktop ($\ge 768\text{px}$) | Perilaku di Layar Mobile ($< 768\text{px}$) |
 |---|---|---|
 | **Modal (`BaseModal`)** | Centered pop-up dialog melayang di tengah layar dengan backdrop blur. | Bertransformasi menjadi iOS-style Bottom Sheet menempel di bawah dengan drag handle. |
-| **Navigasi Sidebar** | Dual-rail sidebar permanen (Primary Menu Rail + Submenu Rail meluncur). | Drawer samping layar penuh dari kiri, dibuka via floating squircle button pojok bawah. |
+| **Navigasi Sidebar** | Dual-rail sidebar permanen (Primary Menu Rail + Submenu Rail meluncur). | Drawer samping layar penuh dari kiri, dibuka via tombol menu pojok kiri atas (topbar). |
 | **Header Diagram SVG** | 1 garis horizontal (`justify-between`), tombol gelombang icon-only + date range compact. | Tetap 1 garis horizontal compact dengan ikon gelombang square dan datepicker responsif. |
 | **Bilah Aksi Masal (Bulk Bar)** | Bar terapung di bawah tengah layar dengan label teks lengkap dan tombol aksi. | Bar terapung responsif dengan `max-w-[calc(100vw-32px)]`, teks diringkas, tombol tetap mudah diklik. |
 | **Tabel Data Enterprise** | Kolom lengkap terlihat langsung, horizontal scroll halus bila melebihi kontainer. | Mendukung swipe horizontal, kolom NIP/kontak dilipat ringkas di bawah nama pegawai. |
