@@ -44,6 +44,7 @@ export function useTheme() {
     await transition.ready
 
     // Animasi Circular Reveal / Wipe identik di kedua arah (Light->Dark & Dark->Light)
+    // Durasi diatur 850ms dengan kurva yang lebih tenang dan halus (tidak terburu-buru)
     document.documentElement.animate(
       {
         clipPath: [
@@ -52,8 +53,8 @@ export function useTheme() {
         ],
       },
       {
-        duration: 500,
-        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+        duration: 850,
+        easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
         pseudoElement: '::view-transition-new(root)',
       }
     )
