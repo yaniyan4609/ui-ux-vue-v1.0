@@ -8,6 +8,7 @@ import BaseInput from '../components/ui/BaseInput.vue'
 import BaseBadge from '../components/ui/BaseBadge.vue'
 import BasePagination from '../components/ui/BasePagination.vue'
 import BaseDropdownMenu from '../components/ui/BaseDropdownMenu.vue'
+import BaseEmptyState from '../components/ui/BaseEmptyState.vue'
 import { useToast } from '../composables/useToast'
 import { gunungJawaList } from '../data/gunungJawaData'
 import {
@@ -656,14 +657,14 @@ const handleResetDefault = () => {
 
             <!-- Empty State in Table -->
             <tr v-if="processedList.length === 0">
-              <td colspan="8" class="py-12 text-center text-neutral-400">
-                <div class="flex flex-col items-center justify-center space-y-2">
-                  <Mountain class="w-8 h-8 text-neutral-300 dark:text-neutral-600" />
-                  <p class="font-medium">Tidak ada data gunung yang cocok</p>
-                  <BaseButton variant="outline" size="sm" @click="searchQuery = ''; selectedCategory = 'all'; selectedProvinsi = 'all'">
-                    Bersihkan Filter
-                  </BaseButton>
-                </div>
+              <td colspan="8" class="py-8 text-center">
+                <BaseEmptyState
+                  :icon="Mountain"
+                  title="Tidak ada data gunung yang cocok"
+                  description="Coba ubah kata kunci pencarian, kategori ketinggian, atau provinsi yang dipilih."
+                  actionText="Bersihkan Filter"
+                  @action="searchQuery = ''; selectedCategory = 'all'; selectedProvinsi = 'all'"
+                />
               </td>
             </tr>
           </tbody>
@@ -760,12 +761,15 @@ const handleResetDefault = () => {
         </div>
 
         <!-- Mobile Empty State -->
-        <div v-if="processedList.length === 0" class="p-8 text-center rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] space-y-3">
-          <Mountain class="w-8 h-8 text-neutral-300 dark:text-neutral-600 mx-auto" />
-          <p class="text-xs text-neutral-400">Tidak ada data gunung yang cocok.</p>
-          <BaseButton variant="outline" size="sm" @click="searchQuery = ''; selectedCategory = 'all'; selectedProvinsi = 'all'">
-            Bersihkan Filter
-          </BaseButton>
+        <div v-if="processedList.length === 0" class="p-4 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a]">
+          <BaseEmptyState
+            :icon="Mountain"
+            title="Tidak ada data gunung"
+            description="Tidak ditemukan data gunung yang sesuai filter pencarian."
+            actionText="Bersihkan Filter"
+            compact
+            @action="searchQuery = ''; selectedCategory = 'all'; selectedProvinsi = 'all'"
+          />
         </div>
       </div>
 

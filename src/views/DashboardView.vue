@@ -6,6 +6,7 @@ import BaseBadge from '../components/ui/BaseBadge.vue'
 import BaseModal from '../components/ui/BaseModal.vue'
 import BaseSkeleton from '../components/ui/BaseSkeleton.vue'
 import BaseCountUp from '../components/ui/BaseCountUp.vue'
+import BaseDatePicker from '../components/ui/BaseDatePicker.vue'
 import { useToast } from '../composables/useToast'
 import {
   kpiSummary,
@@ -79,6 +80,18 @@ const selectedTrenPeriod = ref('7hari') // '7hari' | '14hari' | 'bulan'
 const selectedLayananPeriod = ref('hari-ini') // 'hari-ini' | 'minggu-ini'
 const activeChartHoverIdx = ref(6) // Default to latest point (27 Jan)
 const hoveredDonutSlice = ref(null)
+
+// Date Range Filter
+const dashboardDateRange = ref({
+  start: '2025-01-21',
+  end: '2025-01-27',
+})
+
+const handleDateRangeChange = (val) => {
+  if (val && val.start && val.end) {
+    toast.info(`Rentang tanggal difilter: ${val.start} s/d ${val.end}`, 'Filter Tanggal Dashboard')
+  }
+}
 
 // Current Trend Data
 const currentTren = computed(() => {
@@ -515,7 +528,7 @@ onUnmounted(() => {
         <!-- Real Chart 1 dengan Gelombang Interaktif -->
         <template v-else>
           <!-- Chart Header -->
-          <div class="flex items-center justify-between gap-2">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <div class="flex items-center gap-2">
               <TrendingUp class="w-4 h-4 text-[var(--theme-primary)]" />
               <h2 class="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white">
@@ -523,13 +536,13 @@ onUnmounted(() => {
               </h2>
             </div>
 
-            <!-- Periode Dropdown & Wave Toggle -->
-            <div class="flex items-center gap-1.5">
+            <!-- Periode Controls & Wave Toggle -->
+            <div class="flex items-center gap-2 flex-wrap">
               <!-- Wave Toggle Button -->
               <button
                 type="button"
                 @click="toggleWave"
-                class="p-1 px-2 rounded-lg border border-neutral-200 dark:border-[#27272a] text-[10.5px] font-medium flex items-center gap-1 transition cursor-pointer"
+                class="p-1 px-2 h-8.5 rounded-xl border border-neutral-200 dark:border-[#27272a] text-[10.5px] font-medium flex items-center gap-1 transition cursor-pointer"
                 :class="isWaveActive ? 'bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 border-sky-300 dark:border-sky-800' : 'bg-neutral-100 dark:bg-[#18181b] text-neutral-500'"
                 title="Beralih Animasi Gelombang Beriak"
               >
@@ -537,14 +550,16 @@ onUnmounted(() => {
                 <span class="hidden sm:inline">{{ isWaveActive ? 'Gelombang On' : 'Gelombang Off' }}</span>
               </button>
 
-              <select
-                v-model="selectedTrenPeriod"
-                class="text-xs py-1 px-2.5 rounded-lg border border-neutral-200 dark:border-[#27272a] bg-neutral-50 dark:bg-[#18181b] text-neutral-700 dark:text-neutral-300 font-medium focus:outline-none cursor-pointer"
-              >
-                <option value="7hari">7 Hari Terakhir</option>
-                <option value="14hari">14 Hari Terakhir</option>
-                <option value="bulan">Bulan Ini</option>
-              </select>
+              <!-- BaseDatePicker Range Mode -->
+              <div class="w-48 sm:w-56 shrink-0">
+                <BaseDatePicker
+                  v-model="dashboardDateRange"
+                  range
+                  size="sm"
+                  placeholder="Rentang tanggal..."
+                  @change="handleDateRangeChange"
+                />
+              </div>
             </div>
           </div>
 

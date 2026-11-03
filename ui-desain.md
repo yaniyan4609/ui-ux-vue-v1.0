@@ -387,6 +387,79 @@ Menu popover melayang untuk kolom aksi tabel atau header kartu.
 
 ---
 
+### 4.11 `BaseCommandPalette.vue` (Global Search & Quick Actions `Ctrl + K`)
+Pusat komando dan pencarian cepat berbasis pintasan keyboard (`Ctrl + K` / `Cmd + K`):
+- **Navigasi Cepat**: Langsung berpindah ke Dashboard, Data Pegawai, Data Gunung, atau Pengaturan.
+- **Aksi Cepat Sistem**: Mengganti tema gelap/terang, berganti palet warna (Default, Terracotta, Pink, Blue).
+- **Pencarian Data**: Menemukan nama pegawai atau nama gunung secara instan.
+- **Dukungan Keyboard Penuh**: Panah Atas/Bawah untuk navigasi, `Enter` untuk memilih, `Esc` untuk menutup.
+
+```vue
+<template>
+  <!-- Mount global di AppLayout.vue -->
+  <BaseCommandPalette v-model="isCommandPaletteOpen" />
+</template>
+```
+
+---
+
+### 4.12 `BaseDatePicker.vue` (Kalender Mandiri Single & Range Mode)
+Komponen pemilih tanggal enterprise tanpa dependensi eksternal:
+- **Mode Fleksibel**: Mendukung pemilihan tanggal tunggal (*single date*) atau rentang tanggal (*date range*).
+- **Preset Instan Cepat**: Pilihan "Hari Ini", "7 Hari Terakhir", "30 Hari Terakhir", dan "Bulan Ini".
+- **Format Tampilan Indonesia**: Menampilkan label ramah pengguna (contoh: `27 Jan 2025` atau `21 Jan 2025 - 27 Jan 2025`), sementara `v-model` menyimpan format ISO standar `YYYY-MM-DD`.
+
+```vue
+<template>
+  <!-- Mode Single Date -->
+  <BaseDatePicker
+    v-model="tanggalMasuk"
+    label="Tanggal Masuk"
+    placeholder="Pilih tanggal..."
+  />
+
+  <!-- Mode Range Date dengan Presets -->
+  <BaseDatePicker
+    v-model="periodeFilter"
+    range
+    label="Rentang Waktu"
+    placeholder="Pilih rentang tanggal..."
+    @change="handleFilterChange"
+  />
+</template>
+```
+
+---
+
+### 4.13 `BaseEmptyState.vue` (Ilustrasi Status Kosong Soft Badge)
+Penyaji status ketika hasil pencarian atau tabel bernilai 0:
+- Menghindari halaman tampak patah atau kosong melompong.
+- Dilengkapi ilustrasi halo bertema lembut, judul, deskripsi pemecahan masalah, dan tombol aksi (*call-to-action*).
+
+```vue
+<template>
+  <BaseEmptyState
+    :icon="FolderSearch"
+    title="Data Tidak Ditemukan"
+    description="Coba gunakan kata kunci lain atau bersihkan filter pencarian."
+    actionText="Bersihkan Filter"
+    @action="resetFilter"
+  />
+</template>
+```
+
+---
+
+### 4.14 Multi-Select Checkbox, Floating Batch Bar & Ekspor CSV
+Fitur produktivitas tabel data skala enterprise di [`DataKaryawanView.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/views/DataKaryawanView.vue):
+- **Pilih Semua (Select All)**: Mengontrol semua baris dalam halaman aktif atau seluruh dataset.
+- **Floating Batch Action Bar**: Bilah aksi mengambang di bagian bawah layar saat $\ge 1$ baris terpilih, dengan tombol *Ekspor CSV Terpilih* dan *Hapus Terpilih*.
+- **Ekspor CSV Sesuai Standar RFC 4180**:
+  - Mengikutsertakan UTF-8 BOM (`\uFEFF`) agar teks dan angka terbuka rapi di Microsoft Excel tanpa rusak encoding.
+  - Nilai dengan koma atau tanda petik otomatis dibungkus tanda kutip ganda secara aman.
+
+---
+
 ## 5. Standar Desain Dashboard & Visualisasi SVG (Zero Library)
 
 Dashboard operasional di [`DashboardView.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/views/DashboardView.vue) dibangun menggunakan pure SVG interaktif berkinerja tinggi tanpa library chart eksternal:

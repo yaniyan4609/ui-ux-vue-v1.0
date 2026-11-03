@@ -6,6 +6,8 @@ import ConfirmationModal from '../components/ui/ConfirmationModal.vue'
 import BaseSearchableSelect from '../components/ui/BaseSearchableSelect.vue'
 import BaseInput from '../components/ui/BaseInput.vue'
 import BaseCurrencyInput from '../components/ui/BaseCurrencyInput.vue'
+import BaseDatePicker from '../components/ui/BaseDatePicker.vue'
+import BaseEmptyState from '../components/ui/BaseEmptyState.vue'
 import BaseTextarea from '../components/ui/BaseTextarea.vue'
 import BaseSwitch from '../components/ui/BaseSwitch.vue'
 import BaseBadge from '../components/ui/BaseBadge.vue'
@@ -38,6 +40,8 @@ import {
   Phone,
   Mail,
   ShieldCheck,
+  Download,
+  CheckSquare,
 } from 'lucide-vue-next'
 
 const toast = useToast()
@@ -60,6 +64,10 @@ const sortOrder = ref('desc')
 
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
+
+// Multi-select & Batch Actions State
+const selectedIds = ref([])
+const isBatchDeleteModalOpen = ref(false)
 
 // Dropdown Options: Divisi (Searchable)
 const divisiOptions = computed(() => {
@@ -166,6 +174,32 @@ const paginatedList = computed(() => {
   return processedList.value.slice(start, start + Number(itemsPerPage.value))
 })
 
+// Multi-select Logic
+const isAllSelected = computed(() => {
+  if (paginatedList.value.length === 0) return false
+  return paginatedList.value.every((k) => selectedIds.value.includes(k.id))
+})
+
+const toggleSelectAll = () => {
+  if (isAllSelected.value) {
+    const pageIds = paginatedList.value.map((k) => k.id)
+    selectedIds.value = selectedIds.value.filter((id) => !pageIds.includes(id))
+  } else {
+    const pageIds = paginatedList.value.map((k) => k.id)
+    const set = new Set([...selectedIds.value, ...pageIds])
+    selectedIds.value = Array.from(set)
+  }
+}
+
+const toggleSelect = (id) => {
+  const idx = selectedIds.value.indexOf(id)
+  if (idx !== -1) {
+    selectedIds.value.splice(idx, 1)
+  } else {
+    selectedIds.value.push(id)
+  }
+}
+
 // Stats Calculations
 const totalPayroll = computed(() => {
   return listKaryawan.value.reduce((acc, k) => acc + (k.gaji || 0) + (k.tunjangan || 0), 0)
@@ -200,7 +234,59 @@ const getStatusBadgeVariant = (status) => {
 }
 
 // ========================================================
-// 3. MODAL CRUD (TAMBAH & EDIT PEGAWAI)
+// 3. EXPORT CSV & BATCH ACTIONS
+// ========================================================
+const exportToCSV = (items = listKaryawan.value, filename = 'data-pegawai-digaji.csv') => {
+  if (!items || items.length === 0) {
+    toast.error('Tidak ada data untuk diekspor')
+    return
+  }
+
+  const headers = ['NIP', 'Nama Pegawai', 'Email', 'No Telepon', 'Divisi', 'Jabatan', 'Gaji Pokok', 'Tunjangan', 'Status', 'Lokasi', 'Tanggal Masuk', 'BPJS']
+  const rows = items.map((k) => [
+    `"${k.nip || ''}"`,
+    `"${k.nama || ''}"`,
+    `"${k.email || ''}"`,
+    `"${k.telepon || ''}"`,
+    `"${k.divisi || ''}"`,
+    `"${k.jabatan || ''}"`,
+    k.gaji || 0,
+    k.tunjangan || 0,
+    `"${k.status || ''}"`,
+    `"${k.lokasi || ''}"`,
+    `"${k.tanggalMasuk || ''}"`,
+    k.bpjsAktif ? 'Aktif' : 'Tidak',
+  ])
+
+  const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n')
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.setAttribute('href', url)
+  link.setAttribute('download', filename)
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+
+  toast.success(`Berhasil mengunduh ${items.length} data pegawai ke file CSV!`, 'Ekspor CSV')
+}
+
+const exportSelected = () => {
+  const items = listKaryawan.value.filter((k) => selectedIds.value.includes(k.id))
+  exportToCSV(items, `data-pegawai-terpilih-${items.length}.csv`)
+}
+
+const handleBatchDeleteConfirm = () => {
+  const count = selectedIds.value.length
+  listKaryawan.value = listKaryawan.value.filter((k) => !selectedIds.value.includes(k.id))
+  selectedIds.value = []
+  isBatchDeleteModalOpen.value = false
+  toast.error(`${count} pegawai terpilih telah dihapus dari sistem.`, 'Hapus Massal')
+}
+
+// ========================================================
+// 4. MODAL CRUD (TAMBAH & EDIT PEGAWAI)
 // ========================================================
 const isFormModalOpen = ref(false)
 const isEditMode = ref(false)
@@ -216,7 +302,7 @@ const formData = ref({
   tunjangan: '',
   status: 'Tetap',
   lokasi: 'Jakarta Selatan',
-  tanggalMasuk: '01 Jan 2024',
+  tanggalMasuk: '2024-01-01',
   bpjsAktif: true,
   rekening: '',
   catatan: '',
@@ -238,7 +324,7 @@ const openAddModal = () => {
     tunjangan: '',
     status: 'Tetap',
     lokasi: 'Jakarta Selatan',
-    tanggalMasuk: new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }),
+    tanggalMasuk: '2024-01-01',
     bpjsAktif: true,
     rekening: 'BCA - ',
     catatan: '',
@@ -294,7 +380,7 @@ const handleSaveForm = async () => {
           const idx = listKaryawan.value.findIndex((k) => k.id === payload.id)
           if (idx !== -1) listKaryawan.value[idx] = payload
           resolve(payload)
-        }, 800)
+        }, 600)
       }),
       {
         loading: 'Menyimpan perubahan data...',
@@ -309,7 +395,7 @@ const handleSaveForm = async () => {
           payload.id = Date.now()
           listKaryawan.value.unshift(payload)
           resolve(payload)
-        }, 800)
+        }, 600)
       }),
       {
         loading: 'Mendaftarkan pegawai baru...',
@@ -321,7 +407,7 @@ const handleSaveForm = async () => {
 }
 
 // ========================================================
-// 4. DELETE MODAL CONFIRMATION
+// 5. DELETE MODAL CONFIRMATION
 // ========================================================
 const isDeleteModalOpen = ref(false)
 const itemToDelete = ref(null)
@@ -346,50 +432,21 @@ const handleResetDefault = () => {
   searchQuery.value = ''
   selectedDivisi.value = 'all'
   selectedStatus.value = 'all'
+  selectedIds.value = []
   sortKey.value = 'gaji'
   sortOrder.value = 'desc'
-  currentPage.value = 1
-  itemsPerPage.value = 10
-  toast.success('Data pegawai dikembalikan ke data awal sistem', 'Data Direset')
+  toast.info('Data telah dikembalikan ke daftar awal.')
 }
 
-// Dropdown Action Items for Table Rows
+// Action items for BaseDropdownMenu
 const getRowActionItems = (item) => [
   {
-    label: 'Lihat Profil Pegawai',
-    icon: Info,
-    action: () =>
-      toast.info(
-        `${item.nama} (${item.jabatan}) - Gaji: ${formatRupiah(item.gaji)}`,
-        'Profil Pegawai'
-      ),
-  },
-  {
-    label: 'Edit Data',
+    label: 'Ubah Data Pegawai',
     icon: Pencil,
     action: () => openEditModal(item),
   },
   {
-    label: 'Cetak Slip Gaji',
-    icon: FileText,
-    action: () =>
-      toast.success(
-        `Slip gaji periode aktif untuk ${item.nama} siap diunduh.`,
-        'Slip Gaji'
-      ),
-  },
-  {
-    label: 'Duplikasi Pegawai',
-    icon: Plus,
-    action: () => {
-      const copy = { ...item, id: Date.now(), nama: `${item.nama} (Salinan)` }
-      listKaryawan.value.unshift(copy)
-      toast.success(`Berhasil menduplikasi data ${item.nama}`, 'Duplikasi')
-    },
-  },
-  { divider: true },
-  {
-    label: 'Hapus Pegawai',
+    label: 'Hapus dari Sistem',
     icon: Trash2,
     danger: true,
     action: () => openDeleteConfirm(item),
@@ -398,8 +455,8 @@ const getRowActionItems = (item) => [
 </script>
 
 <template>
-  <!-- Main View Container: h-full flex flex-col min-h-0 overflow-hidden agar Layer 2 tidak scroll -->
-  <div class="h-full flex flex-col min-h-0 overflow-hidden gap-2.5 w-full max-w-7xl mx-auto select-none">
+  <!-- Main View Container -->
+  <div class="h-full flex flex-col min-h-0 overflow-hidden gap-2.5 w-full max-w-7xl mx-auto select-none relative">
     
     <!-- Top Compact Header: Title & Action Buttons -->
     <div class="flex items-center justify-between gap-3 pb-2 border-b border-neutral-200 dark:border-[#27272a] shrink-0">
@@ -424,6 +481,11 @@ const getRowActionItems = (item) => [
 
       <!-- Action Buttons -->
       <div class="flex items-center gap-2 shrink-0">
+        <BaseButton variant="outline" size="sm" @click="exportToCSV()" title="Ekspor seluruh data ke file CSV">
+          <Download class="w-3.5 h-3.5 text-neutral-500" />
+          <span class="hidden sm:inline">Ekspor CSV</span>
+        </BaseButton>
+
         <BaseButton variant="outline" size="sm" @click="handleResetDefault" title="Kembalikan data default">
           <RotateCcw class="w-3.5 h-3.5 text-neutral-500" />
           <span class="hidden sm:inline">Reset</span>
@@ -436,9 +498,7 @@ const getRowActionItems = (item) => [
       </div>
     </div>
 
-    <!-- ======================================================== -->
-    <!-- BARIS 1 (SESUAI WIREFRAME): [SEARCH] [FILTER 1] [FILTER 2] -->
-    <!-- ======================================================== -->
+    <!-- Filter Bar: Search + Searchable Select Divisi + Status -->
     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
       <!-- Search Input -->
       <div class="relative flex-1">
@@ -453,49 +513,37 @@ const getRowActionItems = (item) => [
           v-if="searchQuery"
           type="button"
           @click="searchQuery = ''"
-          class="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 cursor-pointer"
+          class="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
         >
           <X class="w-3.5 h-3.5" />
         </button>
       </div>
 
-      <!-- FILTER 1: Dropdown Searchable Divisi -->
+      <!-- Filter Divisi: BaseSearchableSelect -->
       <div class="w-full sm:w-56 shrink-0">
         <BaseSearchableSelect
           v-model="selectedDivisi"
           :options="divisiOptions"
-          placeholder="Semua Divisi"
-          search-placeholder="Cari divisi..."
-          :leading-icon="Building2"
-          clear-value="all"
+          placeholder="Filter Divisi..."
           clearable
         />
       </div>
 
-      <!-- FILTER 2: Dropdown Status Kerja -->
-      <div class="w-full sm:w-52 shrink-0">
+      <!-- Filter Status Kerja: BaseSearchableSelect -->
+      <div class="w-full sm:w-48 shrink-0">
         <BaseSearchableSelect
           v-model="selectedStatus"
           :options="statusOptions"
-          placeholder="Semua Status"
-          :searchable="false"
-          :leading-icon="Briefcase"
-          align="right"
-          clear-value="all"
+          placeholder="Filter Status..."
+          clearable
         />
       </div>
     </div>
 
-    <!-- Garis Pembatas -->
-    <div class="border-b border-neutral-200 dark:border-[#27272a] shrink-0" />
-
-    <!-- ======================================================== -->
-    <!-- BARIS 2 (SESUAI WIREFRAME): 4 COMPACT ICON STAT PILLS   -->
-    <!-- ======================================================== -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 shrink-0">
-      <!-- Pill 1: Total Karyawan -->
+    <!-- Quick Stats Summary Strip -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 shrink-0">
       <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex items-center gap-2">
-        <div class="w-6 h-6 rounded-lg bg-neutral-100 dark:bg-[#202024] text-neutral-700 dark:text-neutral-300 flex items-center justify-center shrink-0">
+        <div class="w-6 h-6 rounded-lg bg-neutral-100 dark:bg-[#202025] text-neutral-700 dark:text-neutral-300 flex items-center justify-center shrink-0">
           <Users class="w-3.5 h-3.5" />
         </div>
         <div class="flex items-center gap-1.5 min-w-0 truncate text-xs">
@@ -504,7 +552,6 @@ const getRowActionItems = (item) => [
         </div>
       </div>
 
-      <!-- Pill 2: Total Payroll -->
       <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex items-center gap-2">
         <div class="w-6 h-6 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
           <Coins class="w-3.5 h-3.5" />
@@ -515,7 +562,6 @@ const getRowActionItems = (item) => [
         </div>
       </div>
 
-      <!-- Pill 3: Karyawan Tetap -->
       <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex items-center gap-2">
         <div class="w-6 h-6 rounded-lg bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
           <CheckCircle2 class="w-3.5 h-3.5" />
@@ -526,7 +572,6 @@ const getRowActionItems = (item) => [
         </div>
       </div>
 
-      <!-- Pill 4: Kontrak & Probasi -->
       <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex items-center gap-2">
         <div class="w-6 h-6 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
           <Clock class="w-3.5 h-3.5" />
@@ -539,7 +584,7 @@ const getRowActionItems = (item) => [
     </div>
 
     <!-- ======================================================== -->
-    <!-- DESKTOP TABLE VIEW: FIX HEIGHT / SCROLL DI DALAM        -->
+    <!-- DESKTOP TABLE VIEW                                       -->
     <!-- ======================================================== -->
     <div class="hidden md:flex flex-1 min-h-0 flex-col rounded-2xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417] shadow-2xs overflow-hidden">
       <!-- Area Scroll Mandiri -->
@@ -548,7 +593,18 @@ const getRowActionItems = (item) => [
           <!-- STICKY THEAD -->
           <thead class="sticky top-0 z-20 bg-neutral-100/95 dark:bg-[#18181b]/95 backdrop-blur-md border-b border-neutral-200 dark:border-[#27272a] shadow-2xs">
             <tr class="text-neutral-600 dark:text-neutral-400 font-semibold select-none text-[11px] uppercase tracking-wider">
-              <th class="py-2.5 px-3.5 text-center w-12">No</th>
+              <!-- Checkbox Select All -->
+              <th class="py-2.5 px-3 text-center w-10">
+                <input
+                  type="checkbox"
+                  :checked="isAllSelected"
+                  @change="toggleSelectAll"
+                  class="rounded border-neutral-300 text-[var(--theme-primary)] focus:ring-[var(--theme-primary)] cursor-pointer"
+                  title="Pilih Semua di Halaman Ini"
+                />
+              </th>
+
+              <th class="py-2.5 px-2 text-center w-10">No</th>
 
               <!-- Nama & NIP -->
               <th class="py-2.5 px-3 cursor-pointer hover:text-neutral-900 dark:hover:text-white transition" @click="handleSort('nama')">
@@ -606,9 +662,20 @@ const getRowActionItems = (item) => [
               v-for="(item, idx) in paginatedList"
               :key="item.id"
               class="hover:bg-neutral-50/80 dark:hover:bg-[#18181c] transition-colors"
+              :class="selectedIds.includes(item.id) ? 'bg-[var(--theme-primary-soft)]/40 dark:bg-[var(--theme-primary-soft)]/20' : ''"
             >
+              <!-- Checkbox Row -->
+              <td class="py-2.5 px-3 text-center">
+                <input
+                  type="checkbox"
+                  :checked="selectedIds.includes(item.id)"
+                  @change="toggleSelect(item.id)"
+                  class="rounded border-neutral-300 text-[var(--theme-primary)] focus:ring-[var(--theme-primary)] cursor-pointer"
+                />
+              </td>
+
               <!-- No -->
-              <td class="py-2.5 px-3.5 text-center font-bold text-neutral-400 text-xs">
+              <td class="py-2.5 px-2 text-center font-bold text-neutral-400 text-xs">
                 {{ (itemsPerPage === 'all' ? 0 : (currentPage - 1) * Number(itemsPerPage)) + idx + 1 }}
               </td>
 
@@ -691,16 +758,15 @@ const getRowActionItems = (item) => [
               </td>
             </tr>
 
-            <!-- Empty State -->
+            <!-- BaseEmptyState saat 0 data cocok -->
             <tr v-if="processedList.length === 0">
-              <td colspan="8" class="py-12 text-center text-neutral-400">
-                <div class="flex flex-col items-center justify-center space-y-2">
-                  <Users class="w-8 h-8 text-neutral-300 dark:text-neutral-600" />
-                  <p class="font-medium">Tidak ada data pegawai yang sesuai</p>
-                  <BaseButton variant="outline" size="sm" @click="searchQuery = ''; selectedDivisi = 'all'; selectedStatus = 'all'">
-                    Bersihkan Filter
-                  </BaseButton>
-                </div>
+              <td colspan="9" class="p-0">
+                <BaseEmptyState
+                  title="Data Pegawai Tidak Ditemukan"
+                  description="Tidak ada karyawan yang cocok dengan kriteria filter atau pencarian Anda."
+                  action-text="Reset Filter Pencarian"
+                  @action="handleResetDefault"
+                />
               </td>
             </tr>
           </tbody>
@@ -723,14 +789,31 @@ const getRowActionItems = (item) => [
     <!-- ======================================================== -->
     <div class="md:hidden flex-1 min-h-0 flex flex-col overflow-hidden">
       <div class="flex-1 min-h-0 overflow-y-auto space-y-2.5 pr-0.5">
+        <!-- Empty State Mobile -->
+        <div v-if="processedList.length === 0" class="py-8">
+          <BaseEmptyState
+            title="Data Tidak Ditemukan"
+            description="Tidak ada hasil yang sesuai dengan kata kunci Anda."
+            action-text="Reset Filter"
+            @action="handleResetDefault"
+          />
+        </div>
+
         <div
-          v-for="(item, idx) in paginatedList"
+          v-for="item in paginatedList"
           :key="item.id"
           class="p-3.5 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-xs space-y-3"
+          :class="selectedIds.includes(item.id) ? 'ring-2 ring-[var(--theme-primary)]' : ''"
         >
-          <!-- Top Row: Avatar, Nama, Status -->
+          <!-- Top Row: Checkbox, Avatar, Nama, Status -->
           <div class="flex items-start justify-between gap-2">
             <div class="flex items-center gap-2.5">
+              <input
+                type="checkbox"
+                :checked="selectedIds.includes(item.id)"
+                @change="toggleSelect(item.id)"
+                class="rounded border-neutral-300 text-[var(--theme-primary)] focus:ring-[var(--theme-primary)] cursor-pointer mt-0.5"
+              />
               <div class="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-[#202024] font-bold text-xs flex items-center justify-center shrink-0">
                 {{ item.avatar }}
               </div>
@@ -748,70 +831,117 @@ const getRowActionItems = (item) => [
 
             <BaseBadge
               :variant="getStatusBadgeVariant(item.status)"
-              size="sm"
-              :dot="item.status === 'Tetap'"
+              :dot="item.status === 'Tetap' || item.status === 'Kontrak'"
               :pulse="item.status === 'Tetap'"
+              size="sm"
             >
               {{ item.status }}
             </BaseBadge>
           </div>
 
-          <!-- Detail Gaji & Lokasi -->
-          <div class="p-2.5 rounded-xl bg-neutral-50 dark:bg-[#18181c] text-xs flex items-center justify-between border border-neutral-100 dark:border-[#222226]">
+          <!-- Mid Row: Kompensasi Gaji & Lokasi -->
+          <div class="p-2.5 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-100 dark:border-[#242428] flex items-center justify-between text-xs">
             <div>
-              <span class="text-[9.5px] uppercase font-bold text-neutral-400 block">Gaji Pokok</span>
-              <span class="font-bold text-neutral-900 dark:text-white font-mono">{{ formatRupiah(item.gaji) }}</span>
+              <span class="text-[10px] text-neutral-400 block font-semibold uppercase">Gaji Pokok</span>
+              <span class="font-bold font-mono text-neutral-900 dark:text-white">
+                {{ formatRupiah(item.gaji) }}
+              </span>
             </div>
             <div class="text-right">
-              <span class="text-[9.5px] uppercase font-bold text-neutral-400 block">Penempatan</span>
-              <span class="text-neutral-700 dark:text-neutral-300">{{ item.lokasi }}</span>
+              <span class="text-[10px] text-neutral-400 block font-semibold uppercase">Lokasi</span>
+              <span class="text-neutral-700 dark:text-neutral-300 font-medium">
+                {{ item.lokasi }}
+              </span>
             </div>
           </div>
 
-          <!-- Card Actions -->
-          <div class="grid grid-cols-2 gap-2 pt-1 border-t border-neutral-100 dark:border-[#202024]">
-            <button
-              type="button"
-              @click="openEditModal(item)"
-              class="w-full py-1.5 px-3 rounded-xl text-xs font-semibold border border-neutral-200 dark:border-[#2a2a30] bg-white hover:bg-neutral-50 dark:bg-[#1a1a1e] dark:hover:bg-[#222228] text-neutral-700 dark:text-neutral-200 transition flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <Pencil class="w-3.5 h-3.5" />
-              <span>Edit</span>
-            </button>
+          <!-- Bottom Action Buttons Mobile -->
+          <div class="flex items-center justify-between pt-1">
+            <BaseBadge :variant="item.bpjsAktif ? 'success' : 'neutral'" size="sm">
+              {{ item.bpjsAktif ? 'BPJS Aktif' : 'Non-BPJS' }}
+            </BaseBadge>
 
-            <button
-              type="button"
-              @click="openDeleteConfirm(item)"
-              class="w-full py-1.5 px-3 rounded-xl text-xs font-semibold border border-rose-200/80 dark:border-rose-900/40 bg-rose-50/60 hover:bg-rose-100/80 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 transition flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <Trash2 class="w-3.5 h-3.5" />
-              <span>Hapus</span>
-            </button>
+            <div class="flex items-center gap-1.5">
+              <button
+                type="button"
+                @click="openEditModal(item)"
+                class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-neutral-100 dark:bg-[#202025] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 transition"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                @click="openDeleteConfirm(item)"
+                class="p-1 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition"
+              >
+                <Trash2 class="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
-        </div>
-
-        <!-- Empty State Mobile -->
-        <div v-if="processedList.length === 0" class="p-8 text-center rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] space-y-3">
-          <Users class="w-8 h-8 text-neutral-300 dark:text-neutral-600 mx-auto" />
-          <p class="text-xs text-neutral-400">Tidak ada data pegawai yang sesuai.</p>
         </div>
       </div>
 
       <!-- Mobile Pagination -->
-      <div v-if="totalPages > 1 && itemsPerPage !== 'all'" class="pt-2 shrink-0">
+      <div class="pt-2 border-t border-neutral-200 dark:border-[#27272a] shrink-0">
         <BasePagination
           v-model:current-page="currentPage"
           :total-items="processedList.length"
           v-model:items-per-page="itemsPerPage"
           :per-page-options="[10, 20, 30, 'all']"
-          compact
         />
       </div>
     </div>
 
     <!-- ======================================================== -->
+    <!-- FLOATING BATCH ACTION BAR (KETIKA CHECKBOX DIPILIH)     -->
+    <!-- ======================================================== -->
+    <Transition
+      enter-active-class="transition duration-200 ease-out"
+      enter-from-class="opacity-0 translate-y-6"
+      enter-to-class="opacity-100 translate-y-0"
+      leave-active-class="transition duration-150 ease-in"
+      leave-from-class="opacity-100 translate-y-0"
+      leave-to-class="opacity-0 translate-y-6"
+    >
+      <div
+        v-if="selectedIds.length > 0"
+        class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-[#18181c]/95 backdrop-blur-md border border-neutral-300 dark:border-[#383842] shadow-2xl rounded-2xl px-4 py-2.5 flex items-center gap-3 text-xs will-change-transform max-w-[calc(100vw-32px)]"
+      >
+        <div class="flex items-center gap-2 pr-2 border-r border-neutral-200 dark:border-[#2a2a30]">
+          <span class="w-5 h-5 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] flex items-center justify-center font-bold text-[11px]">
+            {{ selectedIds.length }}
+          </span>
+          <span class="font-semibold text-neutral-800 dark:text-neutral-200 hidden sm:inline">Pegawai Terpilih</span>
+        </div>
+
+        <!-- Ekspor Terpilih -->
+        <BaseButton variant="outline" size="sm" @click="exportSelected">
+          <Download class="w-3.5 h-3.5" />
+          <span>Ekspor CSV</span>
+        </BaseButton>
+
+        <!-- Hapus Terpilih -->
+        <BaseButton variant="danger" size="sm" @click="isBatchDeleteModalOpen = true">
+          <Trash2 class="w-3.5 h-3.5" />
+          <span>Hapus ({{ selectedIds.length }})</span>
+        </BaseButton>
+
+        <!-- Batal Pilih -->
+        <button
+          type="button"
+          @click="selectedIds = []"
+          class="p-1 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition cursor-pointer"
+          title="Batal Pilih Semua"
+        >
+          <X class="w-4 h-4" />
+        </button>
+      </div>
+    </Transition>
+
+    <!-- ======================================================== -->
     <!-- MODAL FORM CRUD: TAMBAH & EDIT PEGAWAI                   -->
-    <!-- Terintegrasi BaseInput, BaseTextarea, BaseSwitch, dll.   -->
+    <!-- Auto-Adaptive: Otomatis render MobileModal di smartphone -->
+    <!-- dan BaseModal di desktop                                 -->
     <!-- ======================================================== -->
     <BaseModal
       v-model="isFormModalOpen"
@@ -904,7 +1034,7 @@ const getRowActionItems = (item) => [
           </div>
         </div>
 
-        <!-- Baris 4: Kompensasi Payroll (Gaji & Tunjangan) dengan Auto Rupiah -->
+        <!-- Baris 4: Kompensasi Payroll & Tanggal Masuk (BaseDatePicker) -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
           <BaseCurrencyInput
             v-model="formData.gaji"
@@ -923,21 +1053,30 @@ const getRowActionItems = (item) => [
             placeholder="2.500.000"
           />
 
+          <!-- BaseDatePicker Integrasi -->
+          <BaseDatePicker
+            v-model="formData.tanggalMasuk"
+            label="Tanggal Bergabung"
+            placeholder="Pilih tanggal..."
+          />
+        </div>
+
+        <!-- Baris 5: Lokasi & Rekening Payroll -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <BaseInput
             v-model="formData.lokasi"
             label="Lokasi Penempatan"
             placeholder="Jakarta Selatan"
             :leading-icon="MapPin"
           />
-        </div>
 
-        <!-- Baris 5: Rekening Payroll -->
-        <BaseInput
-          v-model="formData.rekening"
-          label="Nomor Rekening Payroll"
-          placeholder="BCA - 8820194812"
-          :leading-icon="CreditCard"
-        />
+          <BaseInput
+            v-model="formData.rekening"
+            label="Nomor Rekening Payroll"
+            placeholder="BCA - 8820194812"
+            :leading-icon="CreditCard"
+          />
+        </div>
 
         <!-- Baris 6: Catatan Karyawan (BaseTextarea) -->
         <BaseTextarea
@@ -969,18 +1108,26 @@ const getRowActionItems = (item) => [
       </template>
     </BaseModal>
 
-    <!-- Confirmation Modal Delete -->
+    <!-- Confirmation Modal Single Delete -->
     <ConfirmationModal
       v-model="isDeleteModalOpen"
       type="delete"
-      badge-text="Confirmation — Hapus Pegawai"
-      :title="`Hapus Data ${itemToDelete?.nama || 'Pegawai'}?`"
-      :message="`Data pegawai ${itemToDelete?.nama || ''} (${itemToDelete?.nip || ''} - ${itemToDelete?.jabatan || ''}) akan dihapus secara permanen dari basis data payroll.`"
-      confirm-text="Ya, Hapus"
+      title="Hapus Pegawai"
+      :message="itemToDelete ? `Apakah Anda yakin ingin menghapus data pegawai ${itemToDelete.nama} (${itemToDelete.nip})? Data yang dihapus tidak dapat dipulihkan.` : ''"
+      confirm-text="Hapus Pegawai"
       cancel-text="Batal"
       @confirm="handleDeleteConfirm"
-      @cancel="itemToDelete = null"
+    />
+
+    <!-- Confirmation Modal Batch Delete -->
+    <ConfirmationModal
+      v-model="isBatchDeleteModalOpen"
+      type="delete"
+      title="Hapus Pegawai Terpilih"
+      :message="`Apakah Anda yakin ingin menghapus ${selectedIds.length} data pegawai yang dipilih sekaligus? Tindakan ini tidak dapat dibatalkan.`"
+      :confirm-text="`Hapus ${selectedIds.length} Pegawai`"
+      cancel-text="Batal"
+      @confirm="handleBatchDeleteConfirm"
     />
   </div>
 </template>
-

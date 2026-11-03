@@ -7,6 +7,7 @@ import Header from './Header.vue'
 import PrimarySidebar from './PrimarySidebar.vue'
 import SubmenuSidebar from './SubmenuSidebar.vue'
 import ToastContainer from '../ui/ToastContainer.vue'
+import BaseCommandPalette from '../ui/BaseCommandPalette.vue'
 import { ChevronRight } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -14,6 +15,7 @@ const { bgType, solidColor, imageUrl, initBackground } = useBackground()
 
 const submenuCollapsed = ref(false)
 const mobileDrawerOpen = ref(false)
+const isCommandPaletteOpen = ref(false)
 
 onMounted(() => {
   initBackground()
@@ -78,7 +80,7 @@ const baseLayerStyle = computed(() => {
     :style="baseLayerStyle"
   >
     <!-- Topbar: Logo | Digaji.id di kiri, Theme Icon | Lonceng | Profile di kanan -->
-    <Header />
+    <Header @open-search="isCommandPaletteOpen = true" />
 
     <!-- ======================================================== -->
     <!-- 2. DASAR KEDUA (Layer 2 - Floating Card Besar)           -->
@@ -232,5 +234,8 @@ const baseLayerStyle = computed(() => {
 
     <!-- Global Toast Component -->
     <ToastContainer />
+
+    <!-- Global Command Palette (Ctrl + K) -->
+    <BaseCommandPalette v-model="isCommandPaletteOpen" />
   </div>
 </template>

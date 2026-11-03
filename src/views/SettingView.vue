@@ -12,6 +12,8 @@ import BaseBadge from '../components/ui/BaseBadge.vue'
 import BaseModal from '../components/ui/BaseModal.vue'
 import MobileModal from '../components/ui/MobileModal.vue'
 import ConfirmationModal from '../components/ui/ConfirmationModal.vue'
+import BaseDatePicker from '../components/ui/BaseDatePicker.vue'
+import BaseEmptyState from '../components/ui/BaseEmptyState.vue'
 import { useToast } from '../composables/useToast'
 import { useBackground } from '../composables/useBackground'
 import { useThemeColor } from '../composables/useThemeColor'
@@ -35,6 +37,8 @@ import {
   Info,
   XCircle,
   Sparkles,
+  Calendar,
+  FolderSearch,
 } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -129,6 +133,8 @@ const debugMode = ref(false)
 const demoNominal = ref(1000)
 const demoCountVal = ref(7850000)
 const demoSkelToggle = ref(false)
+const demoSingleDate = ref('2025-01-27')
+const demoRangeDate = ref({ start: '2025-01-20', end: '2025-01-27' })
 
 // Modals Showcase State (Moved from Beranda)
 const isDesktopModalOpen = ref(false)
@@ -375,6 +381,81 @@ const handleSavePassword = () => {
                   <div class="text-neutral-500">Sistem manajemen penggajian dan absensi terintegrasi.</div>
                   <div class="text-[10px] text-emerald-600 font-semibold">● 100% Layanan Normal</div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Showcase Komponen BaseDatePicker & BaseEmptyState -->
+          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417] shadow-2xs space-y-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-sm font-bold text-neutral-900 dark:text-white flex items-center gap-2">
+                  <Calendar class="w-4 h-4 text-[var(--theme-primary)]" />
+                  <span>Komponen Baru: BaseDatePicker & BaseEmptyState</span>
+                </h2>
+                <p class="text-xs text-neutral-500 mt-0.5">
+                  Kalender pemilihan tanggal mandiri (single & rentang tanggal dengan preset) dan status kosong interaktif.
+                </p>
+              </div>
+              <BaseBadge variant="neutral" size="sm">Zero External Libs</BaseBadge>
+            </div>
+
+            <!-- Grid 2 Kolom untuk DatePicker Single vs Range -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Mode Single Date -->
+              <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-200/80 dark:border-[#242428] space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-neutral-800 dark:text-neutral-200">1. Single Date Picker</span>
+                  <BaseBadge variant="primary" size="sm">Single Mode</BaseBadge>
+                </div>
+                <BaseDatePicker
+                  v-model="demoSingleDate"
+                  label="Pilih Tanggal"
+                  placeholder="Pilih satu tanggal..."
+                />
+                <div class="p-2.5 rounded-lg bg-white dark:bg-[#121214] border border-neutral-200 dark:border-[#242428] text-xs font-mono flex items-center justify-between">
+                  <span class="text-neutral-400">v-model:</span>
+                  <span class="font-bold text-[var(--theme-primary)]">{{ demoSingleDate || '(kosong)' }}</span>
+                </div>
+              </div>
+
+              <!-- Mode Range Date -->
+              <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-200/80 dark:border-[#242428] space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-neutral-800 dark:text-neutral-200">2. Date Range Picker (Presets)</span>
+                  <BaseBadge variant="success" size="sm">Range Mode</BaseBadge>
+                </div>
+                <BaseDatePicker
+                  v-model="demoRangeDate"
+                  range
+                  label="Pilih Rentang Tanggal"
+                  placeholder="Pilih rentang tanggal..."
+                />
+                <div class="p-2.5 rounded-lg bg-white dark:bg-[#121214] border border-neutral-200 dark:border-[#242428] text-xs font-mono flex items-center justify-between">
+                  <span class="text-neutral-400">v-model:</span>
+                  <span class="font-bold text-emerald-600 dark:text-emerald-400">
+                    {{ demoRangeDate?.start ? `${demoRangeDate.start} s/d ${demoRangeDate.end}` : '(kosong)' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Demo BaseEmptyState -->
+            <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-200/80 dark:border-[#242428] space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-neutral-800 dark:text-neutral-200">3. Live BaseEmptyState (Ilustrasi Soft Badge)</span>
+                <BaseBadge variant="neutral" size="sm">Modular Empty State</BaseBadge>
+              </div>
+
+              <div class="p-4 rounded-xl bg-white dark:bg-[#121214] border border-dashed border-neutral-200 dark:border-[#2b2b32]">
+                <BaseEmptyState
+                  :icon="FolderSearch"
+                  title="Belum Ada Dokumen Lampiran"
+                  description="Silakan unggah berkas pendukung atau mulai pencarian berkas baru pada folder kerja."
+                  actionText="Unggah Dokumen Baru"
+                  compact
+                  @action="toast.info('Aksi unggah dokumen baru berhasil dipicu!', 'BaseEmptyState')"
+                />
               </div>
             </div>
           </div>
