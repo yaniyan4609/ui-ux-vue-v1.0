@@ -21,6 +21,7 @@ import {
   FileText,
   PlusCircle,
   KanbanSquare,
+  LogIn,
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -89,6 +90,14 @@ const commands = [
     icon: Settings,
     badge: 'Halaman',
     action: () => router.push('/setting'),
+  },
+  {
+    id: 'nav-login',
+    title: 'Buka Halaman Login & Register (Morphing Card)',
+    category: 'Navigasi',
+    icon: LogIn,
+    badge: 'Auth',
+    action: () => router.push('/login'),
   },
   {
     id: 'nav-setting-bg',

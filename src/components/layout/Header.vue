@@ -20,6 +20,7 @@ import {
 } from 'lucide-vue-next'
 import { useTheme } from '../../composables/useTheme'
 import { useToast } from '../../composables/useToast'
+import { useAuth } from '../../composables/useAuth'
 
 const props = defineProps({
   mobileDrawerOpen: {
@@ -31,6 +32,7 @@ const props = defineProps({
 const emit = defineEmits(['open-search', 'toggle-sidebar'])
 
 const { isDark, toggleTheme } = useTheme()
+const { currentUser, logout } = useAuth()
 const toast = useToast()
 
 const userMenuOpen = ref(false)
@@ -355,8 +357,8 @@ onUnmounted(() => {
             class="absolute right-0 mt-2 w-48 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-xl py-2 z-50 text-xs text-neutral-700 dark:text-neutral-300"
           >
             <div class="px-4 py-2 border-b border-neutral-100 dark:border-[#27272a]">
-              <p class="font-bold text-neutral-900 dark:text-white">Admin Digaji.id</p>
-              <p class="text-neutral-400 text-[11px] truncate">admin@digaji.id</p>
+              <p class="font-bold text-neutral-900 dark:text-white">{{ currentUser.name }}</p>
+              <p class="text-neutral-400 text-[11px] truncate">{{ currentUser.email }}</p>
             </div>
             <router-link
               to="/setting"
@@ -367,11 +369,11 @@ onUnmounted(() => {
             </router-link>
             <button
               type="button"
-              @click="toast.info('Keluar dari sesi')"
+              @click="logout"
               class="w-full flex items-center gap-2.5 px-4 py-2 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition text-left cursor-pointer"
             >
               <LogOut class="w-3.5 h-3.5" />
-              Keluar
+              Keluar Sesi
             </button>
           </div>
         </Transition>
