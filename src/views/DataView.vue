@@ -538,8 +538,8 @@ const handleResetDefault = () => {
               <th class="py-2.5 px-3 cursor-pointer hover:text-neutral-900 dark:hover:text-white transition" @click="handleSort('nama')">
                 <div class="flex items-center gap-1.5">
                   <span>Nama Gunung</span>
-                  <ArrowUp v-if="sortKey === 'nama' && sortOrder === 'asc'" class="w-3.5 h-3.5 text-neutral-900 dark:text-white" />
-                  <ArrowDown v-else-if="sortKey === 'nama' && sortOrder === 'desc'" class="w-3.5 h-3.5 text-neutral-900 dark:text-white" />
+                  <ArrowUp v-if="sortKey === 'nama' && sortOrder === 'asc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
+                  <ArrowDown v-else-if="sortKey === 'nama' && sortOrder === 'desc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
                   <ArrowUpDown v-else class="w-3.5 h-3.5 opacity-40" />
                 </div>
               </th>
@@ -548,8 +548,8 @@ const handleResetDefault = () => {
               <th class="py-2.5 px-3 cursor-pointer hover:text-neutral-900 dark:hover:text-white transition" @click="handleSort('ketinggian')">
                 <div class="flex items-center gap-1.5">
                   <span>Ketinggian</span>
-                  <ArrowUp v-if="sortKey === 'ketinggian' && sortOrder === 'asc'" class="w-3.5 h-3.5 text-neutral-900 dark:text-white" />
-                  <ArrowDown v-else-if="sortKey === 'ketinggian' && sortOrder === 'desc'" class="w-3.5 h-3.5 text-neutral-900 dark:text-white" />
+                  <ArrowUp v-if="sortKey === 'ketinggian' && sortOrder === 'asc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
+                  <ArrowDown v-else-if="sortKey === 'ketinggian' && sortOrder === 'desc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
                   <ArrowUpDown v-else class="w-3.5 h-3.5 opacity-40" />
                 </div>
               </th>
@@ -558,8 +558,8 @@ const handleResetDefault = () => {
               <th class="py-2.5 px-3 cursor-pointer hover:text-neutral-900 dark:hover:text-white transition" @click="handleSort('provinsi')">
                 <div class="flex items-center gap-1.5">
                   <span>Provinsi</span>
-                  <ArrowUp v-if="sortKey === 'provinsi' && sortOrder === 'asc'" class="w-3.5 h-3.5 text-neutral-900 dark:text-white" />
-                  <ArrowDown v-else-if="sortKey === 'provinsi' && sortOrder === 'desc'" class="w-3.5 h-3.5 text-neutral-900 dark:text-white" />
+                  <ArrowUp v-if="sortKey === 'provinsi' && sortOrder === 'asc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
+                  <ArrowDown v-else-if="sortKey === 'provinsi' && sortOrder === 'desc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
                   <ArrowUpDown v-else class="w-3.5 h-3.5 opacity-40" />
                 </div>
               </th>
@@ -568,8 +568,8 @@ const handleResetDefault = () => {
               <th class="py-2.5 px-3 cursor-pointer hover:text-neutral-900 dark:hover:text-white transition" @click="handleSort('wilayah')">
                 <div class="flex items-center gap-1.5">
                   <span>Wilayah / Lokasi</span>
-                  <ArrowUp v-if="sortKey === 'wilayah' && sortOrder === 'asc'" class="w-3.5 h-3.5 text-neutral-900 dark:text-white" />
-                  <ArrowDown v-else-if="sortKey === 'wilayah' && sortOrder === 'desc'" class="w-3.5 h-3.5 text-neutral-900 dark:text-white" />
+                  <ArrowUp v-if="sortKey === 'wilayah' && sortOrder === 'asc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
+                  <ArrowDown v-else-if="sortKey === 'wilayah' && sortOrder === 'desc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
                   <ArrowUpDown v-else class="w-3.5 h-3.5 opacity-40" />
                 </div>
               </th>
@@ -578,8 +578,8 @@ const handleResetDefault = () => {
               <th class="py-2.5 px-3 cursor-pointer hover:text-neutral-900 dark:hover:text-white transition" @click="handleSort('basecamp')">
                 <div class="flex items-center gap-1.5">
                   <span>Start / Basecamp</span>
-                  <ArrowUp v-if="sortKey === 'basecamp' && sortOrder === 'asc'" class="w-3.5 h-3.5 text-neutral-900 dark:text-white" />
-                  <ArrowDown v-else-if="sortKey === 'basecamp' && sortOrder === 'desc'" class="w-3.5 h-3.5 text-neutral-900 dark:text-white" />
+                  <ArrowUp v-if="sortKey === 'basecamp' && sortOrder === 'asc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
+                  <ArrowDown v-else-if="sortKey === 'basecamp' && sortOrder === 'desc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
                   <ArrowUpDown v-else class="w-3.5 h-3.5 opacity-40" />
                 </div>
               </th>
@@ -588,8 +588,8 @@ const handleResetDefault = () => {
               <th class="py-2.5 px-3 cursor-pointer hover:text-neutral-900 dark:hover:text-white transition" @click="handleSort('kategori')">
                 <div class="flex items-center gap-1.5">
                   <span>Kategori</span>
-                  <ArrowUp v-if="sortKey === 'kategori' && sortOrder === 'asc'" class="w-3.5 h-3.5 text-neutral-900 dark:text-white" />
-                  <ArrowDown v-else-if="sortKey === 'kategori' && sortOrder === 'desc'" class="w-3.5 h-3.5 text-neutral-900 dark:text-white" />
+                  <ArrowUp v-if="sortKey === 'kategori' && sortOrder === 'asc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
+                  <ArrowDown v-else-if="sortKey === 'kategori' && sortOrder === 'desc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
                   <ArrowUpDown v-else class="w-3.5 h-3.5 opacity-40" />
                 </div>
               </th>
