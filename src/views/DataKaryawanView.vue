@@ -19,6 +19,7 @@ import BaseCsvImporter from '../components/ui/BaseCsvImporter.vue'
 import BaseFileUploader from '../components/ui/BaseFileUploader.vue'
 import { useToast } from '../composables/useToast'
 import { karyawanList } from '../data/karyawanData'
+import { formatRupiah } from '../utils/format.js'
 import {
   Users,
   Plus,
@@ -235,15 +236,6 @@ const totalTetap = computed(() => {
 const totalKontrak = computed(() => {
   return listKaryawan.value.filter((k) => k.status === 'Kontrak' || k.status === 'Probasi').length
 })
-
-// Format Currency IDR
-const formatRupiah = (val) => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    maximumFractionDigits: 0,
-  }).format(val || 0)
-}
 
 // Status Badge Variant for BaseBadge
 const getStatusBadgeVariant = (status) => {
