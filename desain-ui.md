@@ -2,6 +2,8 @@
 
 Dokumen ini adalah **pedoman resmi dan panduan implementasi teknis** untuk seluruh pengembang (*developer*) dan AI Agent yang bekerja pada codebase ini. Semua komponen antarmuka, filosofi tata letak, palet warna, dan aturan interaksi dijelaskan secara menyeluruh agar siap pakai secara langsung tanpa menebak-nebak.
 
+> **Cara membaca dokumen ini.** File ini adalah **katalog template dan contoh kode**. Aturan ringkas, alur keputusan, dan checklist ada di [`aturan-ui.md`](./aturan-ui.md). Semua contoh kode di sini sudah divalidasi terhadap `defineProps` komponen di `src/components/ui/`. Contoh ditulis untuk file di `src/views/`, sehingga impornya **relatif** (`../components/ui/...`). Jika kode dan dokumen berbeda, **kode yang benar**.
+
 ---
 
 ## 1. Filosofi Arsitektur: 2-Layer Layout (Dasar Pertama & Dasar Kedua)
@@ -41,7 +43,7 @@ Aplikasi ini mengadopsi prinsip desain modular berjenjang **2 Layer**:
 - **Fungsi**: Wadah (*container*) utama seluruh konten aplikasi.
 - **Desktop**:
   - Tampil sebagai kartu melayang bersudut bulat (`rounded-2xl lg:rounded-3xl`).
-  - Diberi border tegas (`border-2 border-neutral-300 dark:border-[#27272a]`) dan bayangan lembut (`shadow-xl`).
+  - Diberi border tegas (`border-2 border-neutral-300 dark:border-[var(--theme-border)]`) dan bayangan lembut (`shadow-xl`).
   - Margin luar super mepet (`px-1.5 md:px-2 lg:px-2.5 sm:pb-2`) agar memaksimalkan area kerja.
 - **Mobile**:
   - Menempel mepet ke tepi kiri, kanan, dan atas layar dengan sudut atas lengkung (`rounded-t-[32px]`).
@@ -54,7 +56,7 @@ Navigasi aplikasi mengadopsi sistem **Dual-Sidebar Rail**:
 
 ### Desktop Sidebar Rail
 1. **Primary Rail (`PrimarySidebar.vue`)**:
-   - Kolom sempit (`w-20 sm:w-22`) berisi pill vertikal item menu utama: **Beranda**, **Pesanan**, **Data**, **Setting**.
+   - Kolom sempit (`w-20 sm:w-22`) berisi pill vertikal item menu utama: **Beranda** dan **Template** (sub: Contoh Kanban, Contoh Data 1, Contoh Data 2, dan 5 sub pengaturan).
    - Setiap item menampilkan ikon Lucide di atas teks label ringkas.
    - Status aktif ditandai dengan background warna tema (`var(--theme-primary)`), teks putih/kontras, dan garis indikator samping.
    - **Flyout Submenu on Hover (Saat Submenu Ditutup)**:
@@ -73,9 +75,9 @@ Navigasi aplikasi mengadopsi sistem **Dual-Sidebar Rail**:
   - Buka: Meluncur dari kiri ke kanan (`-translate-x-full` $\rightarrow$ `translate-x-0`).
   - Tutup: Meluncur keluar dari kanan ke kiri (`translate-x-0` $\rightarrow$ `-translate-x-full`).
   - Backdrop gelap independen dengan animasi *fade-in/fade-out*.
-- **Kolom Menu Kapsul**: Kolom `PrimarySidebar` di mobile menggunakan mode `capsule` (`rounded-[26px] bg-neutral-100/90 dark:bg-[#1a1a1e] h-[calc(100%-24px)] my-3 ml-3`), presisi mengikuti sketsa Wireframe.
+- **Kolom Menu Kapsul**: Kolom `PrimarySidebar` di mobile menggunakan mode `capsule` (`rounded-[26px] bg-neutral-100/90 dark:bg-[var(--theme-surface-raised)] h-[calc(100%-24px)] my-3 ml-3`), presisi mengikuti sketsa Wireframe.
 - **Toggle Button Mobile (Pojok Kiri Atas)**:
-  - Terletak di header topbar sebelah kiri (bersebelahan dengan logo): `w-8.5 h-8.5 rounded-xl border border-neutral-300 dark:border-[#27272a]`.
+  - Terletak di header topbar sebelah kiri (bersebelahan dengan logo): `w-8.5 h-8.5 rounded-xl border border-neutral-300 dark:border-[var(--theme-border)]`.
   - Menggunakan ikon `Menu` (hamburger) saat tertutup, dan ikon `X` saat terbuka.
   - Efek klik `active:scale-95` dan outline ring berwarna tema saat aktif.
   - Bebas dari tumpang tindih elemen konten bawah (*clean viewport*).
@@ -90,7 +92,7 @@ Aplikasi mendukung 4 tema warna yang dapat diubah secara instan di menu **Settin
 |---|---|---|---|---|
 | **Default** | `--theme-primary` | `#18181b` (Light) / `#ffffff` (Dark) | `#F8FAFC` | `#09090b` *(Pure Neutral Dark, 0% Blue Tint)* |
 | **Pink** | `--theme-primary` | `#E85D88` (CTA: `#C83D6A`) | `#FFF8FB` | `#140810` / Surface `#1e0e18` |
-| **Blue** | `--theme-primary` | `#007AFF` (CTA: `#007AFF`) | `#F8FAFC` | `#0c1527` / Surface `#111c35` |
+| **Blue** | `--theme-primary` | `#007AFF` (CTA: `#007AFF`) | `#F8FAFC` | `#090e17` / Surface `#0f1726` |
 | **Terracotta** | `--theme-primary` | `#C03A18` (Action: `#C03A18`) | `#F3F1EC` *(Warm Sand)* | `#15120F` *(Charcoal Warm)* |
 
 ### Variabel CSS Tema Global
@@ -116,7 +118,7 @@ Input teks serbaguna dengan dukungan label, tanda wajib `*`, leading/trailing ic
 ```vue
 <script setup>
 import { ref } from 'vue'
-import BaseInput from '@/components/ui/BaseInput.vue'
+import BaseInput from '../components/ui/BaseInput.vue'
 import { Search, Mail } from 'lucide-vue-next'
 
 const nama = ref('')
@@ -157,7 +159,7 @@ Input khusus mata uang Rupiah Indonesia. Mengetik `1000` otomatis terformat menj
 ```vue
 <script setup>
 import { ref } from 'vue'
-import BaseCurrencyInput from '@/components/ui/BaseCurrencyInput.vue'
+import BaseCurrencyInput from '../components/ui/BaseCurrencyInput.vue'
 
 const gaji = ref(15000000) // Nilai murni: 15000000
 </script>
@@ -183,7 +185,7 @@ Dropdown pilihan dengan input pencarian terintegrasi, soft-color badge, dukungan
 ```vue
 <script setup>
 import { ref } from 'vue'
-import BaseSearchableSelect from '@/components/ui/BaseSearchableSelect.vue'
+import BaseSearchableSelect from '../components/ui/BaseSearchableSelect.vue'
 
 const selectedProvinsi = ref('')
 const provinsiOptions = [
@@ -194,20 +196,27 @@ const provinsiOptions = [
 </script>
 
 <template>
-  <BaseSearchableSelect
-    v-model="selectedProvinsi"
-    :options="provinsiOptions"
-    label="Provinsi"
-    placeholder="Pilih atau cari provinsi..."
-    clearable
-  />
+  <!-- BaseSearchableSelect TIDAK punya prop label/required: bungkus dengan <label> sendiri -->
+  <div>
+    <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1">
+      Provinsi
+    </label>
+    <BaseSearchableSelect
+      v-model="selectedProvinsi"
+      :options="provinsiOptions"
+      placeholder="Pilih atau cari provinsi..."
+      clearable
+    />
+  </div>
 </template>
 ```
+
+> **Props:** `options` (primitif atau `{ value, label, badge? }`), `placeholder`, `searchPlaceholder`, `searchable` (default `true`), `clearable`, `clearValue`, `disabled`, `size` (`sm` default, `md`, `lg`), `align` (`left` default, `right`), `leadingIcon`, `emptyText`, `widthClass` (default `w-full`). Emit: `update:modelValue`, `change`, `clear`. Filter di ujung kanan toolbar wajib `align="right"`.
 
 ---
 
 ### 4.3 `BaseButton.vue`
-Tombol aksi standar dengan berbagai varian dan status *loading spinner*.
+Tombol aksi standar. Varian: `primary` (default), `secondary`, `outline`, `danger`, `ghost`. Ukuran: `sm`, `md` (default), `lg`. Prop lain: `disabled`, `type` (default `button`). **Tidak ada prop `loading`**: untuk proses async nonaktifkan tombol dengan `disabled` dan beri umpan balik lewat `useToast().promise()`.
 
 ```vue
 <template>
@@ -216,7 +225,7 @@ Tombol aksi standar dengan berbagai varian dan status *loading spinner*.
     Simpan Data
   </BaseButton>
 
-  <BaseButton variant="outline" size="sm" :loading="isLoading">
+  <BaseButton variant="outline" size="sm" :disabled="isLoading">
     Segarkan
   </BaseButton>
 </template>
@@ -235,8 +244,8 @@ Tombol aksi standar dengan berbagai varian dan status *loading spinner*.
 ```vue
 <script setup>
 import { ref } from 'vue'
-import BaseModal from '@/components/ui/BaseModal.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseModal from '../components/ui/BaseModal.vue'
+import BaseButton from '../components/ui/BaseButton.vue'
 
 const isModalOpen = ref(false)
 </script>
@@ -273,7 +282,7 @@ Placeholder pemuatan data dengan animasi sapuan kilau (*shimmer sweep wave*). Di
 
 ```vue
 <script setup>
-import BaseSkeleton from '@/components/ui/BaseSkeleton.vue'
+import BaseSkeleton from '../components/ui/BaseSkeleton.vue'
 </script>
 
 <template>
@@ -296,9 +305,11 @@ import BaseSkeleton from '@/components/ui/BaseSkeleton.vue'
 ### 4.6 `BaseCountUp.vue` (Animasi Angka Bergulir / Ticker)
 Komponen penampil angka beranimasi dari 0 ke nilai target menggunakan kurva `ease-out cubic` via `requestAnimationFrame`. Ringan, halus, dan mendukung format mata uang Rupiah.
 
+> **Props:** `to` (wajib), `from`, `duration` (ms, default `1200`), `decimals`, `prefix`, `suffix`, `formatNumber` (default `true`), `autoplay`.
+
 ```vue
 <script setup>
-import BaseCountUp from '@/components/ui/BaseCountUp.vue'
+import BaseCountUp from '../components/ui/BaseCountUp.vue'
 </script>
 
 <template>
@@ -315,8 +326,8 @@ import BaseCountUp from '@/components/ui/BaseCountUp.vue'
 
 ---
 
-### 4.7 `BaseBadge.vue` & `BaseTag.vue`
-Penyaji status atau kategori dalam warna-warna *soft color*.
+### 4.7 `BaseBadge.vue`
+Penyaji status atau kategori dalam warna-warna *soft color*. Ukuran: `sm` (default) dan `md` (**tidak ada `xs`**). Prop lain: `dot`, `pulse`, `removable` (emit `remove`). Komponen `BaseTag` **tidak ada**; pakai `BaseBadge`.
 
 ```vue
 <template>
@@ -359,17 +370,17 @@ Komponen kontrol paginasi mandiri yang terintegrasi dengan tabel atau list data.
 
 ```vue
 <template>
+  <!-- Jumlah halaman dihitung internal dari totalItems dan itemsPerPage (tidak ada prop totalPages) -->
   <BasePagination
-    :current-page="currentPage"
-    :total-pages="totalPages"
+    v-model:current-page="currentPage"
+    v-model:items-per-page="itemsPerPage"
     :total-items="totalItems"
-    :items-per-page="itemsPerPage"
-    :per-page-options="[15, 30, 50]"
-    @update:current-page="currentPage = $event"
-    @update:items-per-page="itemsPerPage = $event"
+    :per-page-options="[15, 30, 50, 'all']"
   />
 </template>
 ```
+
+> **Props:** `currentPage` (wajib), `totalItems` (wajib), `itemsPerPage` (default `15`, angka atau `'all'`), `perPageOptions` (default `[15, 30, 50, 'all']`), `compact` (untuk mobile). Emit: `update:currentPage`, `update:itemsPerPage`, `change`.
 
 ---
 
@@ -415,6 +426,8 @@ Komponen pemilih tanggal enterprise tanpa dependensi eksternal:
 - **Preset Instan Cepat**: Pilihan "Hari Ini", "7 Hari Terakhir", "30 Hari Terakhir", dan "Bulan Ini".
 - **Format Tampilan Indonesia**: Menampilkan label ramah pengguna (contoh: `27 Jan 2025` atau `21 Jan 2025 - 27 Jan 2025`), sementara `v-model` menyimpan format ISO standar `YYYY-MM-DD`.
 
+> **Props:** `range`, `label`, `placeholder`, `presets` (default `true`), `clearable` (default `true`), `size` (`sm`/`md`), `placement` (`auto` default, `left`, `right`; **bukan `align`**).
+
 ```vue
 <template>
   <!-- Mode Single Date -->
@@ -457,7 +470,7 @@ Penyaji status ketika hasil pencarian atau tabel bernilai 0:
 ---
 
 ### 4.14 Multi-Select Checkbox, Floating Batch Bar & Ekspor CSV
-Fitur produktivitas tabel data skala enterprise di [`DataKaryawanView.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/views/DataKaryawanView.vue):
+Fitur produktivitas tabel data skala enterprise di [`DataKaryawanView.vue`](./src/views/DataKaryawanView.vue):
 - **Pilih Semua (Select All)**: Mengontrol semua baris dalam halaman aktif atau seluruh dataset.
 - **Floating Batch Action Bar**: Bilah aksi mengambang di bagian bawah layar saat $\ge 1$ baris terpilih, dengan tombol *Ekspor CSV Terpilih* dan *Hapus Terpilih*.
 - **Ekspor CSV Sesuai Standar RFC 4180**:
@@ -577,7 +590,7 @@ Modal multi-tahap (3 langkah) untuk mengimpor berkas CSV ke dalam state tabel ap
 ---
 
 ### 4.20 `KanbanView.vue` (Papan Alur Kanban Pipeline)
-Halaman papan Kanban visual di rute `/pesanan/kanban`:
+Halaman papan Kanban visual di rute `/template/kanban`:
 - **4 Kolom Tahapan Alur**: `Menunggu Pembayaran`, `Antrean Produksi`, `Quality Control`, dan `Selesai & Dikirim`.
 - **Drag & Drop Native HTML5**: Geser kartu antar kolom tanpa dependensi library eksternal.
 - **Metrik Kolom**: Counter jumlah order dan akumulasi total nominal Rupiah per kolom.
@@ -594,7 +607,7 @@ Komponen dialog konfirmasi tindakan penting (Simpan, Hapus, Peringatan, atau Ber
 ```vue
 <script setup>
 import { ref } from 'vue'
-import ConfirmationModal from '@/components/ui/ConfirmationModal.vue'
+import ConfirmationModal from '../components/ui/ConfirmationModal.vue'
 
 const isDeleteModalOpen = ref(false)
 
@@ -618,9 +631,65 @@ const handleConfirmDelete = () => {
 
 ---
 
+### 4.22 `BaseSegmentedControl.vue` (Tab Segmen)
+Pemilih segmen horizontal untuk berpindah tampilan (mis. Tabel / Kartu). Props: `modelValue` (wajib), `options` (array string atau `{ label, value, icon?, badge? }`, wajib), `size` (`sm`, `md` default), `fullWidth`. Emit: `update:modelValue`, `change`.
+
+```vue
+<script setup>
+import { ref } from 'vue'
+import BaseSegmentedControl from '../components/ui/BaseSegmentedControl.vue'
+
+const tampilan = ref('tabel')
+</script>
+
+<template>
+  <BaseSegmentedControl
+    v-model="tampilan"
+    :options="[
+      { label: 'Tabel', value: 'tabel' },
+      { label: 'Kartu', value: 'kartu' },
+    ]"
+    size="sm"
+  />
+</template>
+```
+
+---
+
+### 4.23 Toast (`useToast.js`, `ToastContainer.vue`, `BaseToast.vue`)
+Umpan balik hasil aksi (berhasil, gagal, info). `ToastContainer` **sudah dipasang di `AppLayout`**, jangan dipasang lagi di view. `BaseToast` dipakai internal oleh container, jangan dipanggil langsung.
+
+API `useToast()`:
+- `success(message, title?, options?)`, `error(...)`, `warning(...)`, `info(...)`
+- `loading(message, options?)`: toast status memuat, mengembalikan `id`
+- `promise(promiseOrFn, { loading, success, error })`: toast memuat yang otomatis berubah menjadi sukses atau gagal
+- `update(id, options)`, `remove(id)`, `clear()`
+
+```vue
+<script setup>
+import { useToast } from '../composables/useToast'
+
+const toast = useToast()
+
+const simpan = () => {
+  toast.success('Data karyawan berhasil disimpan.', 'Tersimpan')
+}
+
+// Contoh: simpanKeServer adalah fungsi async milik Anda
+const simpanAsync = () =>
+  toast.promise(() => simpanKeServer(), {
+    loading: 'Menyimpan...',
+    success: 'Perubahan disimpan',
+    error: 'Gagal menyimpan perubahan',
+  })
+</script>
+```
+
+---
+
 ## 5. Standar Desain Dashboard & Visualisasi SVG (Zero Library)
 
-Dashboard operasional di [`DashboardView.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/views/DashboardView.vue) dibangun menggunakan pure SVG interaktif berkinerja tinggi tanpa library chart eksternal:
+Dashboard operasional di [`DashboardView.vue`](./src/views/DashboardView.vue) dibangun menggunakan pure SVG interaktif berkinerja tinggi tanpa library chart eksternal:
 
 ### 1. Kurva Bezier Bergelombang (*Undulating Wave Motion*)
 - Titik koordinat SVG dihitung dinamis dengan osilasi harmonis:
@@ -662,8 +731,9 @@ Agar angka dari `BaseCountUp` dan label satuan (seperti `batch`, `tiket`, `pegaw
 | `useTheme.js` | Mengatur tema Gelap/Terang (`isDark`, `toggleTheme`) dengan efek visual lingkaran View Transition API. |
 | `useThemeColor.js` | Mengatur palet warna brand (`themeColor`, `setThemeColor`: `default`, `pink`, `blue`, `terracotta`). |
 | `useBackground.js` | Mengatur tipe latar Dasar Pertama (`bgType`: `grid`, `dots`, `solid`, `image`). |
-| `useToast.js` | Menampilkan toast global non-blocking (`toast.success()`, `toast.error()`, `toast.info()`, `toast.warning()`). |
+| `useToast.js` | Toast global non-blocking: `success`, `error`, `warning`, `info`, `loading`, `promise`, `update`, `remove`, `clear`. Detail di bagian 4.23. |
 | `useIsMobile.js` | Mendeteksi ukuran layar secara reaktif (`isMobile`, breakpoint default 768px). |
+| `useAuth.js` | Autentikasi in-place untuk login morphing di `AppLayout` (`currentUser`, `isAuthenticated`, `login`, `logout`, `startLogout`, `finishLogout`, `isLoggingOut`). |
 
 ---
 
@@ -671,7 +741,7 @@ Agar angka dari `BaseCountUp` dan label satuan (seperti `batch`, `tiket`, `pegaw
 
 1. **Aturan Dark Mode Murni (*Zero Blue Tint*)**:
    - Untuk tema Default, warna latar gelap **wajib** menggunakan `#09090b` (bukan biru tua/navy `#0f172a`).
-   - Warna card permukaan gelap menggunakan `#121214` atau `#141417`, dengan border `#27272a`.
+   - Permukaan gelap memakai token tema: `var(--theme-layer-2)` (Dasar Kedua, Default `#121214`), `var(--theme-surface)` (card, Default `#141417`), border `var(--theme-border)` (Default `#27272a`). Jangan menulis hex zinc langsung.
 2. **Aturan Format Rupiah**:
    - Setiap formulir nominal gaji, harga, atau omzet **wajib** menggunakan `BaseCurrencyInput.vue`.
    - Pada teks statis gunakan `.toLocaleString('id-ID')` atau `<BaseCountUp prefix="Rp " />`.
@@ -681,6 +751,15 @@ Agar angka dari `BaseCountUp` dan label satuan (seperti `batch`, `tiket`, `pegaw
    - Area isi formulir pada `MobileModal` wajib mengizinkan `touch-auto select-auto` agar pengguna smartphone dapat menggeser form dan mengisi input tanpa terblokir gesture penutup sheet.
 5. **Aturan Integritas Desain**:
    - Jangan menambahkan library charting atau UI bloated (seperti Bootstrap, Vuetify, Chart.js) ke dalam proyek. Semua base UI telah tersedia lengkap di folder `src/components/ui/`.
+
+6. **Aturan Warna Aksen**:
+   - Warna aksen (tombol, link aktif, ring fokus, SVG, item terpilih) **wajib** memakai variabel tema (`var(--theme-primary)`, `var(--theme-primary-soft)`, dan seterusnya), bukan hex tetap, agar mengikuti 4 tema. Permukaan dark juga memakai token (`--theme-layer-2`, `--theme-surface`, `--theme-border`, dan lainnya), bukan hex zinc.
+7. **Aturan Dropdown & Form**:
+   - Pilihan dari daftar memakai `BaseSearchableSelect`, bukan `<select>` mentah. Karena komponen ini tidak punya prop `label`, bungkus dengan `<label>` sendiri (lihat bagian 4.2).
+8. **Aturan Umpan Balik**:
+   - Hasil aksi lewat `useToast()`. Konfirmasi aksi berbahaya lewat `ConfirmationModal`. Dilarang memakai `alert()` atau `confirm()`.
+9. **Aturan Impor**:
+   - Impor komponen dengan path relatif (`../components/ui/...`). Alias `@/` tidak dipakai di kode.
 
 ---
 
@@ -718,32 +797,35 @@ Setiap halaman di folder `src/views/` mengikuti pola tata letak berjenjang yang 
 +-----------------------------------------------------------------------------------+
 ```
 
+> [!IMPORTANT]
+> **Dua pola container, tergantung menu.** `AppLayout` mengatur area konten `<main>`: pada rute bermeta `fixedHeight` (Contoh Data 1 dan 2) ia `overflow-hidden` (halaman wajib mengunci tinggi dan scroll di dalam, ikuti **bagian 11**). Pada rute lain (Beranda, Contoh Kanban, pengaturan) ia `overflow-y-auto` (halaman mengalir, ikuti **bagian 8.2**). `<main>` sudah memberi padding `p-3.5 sm:p-5 lg:p-6`, jadi root view **tidak boleh** menambah padding luar.
+
 ### 8.1 Ringkasan Halaman yang Sudah Dibangun
 
 | Halaman | Rute | File View | Fitur Utama |
 |---|---|---|---|
-| **Dashboard ERP & Payroll** | `/` | [`DashboardView.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/views/DashboardView.vue) | 6 KPI stat cards, SVG real-time wave chart beriak, horizontal bar alokasi budget divisi, donut chart distribusi status pegawai, audit log realtime, simulasi skeleton loading. |
-| **Login In-Place (Morphing Card)** | Terintegrasi di `/` (Single Screen) | [`AppLayout.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/components/layout/AppLayout.vue) | Autentikasi in-place tanpa navigasi/pindah halaman (*Zero Route Split*). Menampilkan kartu login terpusat (Frame 1), beralih ke lingkaran LOADING & timeline progress horizontal pada tombol "Masuk" (Frame 2-4: 0% &rarr; 100%), lalu kartu morphing melebar menjadi card besar dashboard. |
-| **Data Karyawan & Payroll** | `/data/karyawan` | [`DataKaryawanView.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/views/DataKaryawanView.vue) | Tabel CRUD enterprise, multi-select checkbox, floating bulk action bar, wizard impor CSV, modal form tambah/edit adaptif, slide-over detail karyawan, modal konfirmasi hapus massal. |
-| **Data Gunung Jawa** | `/data` | [`DataView.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/views/DataView.vue) | Tabel master data 159 gunung di Jawa, filter provinsi & status aktif, pencarian instan, sorting multi-kolom, modal tambah/edit dan pratinjau detail. |
-| **Papan Alur Kanban** | `/pesanan/kanban` | [`KanbanView.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/views/KanbanView.vue) | Pipeline alur kerja 4 kolom, drag & drop HTML5 native antar status, badge prioritas, akumulasi nilai rupiah per kolom, laci slide-over detail order, pratinjau invoice cetak. |
-| **Pusat Pengaturan** | `/setting` | [`SettingView.vue`](file:///c:/Users/yaniy/OneDrive/Documents/PROJEK/Template%20VUE/src/views/SettingView.vue) | Kustomisasi Dasar Pertama (pola latar, palet warna), konfigurasi Dasar Kedua (gaya sudut & margin card), preferensi akun & keamanan, serta pengaturan notifikasi sistem. |
+| **Dashboard ERP & Payroll** | `/` | [`DashboardView.vue`](./src/views/DashboardView.vue) | 6 KPI stat cards, SVG real-time wave chart beriak, horizontal bar alokasi budget divisi, donut chart distribusi status pegawai, audit log realtime, simulasi skeleton loading. |
+| **Login In-Place (Morphing Card)** | Terintegrasi di `/` (Single Screen) | [`AppLayout.vue`](./src/components/layout/AppLayout.vue) | Autentikasi in-place tanpa navigasi/pindah halaman (*Zero Route Split*). Menampilkan kartu login terpusat (Frame 1), beralih ke lingkaran LOADING & timeline progress horizontal pada tombol "Masuk" (Frame 2-4: 0% &rarr; 100%), lalu kartu morphing melebar menjadi card besar dashboard. |
+| **Data Karyawan & Payroll** | `/template/data-2` | [`DataKaryawanView.vue`](./src/views/DataKaryawanView.vue) | Tabel CRUD enterprise, multi-select checkbox, floating bulk action bar, wizard impor CSV, modal form tambah/edit adaptif, slide-over detail karyawan, modal konfirmasi hapus massal. |
+| **Data Gunung Jawa** | `/template/data-1` | [`DataView.vue`](./src/views/DataView.vue) | Tabel master data 159 gunung di Jawa, filter provinsi & status aktif, pencarian instan, sorting multi-kolom, modal tambah/edit dan pratinjau detail. |
+| **Papan Alur Kanban** | `/template/kanban` | [`KanbanView.vue`](./src/views/KanbanView.vue) | Pipeline alur kerja 4 kolom, drag & drop HTML5 native antar status, badge prioritas, akumulasi nilai rupiah per kolom, laci slide-over detail order, pratinjau invoice cetak. |
+| **Pusat Pengaturan** | `/template/umum` (+ `/template/dasar-pertama`, `/modal`, `/notifikasi`, `/keamanan`) | [`SettingView.vue`](./src/views/SettingView.vue) | Kustomisasi Dasar Pertama (pola latar, palet warna), konfigurasi Dasar Kedua (gaya sudut & margin card), preferensi akun & keamanan, serta pengaturan notifikasi sistem. |
 
 ---
 
-### 8.2 Contoh Template Boilerplate Halaman Baru (*Standard Page Template*)
+### 8.2 Template Halaman Mengalir (Non-Data)
 
-Gunakan struktur di bawah ini sebagai acuan saat membuat halaman baru:
+Gunakan untuk halaman di luar halaman data/tabel (dashboard, ringkasan, pengaturan). Halaman data/tabel CRUD **memakai formula bagian 11**, bukan template ini. Root view mengikuti `DashboardView.vue`:
 
 ```vue
 <script setup>
 import { ref, computed } from 'vue'
 import { Plus, Download, RefreshCw, Filter } from 'lucide-vue-next'
-import BaseButton from '@/components/ui/BaseButton.vue'
-import BaseInput from '@/components/ui/BaseInput.vue'
-import BaseBadge from '@/components/ui/BaseBadge.vue'
-import BaseModal from '@/components/ui/BaseModal.vue'
-import ConfirmationModal from '@/components/ui/ConfirmationModal.vue'
+import BaseButton from '../components/ui/BaseButton.vue'
+import BaseInput from '../components/ui/BaseInput.vue'
+import BaseBadge from '../components/ui/BaseBadge.vue'
+import BaseModal from '../components/ui/BaseModal.vue'
+import ConfirmationModal from '../components/ui/ConfirmationModal.vue'
 
 // State Halaman
 const searchQuery = ref('')
@@ -766,7 +848,7 @@ const filteredItems = computed(() => {
 </script>
 
 <template>
-  <div class="space-y-4 sm:space-y-5 p-3.5 sm:p-5">
+  <div class="space-y-4 sm:space-y-5 w-full max-w-7xl mx-auto select-none pb-8">
     <!-- 1. Header Halaman -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
@@ -795,7 +877,7 @@ const filteredItems = computed(() => {
     </div>
 
     <!-- 2. Toolbar Filter & Search -->
-    <div class="p-3 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex items-center justify-between gap-3">
+    <div class="p-3 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex items-center justify-between gap-3">
       <div class="w-full sm:w-72">
         <BaseInput
           v-model="searchQuery"
@@ -807,10 +889,10 @@ const filteredItems = computed(() => {
     </div>
 
     <!-- 3. Tabel Data Konten -->
-    <div class="rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs overflow-hidden">
+    <div class="rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-xs text-left">
-          <thead class="bg-neutral-50 dark:bg-[#18181b] border-b border-neutral-200 dark:border-[#27272a] text-neutral-500 font-semibold uppercase text-[11px]">
+          <thead class="bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border-b border-neutral-200 dark:border-[var(--theme-border)] text-neutral-500 font-semibold uppercase text-[11px]">
             <tr>
               <th class="py-2.5 px-3.5 text-center w-12">No</th>
               <th class="py-2.5 px-3">Kode</th>
@@ -819,8 +901,8 @@ const filteredItems = computed(() => {
               <th class="py-2.5 px-3 text-right">Aksi</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-neutral-100 dark:divide-[#202024]">
-            <tr v-for="(item, idx) in filteredItems" :key="item.id" class="hover:bg-neutral-50 dark:hover:bg-[#18181b]/60 transition">
+          <tbody class="divide-y divide-neutral-100 dark:divide-[var(--theme-border)]">
+            <tr v-for="(item, idx) in filteredItems" :key="item.id" class="hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-raised)]/60 transition">
               <td class="py-2.5 px-3.5 text-center text-neutral-400 font-mono">{{ idx + 1 }}</td>
               <td class="py-2.5 px-3 font-mono font-semibold">{{ item.kode }}</td>
               <td class="py-2.5 px-3 font-medium text-neutral-900 dark:text-white">{{ item.nama }}</td>
@@ -881,7 +963,7 @@ Fitur untuk memilih banyak baris data sekaligus dan menjalankan aksi massal (*bu
 <script setup>
 import { ref, computed } from 'vue'
 import { Trash2, Download, X } from 'lucide-vue-next'
-import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseButton from '../components/ui/BaseButton.vue'
 
 const items = ref([
   { id: 101, nama: 'Budi Santoso' },
@@ -963,9 +1045,9 @@ const clearSelection = () => {
   >
     <div
       v-if="selectedIds.length > 0"
-      class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-[#18181c]/95 backdrop-blur-md border border-neutral-300 dark:border-[#383842] shadow-2xl rounded-2xl px-4 py-2.5 flex items-center gap-3 text-xs will-change-transform max-w-[calc(100vw-32px)]"
+      class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-[var(--theme-surface-raised)]/95 backdrop-blur-md border border-neutral-300 dark:border-[var(--theme-border-strong)] shadow-2xl rounded-2xl px-4 py-2.5 flex items-center gap-3 text-xs will-change-transform max-w-[calc(100vw-32px)]"
     >
-      <div class="flex items-center gap-2 pr-2 border-r border-neutral-200 dark:border-[#2a2a30]">
+      <div class="flex items-center gap-2 pr-2 border-r border-neutral-200 dark:border-[var(--theme-border)]">
         <span class="w-5 h-5 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] flex items-center justify-center font-bold text-[11px]">
           {{ selectedIds.length }}
         </span>
@@ -1082,11 +1164,11 @@ Komponen form modal lengkap dengan input teks, mata uang Rupiah otomatis, dropdo
 ```vue
 <script setup>
 import { ref } from 'vue'
-import BaseModal from '@/components/ui/BaseModal.vue'
-import BaseInput from '@/components/ui/BaseInput.vue'
-import BaseCurrencyInput from '@/components/ui/BaseCurrencyInput.vue'
-import BaseSearchableSelect from '@/components/ui/BaseSearchableSelect.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseModal from '../components/ui/BaseModal.vue'
+import BaseInput from '../components/ui/BaseInput.vue'
+import BaseCurrencyInput from '../components/ui/BaseCurrencyInput.vue'
+import BaseSearchableSelect from '../components/ui/BaseSearchableSelect.vue'
+import BaseButton from '../components/ui/BaseButton.vue'
 
 const isOpen = ref(false)
 const form = ref({
@@ -1128,13 +1210,16 @@ const handleSave = () => {
         placeholder="Contoh: Raden Wijaya"
       />
 
-      <BaseSearchableSelect
-        v-model="form.divisi"
-        label="Divisi Kerja"
-        required
-        :options="divisiOptions"
-        placeholder="Pilih divisi..."
-      />
+      <div>
+        <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1">
+          Divisi Kerja <span class="text-rose-500">*</span>
+        </label>
+        <BaseSearchableSelect
+          v-model="form.divisi"
+          :options="divisiOptions"
+          placeholder="Pilih divisi..."
+        />
+      </div>
 
       <BaseCurrencyInput
         v-model="form.gajiPokok"
@@ -1167,8 +1252,8 @@ Digunakan untuk tindakan penting yang memerlukan kepastian pengguna (*destructiv
 ```vue
 <script setup>
 import { ref } from 'vue'
-import ConfirmationModal from '@/components/ui/ConfirmationModal.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
+import ConfirmationModal from '../components/ui/ConfirmationModal.vue'
+import BaseButton from '../components/ui/BaseButton.vue'
 
 const isConfirmDeleteOpen = ref(false)
 
@@ -1205,8 +1290,8 @@ Menampilkan lembar tagihan resmi yang otomatis disesuaikan untuk cetak printer `
 ```vue
 <script setup>
 import { ref } from 'vue'
-import BaseInvoiceModal from '@/components/ui/BaseInvoiceModal.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseInvoiceModal from '../components/ui/BaseInvoiceModal.vue'
+import BaseButton from '../components/ui/BaseButton.vue'
 
 const isInvoiceOpen = ref(false)
 const invoiceData = ref({
@@ -1248,10 +1333,10 @@ Menyajikan informasi rinci, histori audit, atau log waktu tanpa menutup konteks 
 ```vue
 <script setup>
 import { ref } from 'vue'
-import BaseSlideOver from '@/components/ui/BaseSlideOver.vue'
-import BaseTimeline from '@/components/ui/BaseTimeline.vue'
-import BaseBadge from '@/components/ui/BaseBadge.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseSlideOver from '../components/ui/BaseSlideOver.vue'
+import BaseTimeline from '../components/ui/BaseTimeline.vue'
+import BaseBadge from '../components/ui/BaseBadge.vue'
+import BaseButton from '../components/ui/BaseButton.vue'
 
 const isDrawerOpen = ref(false)
 const auditLogs = [
@@ -1276,7 +1361,7 @@ const auditLogs = [
     </template>
 
     <div class="space-y-4">
-      <div class="p-3 rounded-xl bg-neutral-50 dark:bg-[#18181b] border border-neutral-200 dark:border-[#27272a]">
+      <div class="p-3 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)]">
         <span class="text-xs text-neutral-500">Total Anggaran Payroll:</span>
         <div class="text-lg font-bold font-mono text-neutral-900 dark:text-white mt-0.5">
           Rp 384.500.000
@@ -1307,8 +1392,8 @@ Memungkinkan pengguna mengimpor ribuan baris data CSV lokal ke sistem dengan pem
 ```vue
 <script setup>
 import { ref } from 'vue'
-import BaseCsvImporter from '@/components/ui/BaseCsvImporter.vue'
-import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseCsvImporter from '../components/ui/BaseCsvImporter.vue'
+import BaseButton from '../components/ui/BaseButton.vue'
 import { UploadCloud } from 'lucide-vue-next'
 
 const isImporterOpen = ref(false)
@@ -1355,3 +1440,105 @@ const handleImportedData = (dataRows) => {
 | **Filter & Pencarian** | Input pencarian dan filter dropdown berjejer rapi dalam 1 baris toolbar. | Input pencarian lebar penuh (100%), filter tersusun rapi atau dilipat dalam dropdown ringkas. |
 
 
+
+
+---
+
+## 11. Standar Struktur View Template (The Sovereign View Architecture Formula)
+
+Setiap *view* dengan `meta: { fixedHeight: true }` (Contoh Data 1 dan 2) (halaman data, tabel CRUD, log, dan manajemen admin) **WAJIB** mengikuti cetak biru tata letak resmi (*standard layout anatomy*) berikut. Pola ini dipakai `DataKaryawanView.vue` dan `DataView.vue`. Halaman di menu lain memakai bagian 8.2:
+
+```vue
+<template>
+  <!-- Main View Container: Disiplin tinggi penuh agar Layer 2 tidak pernah overflow/scroll -->
+  <div class="h-full flex flex-col min-h-0 overflow-hidden gap-2.5 w-full max-w-7xl mx-auto select-none relative">
+    
+    <!-- 1. Top Compact Header (shrink-0) -->
+    <div class="flex items-center justify-between gap-3 pb-2 border-b border-neutral-200 dark:border-[var(--theme-border)] shrink-0">
+      ...
+    </div>
+
+    <!-- 2. Filter Bar Toolbar (shrink-0) -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
+      ...
+    </div>
+
+    <!-- 3. Quick Stats Summary Strip: 4 Pill Kompak (shrink-0) -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 shrink-0">
+      ...
+    </div>
+
+    <!-- 4. Desktop Table View: Scroll Mandiri & Sticky thead (hidden md:flex flex-1 min-h-0) -->
+    <div class="hidden md:flex flex-1 min-h-0 flex-col rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs overflow-hidden">
+      <!-- Area Gulir Internal -->
+      <div class="flex-1 min-h-0 overflow-y-auto overflow-x-auto">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead class="sticky top-0 z-20 bg-neutral-100/95 dark:bg-[var(--theme-surface-raised)]/95 backdrop-blur-md border-b border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs">...</thead>
+          <tbody class="divide-y divide-neutral-200/70 dark:divide-[var(--theme-border)]">...</tbody>
+        </table>
+      </div>
+      <!-- Pinned Footer Pagination -->
+      <div class="py-2.5 px-4 border-t border-neutral-200 dark:border-[var(--theme-border)] bg-neutral-50/70 dark:bg-[var(--theme-layer-2)] shrink-0">
+        <BasePagination ... />
+      </div>
+    </div>
+
+    <!-- 5. Mobile Card List View: Layar Smartphone (md:hidden flex-1 min-h-0) -->
+    <div class="md:hidden flex-1 min-h-0 flex flex-col overflow-hidden">
+      <div class="flex-1 min-h-0 overflow-y-auto space-y-2.5 pr-0.5">
+        <div v-for="item in paginatedList" :key="item.id" class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-xs space-y-3">
+          ...
+        </div>
+      </div>
+      <!-- Mobile Pinned Pagination -->
+      <div class="pt-2 border-t border-neutral-200 dark:border-[var(--theme-border)] shrink-0">
+        <BasePagination compact ... />
+      </div>
+    </div>
+
+    <!-- 6. Modals (BaseModal & ConfirmationModal) -->
+    <BaseModal ... />
+    <ConfirmationModal ... />
+  </div>
+</template>
+```
+
+### 11.1 Filosofi "Tidak Full Tidak Fit Juga, Menyesuaikan Konten"
+1. **Lebar Kontainer (`w-full max-w-7xl mx-auto`)**:
+   - Tidak melebar ekstrem sampai ujung bezel monitor (*edge-to-edge stretching*), melainkan dikunci ergonomis pada `max-w-7xl` (~1280px) dan terpusat (`mx-auto`).
+   - Pandangan mata staf administrasi terfokus di tengah secara nyaman, tanpa lelah menoleh ke ujung monitor ultra-wide.
+2. **Tinggi Kontainer (`h-full flex flex-col min-h-0 overflow-hidden`)**:
+   - Dasar Kedua (Surface Card) berukuran presisi 100% viewport.
+   - Mengunci parent layout sehingga **Dasar Kedua TIDAK PERNAH memunculkan scrollbar luar (*outer page scrollbar*)**.
+   - `min-h-0` adalah *CSS Flexbox contract* agar kontainer anak (`flex-1`) diizinkan menyusut lebih kecil dari ukuran intrinsik datanya, sehingga pengguliran mandiri tabel/card list bekerja sempurna.
+3. **Ketukan Spasi Kompak (`gap-2.5`)**:
+   - Seluruh baris atas (Header, Toolbar, 4 Pills) tersusun dengan ritme vertikal kompak `gap-2.5` (10px) dan berstatus `shrink-0`.
+   - Menghemat ruang layar secara maksimal demi memberi porsi vertikal terbesar bagi data tabel.
+
+### 11.2 Spesifikasi 4 Pill Quick Stats
+Bentuk stat ringkas horizontal:
+- **Tinggi**: `h-9` (36px).
+- **Padding & Radius**: `px-2.5 rounded-xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs`.
+- **Ikon Kotak**: `w-6 h-6 rounded-lg` dengan background soft bertema:
+  - Total: `bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300`
+  - Nominal / Sukses: `bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400`
+  - Info / Aktif: `bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400`
+  - Warning / Jatuh Tempo: `bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400`
+- **Tipografi**:
+  - Label: `text-[10px] uppercase font-bold text-neutral-400 tracking-wider whitespace-nowrap`
+  - Nilai: `font-bold text-xs truncate text-neutral-900 dark:text-white`
+
+### 11.3 Spesifikasi Tabel Desktop (`hidden md:flex`)
+- **Sticky THEAD**: `sticky top-0 z-20 bg-neutral-100/95 dark:bg-[var(--theme-surface-raised)]/95 backdrop-blur-md border-b border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs`.
+- **Interaksi Baris**:
+  - Hover: `hover:bg-neutral-50/80 dark:hover:bg-[var(--theme-surface-raised)] transition-colors`.
+  - Terpilih: `bg-[var(--theme-primary-soft)]/40 dark:bg-[var(--theme-primary-soft)]/20`.
+- **Pinned Footer**: Terletak tepat di bagian bawah frame kartu (`py-2.5 px-4 border-t shrink-0`), selalu terlihat dan tidak pernah tenggelam (*never hidden under fold*).
+
+### 11.4 Spesifikasi Mobile Card List (`md:hidden`)
+- Menggantikan tabel di layar `< 768px` menjadi daftar kartu vertikal responsif.
+- Setiap kartu memiliki 3 zona:
+  1. Header Bar: Checkbox + Identitas Utama (Avatar / ID / Nama) + Status Badge.
+  2. Sub-Card Detail: Panel ber-border tipis (`p-2.5 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)]`) menampilkan atribut sekunder (Gaji, Kuota, Lokasi, PIC).
+  3. Action Footer: Tombol aksi ringkas (`BaseButton size="sm"`).
+- Footer paginasi mobile terkunci di dasar kontainer (`pt-2 border-t shrink-0`).
