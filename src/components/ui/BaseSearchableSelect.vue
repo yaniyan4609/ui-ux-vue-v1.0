@@ -185,6 +185,8 @@ const handleKeydown = (e) => {
     }
   } else if (e.key === 'Escape') {
     e.preventDefault()
+    // Cegah Esc ikut menutup modal/slide-over induk (listener mereka ada di window)
+    e.stopPropagation()
     isOpen.value = false
   }
 }

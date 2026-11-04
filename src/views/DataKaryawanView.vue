@@ -643,6 +643,7 @@ const getRowActionItems = (item) => [
           v-model="selectedStatus"
           :options="statusOptions"
           placeholder="Filter Status..."
+          align="right"
           clearable
         />
       </div>
