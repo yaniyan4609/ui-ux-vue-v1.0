@@ -381,7 +381,7 @@ const handleResetDefault = () => {
 
 <template>
   <!-- Main View Container: h-full flex flex-col min-h-0 overflow-hidden agar Layer 2 tidak pernah scroll -->
-  <div class="h-full flex flex-col min-h-0 overflow-hidden gap-2.5 w-full max-w-7xl mx-auto select-none">
+  <div class="h-full flex flex-col min-h-0 overflow-hidden gap-2.5 w-full max-w-7xl mx-auto select-none relative">
     
     <!-- Top Compact Header: Title & Action Buttons -->
     <div class="flex items-center justify-between gap-3 pb-2 border-b border-neutral-200 dark:border-[var(--theme-border)] shrink-0">
