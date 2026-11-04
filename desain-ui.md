@@ -689,6 +689,123 @@ const simpanAsync = () =>
 
 ---
 
+### 4.24 `BaseCheckbox.vue` (Kotak Centang Kustom & Indeterminate)
+Kotak centang bertema (`var(--theme-primary)`) yang menggantikan `<input type="checkbox">` mentah. Mendukung mode boolean tunggal, mode array (`value`), serta state `indeterminate` (ikon strip `-`).
+
+```vue
+<script setup>
+import { ref } from 'vue'
+import BaseCheckbox from '../components/ui/BaseCheckbox.vue'
+
+const setuju = ref(false)
+const dipilih = ref(['read'])
+</script>
+
+<template>
+  <!-- Mode Boolean -->
+  <BaseCheckbox
+    v-model="setuju"
+    label="Setujui syarat & ketentuan"
+    description="Data akan dienkripsi sesuai standar keamanan."
+  />
+
+  <!-- Mode Array Group -->
+  <BaseCheckbox v-model="dipilih" value="read" label="Akses Baca" size="sm" />
+  <BaseCheckbox v-model="dipilih" value="write" label="Akses Tulis" size="sm" />
+</template>
+```
+
+---
+
+### 4.25 `BaseMultiSelect.vue` (Dropdown Pilihan Ganda dengan Chip & Pencarian)
+Dropdown untuk memilih banyak opsi sekaligus, dilengkapi chip item terpilih pada trigger, ringkasan `+N lainnya` (`maxChips`), bar **"Pilih Semua"**, pencarian instan, serta navigasi keyboard.
+
+```vue
+<script setup>
+import { ref } from 'vue'
+import BaseMultiSelect from '../components/ui/BaseMultiSelect.vue'
+
+const fasilitas = ref(['BPJS Kesehatan', 'Laptop Kerja'])
+const fasilitasOptions = [
+  { value: 'BPJS Kesehatan', label: 'BPJS Kesehatan', badge: 'Wajib' },
+  { value: 'BPJS Ketenagakerjaan', label: 'BPJS Ketenagakerjaan', badge: 'Wajib' },
+  { value: 'Laptop Kerja', label: 'Fasilitas Laptop / MacBook' },
+  { value: 'Work From Anywhere', label: 'Fleksibilitas WFA / Hybrid' },
+]
+</script>
+
+<template>
+  <BaseMultiSelect
+    v-model="fasilitas"
+    :options="fasilitasOptions"
+    label="Fasilitas & Benefit Pegawai"
+    placeholder="Pilih satu atau lebih fasilitas..."
+    :max-chips="2"
+    hint="Pilih paket asuransi dan fasilitas kerja pegawai."
+  />
+</template>
+```
+
+---
+
+### 4.26 `BaseDataTable.vue` (Tabel Enterprise Desktop + Kartu Mobile + Bulk Bar)
+Komponen tabel data terpadu yang membungkus pola **Data View** (sticky header, sorting kolom, multi-select dengan `BaseCheckbox` & status `indeterminate`, slot sel kustom `#cell-{key}`, daftar kartu mobile `#mobile-card`, `BaseEmptyState`, `BasePagination` terkunci di bawah, dan *Floating Bulk Action Bar*).
+
+```vue
+<script setup>
+import { ref } from 'vue'
+import BaseDataTable from '../components/ui/BaseDataTable.vue'
+import BaseBadge from '../components/ui/BaseBadge.vue'
+import BaseButton from '../components/ui/BaseButton.vue'
+
+const columns = [
+  { key: 'nama', label: 'Pegawai', sortable: true },
+  { key: 'divisi', label: 'Divisi', sortable: true },
+  { key: 'status', label: 'Status', sortable: true },
+]
+
+const rows = ref([
+  { id: 1, nama: 'Rizky Pratama', divisi: 'Teknologi & IT', status: 'Tetap' },
+  { id: 2, nama: 'Nadia Putri', divisi: 'Desain & Kreatif', status: 'Kontrak' },
+])
+
+const selectedIds = ref([])
+const sortKey = ref('nama')
+const sortOrder = ref('asc')
+const currentPage = ref(1)
+const itemsPerPage = ref(10)
+</script>
+
+<template>
+  <BaseDataTable
+    :columns="columns"
+    :rows="rows"
+    :total-items="rows.length"
+    selectable
+    v-model:selected-ids="selectedIds"
+    v-model:sort-key="sortKey"
+    v-model:sort-order="sortOrder"
+    v-model:current-page="currentPage"
+    v-model:items-per-page="itemsPerPage"
+    selected-label="Pegawai Terpilih"
+  >
+    <template #cell-status="{ value }">
+      <BaseBadge :variant="value === 'Tetap' ? 'success' : 'warning'">
+        {{ value }}
+      </BaseBadge>
+    </template>
+
+    <template #bulk-actions="{ selectedIds: ids }">
+      <BaseButton variant="danger" size="sm">
+        Hapus ({{ ids.length }})
+      </BaseButton>
+    </template>
+  </BaseDataTable>
+</template>
+```
+
+---
+
 ## 5. Standar Desain Dashboard & Visualisasi SVG (Zero Library)
 
 Dashboard operasional di [`DashboardView.vue`](./src/views/DashboardView.vue) dibangun menggunakan pure SVG interaktif berkinerja tinggi tanpa library chart eksternal:

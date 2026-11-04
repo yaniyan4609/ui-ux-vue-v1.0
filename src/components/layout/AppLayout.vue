@@ -10,6 +10,7 @@ import PrimarySidebar from './PrimarySidebar.vue'
 import SubmenuSidebar from './SubmenuSidebar.vue'
 import ToastContainer from '../ui/ToastContainer.vue'
 import BaseCommandPalette from '../ui/BaseCommandPalette.vue'
+import BaseCheckbox from '../ui/BaseCheckbox.vue'
 import {
   Mail,
   Lock,
@@ -294,14 +295,12 @@ const baseLayerStyle = computed(() => {
 
                 <!-- Remember Me Checkbox -->
                 <div class="flex items-center justify-between text-xs pt-0.5">
-                  <label class="flex items-center gap-2 cursor-pointer select-none">
-                    <input
-                      v-model="loginForm.rememberMe"
-                      type="checkbox"
-                      class="rounded border-neutral-300 text-[var(--theme-primary)] focus:ring-[var(--theme-primary)] cursor-pointer"
-                    />
-                    <span class="text-neutral-600 dark:text-neutral-400 text-[11px]">Ingat sesi saya di perangkat ini</span>
-                  </label>
+                  <BaseCheckbox
+                    v-model="loginForm.rememberMe"
+                    size="sm"
+                  >
+                    <span class="text-neutral-600 dark:text-neutral-400 text-[11px] font-normal">Ingat sesi saya di perangkat ini</span>
+                  </BaseCheckbox>
                 </div>
               </form>
             </div>

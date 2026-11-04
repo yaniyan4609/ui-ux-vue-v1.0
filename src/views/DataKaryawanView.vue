@@ -17,6 +17,9 @@ import BaseSlideOver from '../components/ui/BaseSlideOver.vue'
 import BaseTimeline from '../components/ui/BaseTimeline.vue'
 import BaseCsvImporter from '../components/ui/BaseCsvImporter.vue'
 import BaseFileUploader from '../components/ui/BaseFileUploader.vue'
+import BaseCheckbox from '../components/ui/BaseCheckbox.vue'
+import BaseMultiSelect from '../components/ui/BaseMultiSelect.vue'
+import BaseDataTable from '../components/ui/BaseDataTable.vue'
 import { useToast } from '../composables/useToast'
 import { karyawanList } from '../data/karyawanData'
 import { formatRupiah } from '../utils/format.js'
@@ -91,6 +94,26 @@ const formStatusOptions = [
   { value: 'Kontrak', label: 'Kontrak' },
   { value: 'Probasi', label: 'Probasi' },
   { value: 'Freelance', label: 'Freelance' },
+]
+
+// Opsi Multi-Select Fasilitas & Benefit Pegawai
+const formFasilitasOptions = [
+  { value: 'BPJS Kesehatan', label: 'BPJS Kesehatan', badge: 'Wajib' },
+  { value: 'BPJS Ketenagakerjaan', label: 'BPJS Ketenagakerjaan', badge: 'Wajib' },
+  { value: 'Asuransi Swasta', label: 'Asuransi Kesehatan Swasta' },
+  { value: 'Laptop Kerja', label: 'Fasilitas Laptop / MacBook' },
+  { value: 'Tunjangan Transport', label: 'Tunjangan Transport & Makan' },
+  { value: 'Work From Anywhere', label: 'Fleksibilitas WFA / Hybrid' },
+]
+
+// Konfigurasi Kolom BaseDataTable
+const tableColumns = [
+  { key: 'nama', label: 'Pegawai', sortable: true, cellClass: 'whitespace-nowrap' },
+  { key: 'divisi', label: 'Jabatan & Divisi', sortable: true, cellClass: 'whitespace-nowrap' },
+  { key: 'gaji', label: 'Gaji Pokok', sortable: true, cellClass: 'whitespace-nowrap' },
+  { key: 'status', label: 'Status', sortable: true, cellClass: 'whitespace-nowrap' },
+  { key: 'lokasi', label: 'Lokasi', sortable: false, cellClass: 'whitespace-nowrap text-neutral-600 dark:text-neutral-400' },
+  { key: 'bpjsAktif', label: 'Asuransi', sortable: false, align: 'center', cellClass: 'whitespace-nowrap' },
 ]
 
 // Dropdown Options: Divisi (Searchable)
@@ -319,6 +342,7 @@ const formData = ref({
   lokasi: 'Jakarta Selatan',
   tanggalMasuk: '2024-01-01',
   bpjsAktif: true,
+  fasilitas: ['BPJS Kesehatan', 'BPJS Ketenagakerjaan', 'Laptop Kerja'],
   rekening: '',
   catatan: '',
 })
@@ -341,6 +365,7 @@ const openAddModal = () => {
     lokasi: 'Jakarta Selatan',
     tanggalMasuk: '2024-01-01',
     bpjsAktif: true,
+    fasilitas: ['BPJS Kesehatan', 'BPJS Ketenagakerjaan', 'Laptop Kerja'],
     rekening: 'BCA - ',
     catatan: '',
   }
@@ -350,7 +375,12 @@ const openAddModal = () => {
 
 const openEditModal = (item) => {
   isEditMode.value = true
-  formData.value = { ...item }
+  formData.value = {
+    ...item,
+    fasilitas: Array.isArray(item.fasilitas)
+      ? [...item.fasilitas]
+      : ['BPJS Kesehatan', 'BPJS Ketenagakerjaan', 'Laptop Kerja'],
+  }
   formErrors.value = {}
   isFormModalOpen.value = true
 }
@@ -693,258 +723,140 @@ const getRowActionItems = (item) => [
     </div>
 
     <!-- ======================================================== -->
-    <!-- DESKTOP TABLE VIEW                                       -->
+    <!-- BASE DATA TABLE (DESKTOP + MOBILE + BULK ACTION BAR)     -->
     <!-- ======================================================== -->
-    <div class="hidden md:flex flex-1 min-h-0 flex-col rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs overflow-hidden">
-      <!-- Area Scroll Mandiri -->
-      <div class="flex-1 min-h-0 overflow-y-auto overflow-x-auto">
-        <table class="w-full text-left border-collapse text-xs">
-          <!-- STICKY THEAD -->
-          <thead class="sticky top-0 z-20 bg-neutral-100/95 dark:bg-[var(--theme-surface-raised)]/95 backdrop-blur-md border-b border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs">
-            <tr class="text-neutral-600 dark:text-neutral-400 font-semibold select-none text-[11px] uppercase tracking-wider">
-              <!-- Checkbox Select All -->
-              <th class="py-2.5 px-3 text-center w-10">
-                <input
-                  type="checkbox"
-                  :checked="isAllSelected"
-                  @change="toggleSelectAll"
-                  class="rounded border-neutral-300 text-[var(--theme-primary)] focus:ring-[var(--theme-primary)] cursor-pointer"
-                  title="Pilih Semua di Halaman Ini"
-                />
-              </th>
-
-              <th class="py-2.5 px-2 text-center w-10">No</th>
-
-              <!-- Nama & NIP -->
-              <th class="py-2.5 px-3 cursor-pointer hover:text-neutral-900 dark:hover:text-white transition" @click="handleSort('nama')">
-                <div class="flex items-center gap-1.5">
-                  <span>Pegawai</span>
-                  <ArrowUp v-if="sortKey === 'nama' && sortOrder === 'asc'" class="w-3.5 h-3.5 text-neutral-900 dark:text-white" />
-                  <ArrowDown v-else-if="sortKey === 'nama' && sortOrder === 'desc'" class="w-3.5 h-3.5 text-neutral-900 dark:text-white" />
-                  <ArrowUpDown v-else class="w-3.5 h-3.5 opacity-40" />
-                </div>
-              </th>
-
-              <!-- Jabatan & Divisi -->
-              <th class="py-2.5 px-3 cursor-pointer hover:text-neutral-900 dark:hover:text-white transition" @click="handleSort('divisi')">
-                <div class="flex items-center gap-1.5">
-                  <span>Jabatan & Divisi</span>
-                  <ArrowUp v-if="sortKey === 'divisi' && sortOrder === 'asc'" class="w-3.5 h-3.5 text-neutral-900 dark:text-white" />
-                  <ArrowDown v-else-if="sortKey === 'divisi' && sortOrder === 'desc'" class="w-3.5 h-3.5 text-neutral-900 dark:text-white" />
-                  <ArrowUpDown v-else class="w-3.5 h-3.5 opacity-40" />
-                </div>
-              </th>
-
-              <!-- Gaji Pokok -->
-              <th class="py-2.5 px-3 cursor-pointer hover:text-neutral-900 dark:hover:text-white transition" @click="handleSort('gaji')">
-                <div class="flex items-center gap-1.5">
-                  <span>Gaji Pokok</span>
-                  <ArrowUp v-if="sortKey === 'gaji' && sortOrder === 'asc'" class="w-3.5 h-3.5 text-neutral-900 dark:text-white" />
-                  <ArrowDown v-else-if="sortKey === 'gaji' && sortOrder === 'desc'" class="w-3.5 h-3.5 text-neutral-900 dark:text-white" />
-                  <ArrowUpDown v-else class="w-3.5 h-3.5 opacity-40" />
-                </div>
-              </th>
-
-              <!-- Status Kerja -->
-              <th class="py-2.5 px-3 cursor-pointer hover:text-neutral-900 dark:hover:text-white transition" @click="handleSort('status')">
-                <div class="flex items-center gap-1.5">
-                  <span>Status</span>
-                  <ArrowUp v-if="sortKey === 'status' && sortOrder === 'asc'" class="w-3.5 h-3.5 text-neutral-900 dark:text-white" />
-                  <ArrowDown v-else-if="sortKey === 'status' && sortOrder === 'desc'" class="w-3.5 h-3.5 text-neutral-900 dark:text-white" />
-                  <ArrowUpDown v-else class="w-3.5 h-3.5 opacity-40" />
-                </div>
-              </th>
-
-              <!-- Lokasi Kantor -->
-              <th class="py-2.5 px-3">Lokasi</th>
-
-              <!-- BPJS -->
-              <th class="py-2.5 px-3 text-center">Asuransi</th>
-
-              <th class="py-2.5 px-4 text-right w-24">Aksi</th>
-            </tr>
-          </thead>
-
-          <!-- TABLE BODY -->
-          <tbody class="divide-y divide-neutral-200/70 dark:divide-[var(--theme-border)]">
-            <tr
-              v-for="(item, idx) in paginatedList"
-              :key="item.id"
-              class="hover:bg-neutral-50/80 dark:hover:bg-[var(--theme-surface-raised)] transition-colors"
-              :class="selectedIds.includes(item.id) ? 'bg-[var(--theme-primary-soft)]/40 dark:bg-[var(--theme-primary-soft)]/20' : ''"
-            >
-              <!-- Checkbox Row -->
-              <td class="py-2.5 px-3 text-center">
-                <input
-                  type="checkbox"
-                  :checked="selectedIds.includes(item.id)"
-                  @change="toggleSelect(item.id)"
-                  class="rounded border-neutral-300 text-[var(--theme-primary)] focus:ring-[var(--theme-primary)] cursor-pointer"
-                />
-              </td>
-
-              <!-- No -->
-              <td class="py-2.5 px-2 text-center font-bold text-neutral-400 text-xs">
-                {{ (itemsPerPage === 'all' ? 0 : (currentPage - 1) * Number(itemsPerPage)) + idx + 1 }}
-              </td>
-
-              <!-- Pegawai (Avatar + Nama + NIP) -->
-              <td class="py-2.5 px-3 whitespace-nowrap">
-                <div class="flex items-center gap-2.5">
-                  <div class="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-[var(--theme-surface-muted)] border border-neutral-200/80 dark:border-[var(--theme-border-strong)] text-neutral-800 dark:text-neutral-200 font-bold text-xs flex items-center justify-center shrink-0">
-                    {{ item.avatar }}
-                  </div>
-                  <div class="min-w-0">
-                    <span class="font-semibold text-neutral-900 dark:text-white block leading-tight truncate">
-                      {{ item.nama }}
-                    </span>
-                    <span class="text-[10.5px] font-mono text-neutral-400 block mt-0.5">
-                      {{ item.nip }}
-                    </span>
-                  </div>
-                </div>
-              </td>
-
-              <!-- Jabatan & Divisi -->
-              <td class="py-2.5 px-3 whitespace-nowrap">
-                <span class="font-medium text-neutral-800 dark:text-neutral-200 block leading-tight">
-                  {{ item.jabatan }}
-                </span>
-                <span class="text-[10.5px] text-neutral-400 block mt-0.5">
-                  {{ item.divisi }}
-                </span>
-              </td>
-
-              <!-- Gaji Pokok & Tunjangan -->
-              <td class="py-2.5 px-3 whitespace-nowrap">
-                <span class="font-bold text-neutral-900 dark:text-white font-mono block leading-tight">
-                  {{ formatRupiah(item.gaji) }}
-                </span>
-                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono block mt-0.5">
-                  +{{ formatRupiah(item.tunjangan) }} tunj.
-                </span>
-              </td>
-
-              <!-- Status Kerja BaseBadge -->
-              <td class="py-2.5 px-3 whitespace-nowrap">
-                <BaseBadge
-                  :variant="getStatusBadgeVariant(item.status)"
-                  :dot="item.status === 'Tetap' || item.status === 'Kontrak'"
-                  :pulse="item.status === 'Tetap'"
-                >
-                  {{ item.status }}
-                </BaseBadge>
-              </td>
-
-              <!-- Lokasi -->
-              <td class="py-2.5 px-3 whitespace-nowrap text-neutral-600 dark:text-neutral-400">
-                <div class="flex items-center gap-1.5">
-                  <MapPin class="w-3.5 h-3.5 text-neutral-400 shrink-0" />
-                  <span>{{ item.lokasi }}</span>
-                </div>
-              </td>
-
-              <!-- BPJS Aktif BaseBadge -->
-              <td class="py-2.5 px-3 text-center whitespace-nowrap">
-                <BaseBadge :variant="item.bpjsAktif ? 'success' : 'neutral'" size="sm">
-                  {{ item.bpjsAktif ? 'BPJS Aktif' : 'Non-BPJS' }}
-                </BaseBadge>
-              </td>
-
-              <!-- Aksi -->
-              <td class="py-2.5 px-4 text-right whitespace-nowrap">
-                <div class="flex items-center justify-end gap-1">
-                  <button
-                    type="button"
-                    @click="openEditModal(item)"
-                    class="p-1.5 rounded-lg text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:text-white dark:hover:bg-[var(--theme-surface-muted)] transition cursor-pointer"
-                    title="Edit Pegawai"
-                  >
-                    <Pencil class="w-3.5 h-3.5" />
-                  </button>
-                  <BaseDropdownMenu :items="getRowActionItems(item)" align="right" />
-                </div>
-              </td>
-            </tr>
-
-            <!-- BaseEmptyState saat 0 data cocok -->
-            <tr v-if="processedList.length === 0">
-              <td colspan="9" class="p-0">
-                <BaseEmptyState
-                  title="Data Pegawai Tidak Ditemukan"
-                  description="Tidak ada karyawan yang cocok dengan kriteria filter atau pencarian Anda."
-                  action-text="Reset Filter Pencarian"
-                  @action="handleResetDefault"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Table Footer: BasePagination -->
-      <div class="py-2.5 px-4 border-t border-neutral-200 dark:border-[var(--theme-border)] bg-neutral-50/70 dark:bg-[var(--theme-layer-2)] shrink-0">
-        <BasePagination
-          v-model:current-page="currentPage"
-          :total-items="processedList.length"
-          v-model:items-per-page="itemsPerPage"
-          :per-page-options="[10, 20, 30, 'all']"
-        />
-      </div>
-    </div>
-
-    <!-- ======================================================== -->
-    <!-- MOBILE CARD LIST COMPACT (< md)                          -->
-    <!-- ======================================================== -->
-    <div class="md:hidden flex-1 min-h-0 flex flex-col overflow-hidden">
-      <div class="flex-1 min-h-0 overflow-y-auto space-y-2.5 pr-0.5">
-        <!-- Empty State Mobile -->
-        <div v-if="processedList.length === 0" class="py-8">
-          <BaseEmptyState
-            title="Data Tidak Ditemukan"
-            description="Tidak ada hasil yang sesuai dengan kata kunci Anda."
-            action-text="Reset Filter"
-            @action="handleResetDefault"
-          />
+    <BaseDataTable
+      :columns="tableColumns"
+      :rows="paginatedList"
+      :total-items="processedList.length"
+      selectable
+      v-model:selected-ids="selectedIds"
+      v-model:sort-key="sortKey"
+      v-model:sort-order="sortOrder"
+      v-model:current-page="currentPage"
+      v-model:items-per-page="itemsPerPage"
+      :per-page-options="[10, 20, 30, 'all']"
+      selected-label="Pegawai Terpilih"
+      empty-title="Data Pegawai Tidak Ditemukan"
+      empty-description="Tidak ada karyawan yang cocok dengan kriteria filter atau pencarian Anda."
+      empty-action-text="Reset Filter Pencarian"
+      @empty-action="handleResetDefault"
+    >
+      <!-- Pegawai (Avatar + Nama + NIP) -->
+      <template #cell-nama="{ row }">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-[var(--theme-surface-muted)] border border-neutral-200/80 dark:border-[var(--theme-border-strong)] text-neutral-800 dark:text-neutral-200 font-bold text-xs flex items-center justify-center shrink-0">
+            {{ row.avatar }}
+          </div>
+          <div class="min-w-0">
+            <span class="font-semibold text-neutral-900 dark:text-white block leading-tight truncate">
+              {{ row.nama }}
+            </span>
+            <span class="text-[10.5px] font-mono text-neutral-400 block mt-0.5">
+              {{ row.nip }}
+            </span>
+          </div>
         </div>
+      </template>
 
+      <!-- Jabatan & Divisi -->
+      <template #cell-divisi="{ row }">
+        <span class="font-medium text-neutral-800 dark:text-neutral-200 block leading-tight">
+          {{ row.jabatan }}
+        </span>
+        <span class="text-[10.5px] text-neutral-400 block mt-0.5">
+          {{ row.divisi }}
+        </span>
+      </template>
+
+      <!-- Gaji Pokok & Tunjangan -->
+      <template #cell-gaji="{ row }">
+        <span class="font-bold text-neutral-900 dark:text-white font-mono block leading-tight">
+          {{ formatRupiah(row.gaji) }}
+        </span>
+        <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono block mt-0.5">
+          +{{ formatRupiah(row.tunjangan) }} tunj.
+        </span>
+      </template>
+
+      <!-- Status Kerja BaseBadge -->
+      <template #cell-status="{ row }">
+        <BaseBadge
+          :variant="getStatusBadgeVariant(row.status)"
+          :dot="row.status === 'Tetap' || row.status === 'Kontrak'"
+          :pulse="row.status === 'Tetap'"
+        >
+          {{ row.status }}
+        </BaseBadge>
+      </template>
+
+      <!-- Lokasi -->
+      <template #cell-lokasi="{ row }">
+        <div class="flex items-center gap-1.5">
+          <MapPin class="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+          <span>{{ row.lokasi }}</span>
+        </div>
+      </template>
+
+      <!-- BPJS Aktif BaseBadge -->
+      <template #cell-bpjsAktif="{ row }">
+        <BaseBadge :variant="row.bpjsAktif ? 'success' : 'neutral'" size="sm">
+          {{ row.bpjsAktif ? 'BPJS Aktif' : 'Non-BPJS' }}
+        </BaseBadge>
+      </template>
+
+      <!-- Aksi -->
+      <template #actions="{ row }">
+        <div class="flex items-center justify-end gap-1">
+          <button
+            type="button"
+            @click="openEditModal(row)"
+            class="p-1.5 rounded-lg text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:text-white dark:hover:bg-[var(--theme-surface-muted)] transition cursor-pointer"
+            title="Edit Pegawai"
+          >
+            <Pencil class="w-3.5 h-3.5" />
+          </button>
+          <BaseDropdownMenu :items="getRowActionItems(row)" align="right" />
+        </div>
+      </template>
+
+      <!-- Kartu Mobile -->
+      <template #mobile-card="{ row, isSelected, toggleSelect: onToggleSelect }">
         <div
-          v-for="item in paginatedList"
-          :key="item.id"
           class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-xs space-y-3"
-          :class="selectedIds.includes(item.id) ? 'ring-2 ring-[var(--theme-primary)]' : ''"
+          :class="isSelected ? 'ring-2 ring-[var(--theme-primary)]' : ''"
         >
           <!-- Top Row: Checkbox, Avatar, Nama, Status -->
           <div class="flex items-start justify-between gap-2">
             <div class="flex items-center gap-2.5">
-              <input
-                type="checkbox"
-                :checked="selectedIds.includes(item.id)"
-                @change="toggleSelect(item.id)"
-                class="rounded border-neutral-300 text-[var(--theme-primary)] focus:ring-[var(--theme-primary)] cursor-pointer mt-0.5"
+              <BaseCheckbox
+                :model-value="isSelected"
+                size="sm"
+                class="mt-0.5"
+                @change="onToggleSelect"
               />
               <div class="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-[var(--theme-surface-muted)] font-bold text-xs flex items-center justify-center shrink-0">
-                {{ item.avatar }}
+                {{ row.avatar }}
               </div>
               <div>
                 <h3 class="text-sm font-bold text-neutral-900 dark:text-white leading-tight">
-                  {{ item.nama }}
+                  {{ row.nama }}
                 </h3>
                 <div class="flex items-center gap-1.5 mt-0.5">
-                  <span class="text-[10.5px] font-mono text-neutral-400">{{ item.nip }}</span>
+                  <span class="text-[10.5px] font-mono text-neutral-400">{{ row.nip }}</span>
                   <span class="text-neutral-300">&bull;</span>
-                  <span class="text-[10.5px] text-neutral-500">{{ item.divisi }}</span>
+                  <span class="text-[10.5px] text-neutral-500">{{ row.divisi }}</span>
                 </div>
               </div>
             </div>
 
             <BaseBadge
-              :variant="getStatusBadgeVariant(item.status)"
-              :dot="item.status === 'Tetap' || item.status === 'Kontrak'"
-              :pulse="item.status === 'Tetap'"
+              :variant="getStatusBadgeVariant(row.status)"
+              :dot="row.status === 'Tetap' || row.status === 'Kontrak'"
+              :pulse="row.status === 'Tetap'"
               size="sm"
             >
-              {{ item.status }}
+              {{ row.status }}
             </BaseBadge>
           </div>
 
@@ -953,99 +865,56 @@ const getRowActionItems = (item) => [
             <div>
               <span class="text-[10px] text-neutral-400 block font-semibold uppercase">Gaji Pokok</span>
               <span class="font-bold font-mono text-neutral-900 dark:text-white">
-                {{ formatRupiah(item.gaji) }}
+                {{ formatRupiah(row.gaji) }}
               </span>
             </div>
             <div class="text-right">
               <span class="text-[10px] text-neutral-400 block font-semibold uppercase">Lokasi</span>
               <span class="text-neutral-700 dark:text-neutral-300 font-medium">
-                {{ item.lokasi }}
+                {{ row.lokasi }}
               </span>
             </div>
           </div>
 
           <!-- Bottom Action Buttons Mobile -->
           <div class="flex items-center justify-between pt-1">
-            <BaseBadge :variant="item.bpjsAktif ? 'success' : 'neutral'" size="sm">
-              {{ item.bpjsAktif ? 'BPJS Aktif' : 'Non-BPJS' }}
+            <BaseBadge :variant="row.bpjsAktif ? 'success' : 'neutral'" size="sm">
+              {{ row.bpjsAktif ? 'BPJS Aktif' : 'Non-BPJS' }}
             </BaseBadge>
 
             <div class="flex items-center gap-1.5">
               <button
                 type="button"
-                @click="openEditModal(item)"
-                class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 transition"
+                @click="openEditModal(row)"
+                class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 transition cursor-pointer"
               >
                 Edit
               </button>
               <button
                 type="button"
-                @click="openDeleteConfirm(item)"
-                class="p-1 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition"
+                @click="openDeleteConfirm(row)"
+                class="p-1 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition cursor-pointer"
               >
                 <Trash2 class="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
         </div>
-      </div>
+      </template>
 
-      <!-- Mobile Pagination -->
-      <div class="pt-2 border-t border-neutral-200 dark:border-[var(--theme-border)] shrink-0">
-        <BasePagination
-          v-model:current-page="currentPage"
-          :total-items="processedList.length"
-          v-model:items-per-page="itemsPerPage"
-          :per-page-options="[10, 20, 30, 'all']"
-        />
-      </div>
-    </div>
-
-    <!-- ======================================================== -->
-    <!-- FLOATING BATCH ACTION BAR (KETIKA CHECKBOX DIPILIH)     -->
-    <!-- ======================================================== -->
-    <Transition
-      enter-active-class="transition duration-200 ease-out"
-      enter-from-class="opacity-0 translate-y-6"
-      enter-to-class="opacity-100 translate-y-0"
-      leave-active-class="transition duration-150 ease-in"
-      leave-from-class="opacity-100 translate-y-0"
-      leave-to-class="opacity-0 translate-y-6"
-    >
-      <div
-        v-if="selectedIds.length > 0"
-        class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-[var(--theme-surface-raised)]/95 backdrop-blur-md border border-neutral-300 dark:border-[var(--theme-border-strong)] shadow-2xl rounded-2xl px-4 py-2.5 flex items-center gap-3 text-xs will-change-transform max-w-[calc(100vw-32px)]"
-      >
-        <div class="flex items-center gap-2 pr-2 border-r border-neutral-200 dark:border-[var(--theme-border)]">
-          <span class="w-5 h-5 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] flex items-center justify-center font-bold text-[11px]">
-            {{ selectedIds.length }}
-          </span>
-          <span class="font-semibold text-neutral-800 dark:text-neutral-200 hidden sm:inline">Pegawai Terpilih</span>
-        </div>
-
-        <!-- Ekspor Terpilih -->
+      <!-- Tombol Aksi Massal pada Floating Bulk Action Bar -->
+      <template #bulk-actions="{ selectedIds: ids }">
         <BaseButton variant="outline" size="sm" @click="exportSelected">
           <Download class="w-3.5 h-3.5" />
           <span>Ekspor CSV</span>
         </BaseButton>
 
-        <!-- Hapus Terpilih -->
         <BaseButton variant="danger" size="sm" @click="isBatchDeleteModalOpen = true">
           <Trash2 class="w-3.5 h-3.5" />
-          <span>Hapus ({{ selectedIds.length }})</span>
+          <span>Hapus ({{ ids.length }})</span>
         </BaseButton>
-
-        <!-- Batal Pilih -->
-        <button
-          type="button"
-          @click="selectedIds = []"
-          class="p-1 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition cursor-pointer"
-          title="Batal Pilih Semua"
-        >
-          <X class="w-4 h-4" />
-        </button>
-      </div>
-    </Transition>
+      </template>
+    </BaseDataTable>
 
     <!-- ======================================================== -->
     <!-- MODAL FORM CRUD: TAMBAH & EDIT PEGAWAI                   -->
@@ -1178,6 +1047,17 @@ const getRowActionItems = (item) => [
             :leading-icon="CreditCard"
           />
         </div>
+
+        <!-- Baris 5b: Fasilitas & Benefit Tambahan (BaseMultiSelect) -->
+        <BaseMultiSelect
+          v-model="formData.fasilitas"
+          :options="formFasilitasOptions"
+          label="Fasilitas & Benefit Pegawai"
+          placeholder="Pilih satu atau lebih fasilitas..."
+          search-placeholder="Cari fasilitas atau tunjangan..."
+          :max-chips="3"
+          hint="Pilih paket asuransi dan fasilitas kerja yang diterima pegawai."
+        />
 
         <!-- Baris 6: Catatan Karyawan (BaseTextarea) -->
         <BaseTextarea

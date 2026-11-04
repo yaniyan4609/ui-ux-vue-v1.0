@@ -9,6 +9,7 @@ import BaseBadge from '../components/ui/BaseBadge.vue'
 import BasePagination from '../components/ui/BasePagination.vue'
 import BaseDropdownMenu from '../components/ui/BaseDropdownMenu.vue'
 import BaseEmptyState from '../components/ui/BaseEmptyState.vue'
+import BaseDataTable from '../components/ui/BaseDataTable.vue'
 import { useToast } from '../composables/useToast'
 import { gunungJawaList } from '../data/gunungJawaData'
 import {
@@ -86,16 +87,19 @@ const sortOrder = ref('desc') // 'asc' | 'desc'
 const currentPage = ref(1)
 const itemsPerPage = ref(15) // 15 | 30 | 50 | 159 (semua)
 
-const handleSort = (key) => {
-  if (sortKey.value === key) {
-    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
-  } else {
-    sortKey.value = key
-    sortOrder.value = key === 'ketinggian' ? 'desc' : 'asc'
-  }
+const tableColumns = [
+  { key: 'nama', label: 'Nama Gunung', sortable: true, cellClass: 'font-semibold text-neutral-900 dark:text-white whitespace-nowrap' },
+  { key: 'ketinggian', label: 'Ketinggian', sortable: true, cellClass: 'whitespace-nowrap' },
+  { key: 'provinsi', label: 'Provinsi', sortable: true, cellClass: 'whitespace-nowrap text-neutral-700 dark:text-neutral-300' },
+  { key: 'wilayah', label: 'Wilayah / Lokasi', sortable: true, cellClass: 'text-neutral-600 dark:text-neutral-300 max-w-xs truncate' },
+  { key: 'basecamp', label: 'Start / Basecamp', sortable: true, cellClass: 'text-neutral-600 dark:text-neutral-300 max-w-xs truncate' },
+  { key: 'kategori', label: 'Kategori', sortable: true, cellClass: 'whitespace-nowrap' },
+]
+
+const onTableSort = ({ key, order }) => {
   currentPage.value = 1
   toast.info(
-    `Urut berdasarkan ${getColumnLabel(key)} (${sortOrder.value === 'asc' ? 'A-Z / Rendah-Tinggi' : 'Z-A / Tinggi-Rendah'})`,
+    `Urut berdasarkan ${getColumnLabel(key)} (${order === 'asc' ? 'A-Z / Rendah-Tinggi' : 'Z-A / Tinggi-Rendah'})`,
     'Sorting'
   )
 }
@@ -469,7 +473,7 @@ const handleResetDefault = () => {
     </div>
 
     <!-- Garis Pembatas (Sesuai Wireframe) -->
-    <div class="border-b border-neutral-200 dark:border-[var(--theme-border)] shrink-0" />
+    <!-- <div class="border-b border-neutral-200 dark:border-[var(--theme-border)] shrink-0" /> -->
 
     <!-- ======================================================== -->
     <!-- BARIS 2 (SESUAI WIREFRAME): 4 COMPACT ICON STAT PILLS   -->
@@ -522,217 +526,114 @@ const handleResetDefault = () => {
     </div>
 
     <!-- ======================================================== -->
-    <!-- DESKTOP TABLE VIEW: FIX LENGTH / SCROLL HANYA DI DALAM  -->
-    <!-- Tidak menyebabkan scroll di Layer 2                      -->
+    <!-- BASE DATA TABLE (DESKTOP + MOBILE)                       -->
     <!-- ======================================================== -->
-    <div class="hidden md:flex flex-1 min-h-0 flex-col rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs overflow-hidden">
-      <!-- Area Gulir Tabel Mandiri: flex-1 min-h-0 overflow-y-auto -->
-      <div class="flex-1 min-h-0 overflow-y-auto overflow-x-auto">
-        <table class="w-full text-left border-collapse text-xs">
-          <!-- STICKY THEAD -->
-          <thead class="sticky top-0 z-20 bg-neutral-100/95 dark:bg-[var(--theme-surface-raised)]/95 backdrop-blur-md border-b border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs">
-            <tr class="text-neutral-600 dark:text-neutral-400 font-semibold select-none text-[11px] uppercase tracking-wider">
-              <th class="py-2.5 px-3.5 text-center w-12">No</th>
+    <BaseDataTable
+      :columns="tableColumns"
+      :rows="paginatedList"
+      :total-items="processedList.length"
+      v-model:sort-key="sortKey"
+      v-model:sort-order="sortOrder"
+      v-model:current-page="currentPage"
+      v-model:items-per-page="itemsPerPage"
+      compact-mobile-pagination
+      :empty-icon="Mountain"
+      empty-title="Tidak ada data gunung yang cocok"
+      empty-description="Coba ubah kata kunci pencarian, kategori ketinggian, atau provinsi yang dipilih."
+      empty-action-text="Bersihkan Filter"
+      @sort="onTableSort"
+      @empty-action="searchQuery = ''; selectedCategory = 'all'; selectedProvinsi = 'all'"
+    >
+      <!-- Nama Gunung -->
+      <template #cell-nama="{ row }">
+        <div class="flex items-center gap-2">
+          <span
+            class="w-2 h-2 rounded-full shrink-0"
+            :class="row.ketinggian >= 3000 ? 'bg-purple-500' : row.ketinggian >= 2000 ? 'bg-amber-500' : 'bg-emerald-500'"
+          />
+          <span>{{ row.nama }}</span>
+        </div>
+      </template>
 
-              <!-- Sortable: Nama Gunung -->
-              <th class="py-2.5 px-3 cursor-pointer hover:text-neutral-900 dark:hover:text-white transition" @click="handleSort('nama')">
-                <div class="flex items-center gap-1.5">
-                  <span>Nama Gunung</span>
-                  <ArrowUp v-if="sortKey === 'nama' && sortOrder === 'asc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-                  <ArrowDown v-else-if="sortKey === 'nama' && sortOrder === 'desc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-                  <ArrowUpDown v-else class="w-3.5 h-3.5 opacity-40" />
-                </div>
-              </th>
+      <!-- Ketinggian -->
+      <template #cell-ketinggian="{ row }">
+        <span class="font-bold text-neutral-900 dark:text-neutral-100 font-mono bg-neutral-100 dark:bg-[var(--theme-surface-muted)] px-2 py-0.5 rounded-lg border border-neutral-200/80 dark:border-[var(--theme-border-strong)]">
+          {{ row.ketinggian.toLocaleString('id-ID') }} mdpl
+        </span>
+      </template>
 
-              <!-- Sortable: Ketinggian -->
-              <th class="py-2.5 px-3 cursor-pointer hover:text-neutral-900 dark:hover:text-white transition" @click="handleSort('ketinggian')">
-                <div class="flex items-center gap-1.5">
-                  <span>Ketinggian</span>
-                  <ArrowUp v-if="sortKey === 'ketinggian' && sortOrder === 'asc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-                  <ArrowDown v-else-if="sortKey === 'ketinggian' && sortOrder === 'desc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-                  <ArrowUpDown v-else class="w-3.5 h-3.5 opacity-40" />
-                </div>
-              </th>
+      <!-- Provinsi -->
+      <template #cell-provinsi="{ row }">
+        <span class="font-medium">{{ row.provinsi }}</span>
+      </template>
 
-              <!-- Sortable: Provinsi -->
-              <th class="py-2.5 px-3 cursor-pointer hover:text-neutral-900 dark:hover:text-white transition" @click="handleSort('provinsi')">
-                <div class="flex items-center gap-1.5">
-                  <span>Provinsi</span>
-                  <ArrowUp v-if="sortKey === 'provinsi' && sortOrder === 'asc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-                  <ArrowDown v-else-if="sortKey === 'provinsi' && sortOrder === 'desc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-                  <ArrowUpDown v-else class="w-3.5 h-3.5 opacity-40" />
-                </div>
-              </th>
+      <!-- Wilayah -->
+      <template #cell-wilayah="{ row }">
+        <div class="flex items-center gap-1.5 truncate" :title="row.wilayah">
+          <MapPin class="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+          <span class="truncate">{{ row.wilayah }}</span>
+        </div>
+      </template>
 
-              <!-- Sortable: Wilayah -->
-              <th class="py-2.5 px-3 cursor-pointer hover:text-neutral-900 dark:hover:text-white transition" @click="handleSort('wilayah')">
-                <div class="flex items-center gap-1.5">
-                  <span>Wilayah / Lokasi</span>
-                  <ArrowUp v-if="sortKey === 'wilayah' && sortOrder === 'asc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-                  <ArrowDown v-else-if="sortKey === 'wilayah' && sortOrder === 'desc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-                  <ArrowUpDown v-else class="w-3.5 h-3.5 opacity-40" />
-                </div>
-              </th>
+      <!-- Basecamp -->
+      <template #cell-basecamp="{ row }">
+        <div class="flex items-center gap-1.5 truncate" :title="row.basecamp">
+          <Compass class="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+          <span class="truncate">{{ row.basecamp }}</span>
+        </div>
+      </template>
 
-              <!-- Sortable: Basecamp -->
-              <th class="py-2.5 px-3 cursor-pointer hover:text-neutral-900 dark:hover:text-white transition" @click="handleSort('basecamp')">
-                <div class="flex items-center gap-1.5">
-                  <span>Start / Basecamp</span>
-                  <ArrowUp v-if="sortKey === 'basecamp' && sortOrder === 'asc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-                  <ArrowDown v-else-if="sortKey === 'basecamp' && sortOrder === 'desc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-                  <ArrowUpDown v-else class="w-3.5 h-3.5 opacity-40" />
-                </div>
-              </th>
+      <!-- Kategori -->
+      <template #cell-kategori="{ row }">
+        <BaseBadge :variant="getBadgeVariant(row.kategori)">
+          {{ row.kategori }}
+        </BaseBadge>
+      </template>
 
-              <!-- Sortable: Kategori -->
-              <th class="py-2.5 px-3 cursor-pointer hover:text-neutral-900 dark:hover:text-white transition" @click="handleSort('kategori')">
-                <div class="flex items-center gap-1.5">
-                  <span>Kategori</span>
-                  <ArrowUp v-if="sortKey === 'kategori' && sortOrder === 'asc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-                  <ArrowDown v-else-if="sortKey === 'kategori' && sortOrder === 'desc'" class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-                  <ArrowUpDown v-else class="w-3.5 h-3.5 opacity-40" />
-                </div>
-              </th>
+      <!-- Aksi: Edit & Dropdown Action Menu -->
+      <template #actions="{ row }">
+        <div class="flex items-center justify-end gap-1">
+          <button
+            type="button"
+            @click="openEditModal(row)"
+            class="p-1.5 rounded-lg text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:text-white dark:hover:bg-[var(--theme-surface-muted)] transition cursor-pointer"
+            title="Edit Gunung"
+          >
+            <Pencil class="w-3.5 h-3.5" />
+          </button>
+          <BaseDropdownMenu :items="getRowActionItems(row)" align="right" />
+        </div>
+      </template>
 
-              <th class="py-2.5 px-4 text-right w-24">Aksi</th>
-            </tr>
-          </thead>
-
-          <!-- TABLE BODY -->
-          <tbody class="divide-y divide-neutral-200/70 dark:divide-[var(--theme-border)]">
-            <tr
-              v-for="(item, idx) in paginatedList"
-              :key="item.id"
-              class="hover:bg-neutral-50/80 dark:hover:bg-[var(--theme-surface-raised)] transition-colors"
-            >
-              <!-- Nomor -->
-              <td class="py-2.5 px-3.5 text-center font-bold text-neutral-400 text-xs">
-                {{ (itemsPerPage === 'all' ? 0 : (currentPage - 1) * itemsPerPage) + idx + 1 }}
-              </td>
-
-              <!-- Nama Gunung -->
-              <td class="py-2.5 px-3 font-semibold text-neutral-900 dark:text-white whitespace-nowrap">
-                <div class="flex items-center gap-2">
-                  <span
-                    class="w-2 h-2 rounded-full shrink-0"
-                    :class="item.ketinggian >= 3000 ? 'bg-purple-500' : item.ketinggian >= 2000 ? 'bg-amber-500' : 'bg-emerald-500'"
-                  />
-                  <span>{{ item.nama }}</span>
-                </div>
-              </td>
-
-              <!-- Ketinggian -->
-              <td class="py-2.5 px-3 whitespace-nowrap">
-                <span class="font-bold text-neutral-900 dark:text-neutral-100 font-mono bg-neutral-100 dark:bg-[var(--theme-surface-muted)] px-2 py-0.5 rounded-lg border border-neutral-200/80 dark:border-[var(--theme-border-strong)]">
-                  {{ item.ketinggian.toLocaleString('id-ID') }} mdpl
-                </span>
-              </td>
-
-              <!-- Provinsi -->
-              <td class="py-2.5 px-3 whitespace-nowrap text-neutral-700 dark:text-neutral-300">
-                <span class="font-medium">{{ item.provinsi }}</span>
-              </td>
-
-              <!-- Wilayah -->
-              <td class="py-2.5 px-3 text-neutral-600 dark:text-neutral-300 max-w-xs truncate" :title="item.wilayah">
-                <div class="flex items-center gap-1.5 truncate">
-                  <MapPin class="w-3.5 h-3.5 text-neutral-400 shrink-0" />
-                  <span class="truncate">{{ item.wilayah }}</span>
-                </div>
-              </td>
-
-              <!-- Basecamp -->
-              <td class="py-2.5 px-3 text-neutral-600 dark:text-neutral-300 max-w-xs truncate" :title="item.basecamp">
-                <div class="flex items-center gap-1.5 truncate">
-                  <Compass class="w-3.5 h-3.5 text-neutral-400 shrink-0" />
-                  <span class="truncate">{{ item.basecamp }}</span>
-                </div>
-              </td>
-
-              <!-- Kategori -->
-              <td class="py-2.5 px-3 whitespace-nowrap">
-                <BaseBadge :variant="getBadgeVariant(item.kategori)">
-                  {{ item.kategori }}
-                </BaseBadge>
-              </td>
-
-              <!-- Aksi: Edit & Dropdown Action Menu -->
-              <td class="py-2.5 px-4 text-right whitespace-nowrap">
-                <div class="flex items-center justify-end gap-1">
-                  <button
-                    type="button"
-                    @click="openEditModal(item)"
-                    class="p-1.5 rounded-lg text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:text-white dark:hover:bg-[var(--theme-surface-muted)] transition cursor-pointer"
-                    title="Edit Gunung"
-                  >
-                    <Pencil class="w-3.5 h-3.5" />
-                  </button>
-                  <BaseDropdownMenu :items="getRowActionItems(item)" align="right" />
-                </div>
-              </td>
-            </tr>
-
-            <!-- Empty State in Table -->
-            <tr v-if="processedList.length === 0">
-              <td colspan="8" class="py-8 text-center">
-                <BaseEmptyState
-                  :icon="Mountain"
-                  title="Tidak ada data gunung yang cocok"
-                  description="Coba ubah kata kunci pencarian, kategori ketinggian, atau provinsi yang dipilih."
-                  actionText="Bersihkan Filter"
-                  @action="searchQuery = ''; selectedCategory = 'all'; selectedProvinsi = 'all'"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Table Footer: Pinned at bottom of card using BasePagination (shrink-0) -->
-      <div class="py-2.5 px-4 border-t border-neutral-200 dark:border-[var(--theme-border)] bg-neutral-50/70 dark:bg-[var(--theme-layer-2)] shrink-0">
-        <BasePagination
-          v-model:current-page="currentPage"
-          :total-items="processedList.length"
-          v-model:items-per-page="itemsPerPage"
-        />
-      </div>
-    </div>
-
-    <!-- ======================================================== -->
-    <!-- MOBILE CARD LIST COMPACT (LAYAR SMARTPHONE < md)         -->
-    <!-- Tetap fleksibel dan rapi                                 -->
-    <!-- ======================================================== -->
-    <div class="md:hidden flex-1 min-h-0 flex flex-col overflow-hidden">
-      <div class="flex-1 min-h-0 overflow-y-auto space-y-2.5 pr-0.5">
+      <!-- Kartu Mobile -->
+      <template #mobile-card="{ row, rowNumber }">
         <div
-          v-for="(item, idx) in paginatedList"
-          :key="item.id"
           class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-xs space-y-2.5"
         >
           <!-- Card Top Bar: No, Nama, & Ketinggian Badge -->
           <div class="flex items-start justify-between gap-2">
             <div class="flex items-center gap-2">
               <span class="w-6 h-6 rounded-lg bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300 font-bold text-xs flex items-center justify-center shrink-0">
-                #{{ (itemsPerPage === 'all' ? 0 : (currentPage - 1) * itemsPerPage) + idx + 1 }}
+                #{{ rowNumber }}
               </span>
               <div>
                 <h3 class="text-sm font-bold text-neutral-900 dark:text-white leading-tight">
-                  {{ item.nama }}
+                  {{ row.nama }}
                 </h3>
                 <div class="flex items-center gap-1.5 mt-0.5">
                   <span class="text-[10px] text-neutral-500 font-medium">
-                    {{ item.provinsi }}
+                    {{ row.provinsi }}
                   </span>
                   <span class="text-neutral-300">&bull;</span>
-                  <BaseBadge :variant="getBadgeVariant(item.kategori)" size="sm">
-                    {{ item.kategori }}
+                  <BaseBadge :variant="getBadgeVariant(row.kategori)" size="sm">
+                    {{ row.kategori }}
                   </BaseBadge>
                 </div>
               </div>
             </div>
 
             <span class="font-bold text-xs text-neutral-900 dark:text-neutral-100 font-mono bg-neutral-100 dark:bg-[var(--theme-surface-muted)] px-2 py-0.5 rounded-lg border border-neutral-200/80 dark:border-[var(--theme-border-strong)] shrink-0">
-              {{ item.ketinggian.toLocaleString('id-ID') }} mdpl
+              {{ row.ketinggian.toLocaleString('id-ID') }} mdpl
             </span>
           </div>
 
@@ -742,7 +643,7 @@ const handleResetDefault = () => {
               <MapPin class="w-3.5 h-3.5 text-neutral-400 shrink-0 mt-0.5" />
               <div class="min-w-0">
                 <span class="text-[9.5px] text-neutral-400 block uppercase">Wilayah</span>
-                <span class="leading-snug block truncate">{{ item.wilayah }}</span>
+                <span class="leading-snug block truncate">{{ row.wilayah }}</span>
               </div>
             </div>
 
@@ -750,7 +651,7 @@ const handleResetDefault = () => {
               <Compass class="w-3.5 h-3.5 text-neutral-400 shrink-0 mt-0.5" />
               <div class="min-w-0">
                 <span class="text-[9.5px] text-neutral-400 block uppercase">Basecamp</span>
-                <span class="leading-snug block truncate">{{ item.basecamp }}</span>
+                <span class="leading-snug block truncate">{{ row.basecamp }}</span>
               </div>
             </div>
           </div>
@@ -759,7 +660,7 @@ const handleResetDefault = () => {
           <div class="grid grid-cols-2 gap-2 pt-1 border-t border-neutral-100 dark:border-[var(--theme-border)]">
             <button
               type="button"
-              @click="openEditModal(item)"
+              @click="openEditModal(row)"
               class="w-full py-1.5 px-3 rounded-xl text-xs font-semibold border border-neutral-200 dark:border-[var(--theme-border)] bg-white hover:bg-neutral-50 dark:bg-[var(--theme-surface-raised)] dark:hover:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-200 transition flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <Pencil class="w-3.5 h-3.5" />
@@ -768,7 +669,7 @@ const handleResetDefault = () => {
 
             <button
               type="button"
-              @click="openDeleteConfirm(item)"
+              @click="openDeleteConfirm(row)"
               class="w-full py-1.5 px-3 rounded-xl text-xs font-semibold border border-rose-200/80 dark:border-rose-900/40 bg-rose-50/60 hover:bg-rose-100/80 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 transition flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <Trash2 class="w-3.5 h-3.5" />
@@ -776,30 +677,8 @@ const handleResetDefault = () => {
             </button>
           </div>
         </div>
-
-        <!-- Mobile Empty State -->
-        <div v-if="processedList.length === 0" class="p-4 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)]">
-          <BaseEmptyState
-            :icon="Mountain"
-            title="Tidak ada data gunung"
-            description="Tidak ditemukan data gunung yang sesuai filter pencarian."
-            actionText="Bersihkan Filter"
-            compact
-            @action="searchQuery = ''; selectedCategory = 'all'; selectedProvinsi = 'all'"
-          />
-        </div>
-      </div>
-
-      <!-- Mobile Pagination Controls using BasePagination (compact) -->
-      <div v-if="totalPages > 1 && itemsPerPage !== 'all'" class="pt-2 shrink-0">
-        <BasePagination
-          v-model:current-page="currentPage"
-          :total-items="processedList.length"
-          v-model:items-per-page="itemsPerPage"
-          compact
-        />
-      </div>
-    </div>
+      </template>
+    </BaseDataTable>
 
     <!-- ======================================================== -->
     <!-- MODAL FORM: TAMBAH & EDIT GUNUNG                         -->
