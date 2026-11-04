@@ -68,7 +68,7 @@ const commands = [
     category: 'Navigasi',
     icon: KanbanSquare,
     badge: 'Halaman',
-    action: () => router.push('/pesanan/kanban'),
+    action: () => router.push('/template/kanban'),
   },
   {
     id: 'nav-data-gunung',
@@ -76,7 +76,7 @@ const commands = [
     category: 'Navigasi',
     icon: Mountain,
     badge: 'Halaman',
-    action: () => router.push('/data/gunung'),
+    action: () => router.push('/template/data-1'),
   },
   {
     id: 'nav-data-karyawan',
@@ -84,7 +84,7 @@ const commands = [
     category: 'Navigasi',
     icon: Users,
     badge: 'Halaman',
-    action: () => router.push('/data/karyawan'),
+    action: () => router.push('/template/data-2'),
   },
   {
     id: 'nav-setting',
@@ -92,7 +92,7 @@ const commands = [
     category: 'Navigasi',
     icon: Settings,
     badge: 'Halaman',
-    action: () => router.push('/setting'),
+    action: () => router.push('/template/umum'),
   },
   {
     id: 'act-logout',
@@ -108,7 +108,7 @@ const commands = [
     category: 'Navigasi',
     icon: Palette,
     badge: 'Setting',
-    action: () => router.push('/setting/dasar-pertama'),
+    action: () => router.push('/template/dasar-pertama'),
   },
 
   // Aksi Cepat Sistem
@@ -175,7 +175,7 @@ const commands = [
     category: 'Data Pegawai',
     icon: Users,
     badge: 'EMP-2024-001',
-    action: () => router.push('/data/karyawan'),
+    action: () => router.push('/template/data-2'),
   },
   {
     id: 'data-pegawai-2',
@@ -183,7 +183,7 @@ const commands = [
     category: 'Data Pegawai',
     icon: Users,
     badge: 'EMP-2024-002',
-    action: () => router.push('/data/karyawan'),
+    action: () => router.push('/template/data-2'),
   },
   {
     id: 'data-gunung-semeru',
@@ -191,7 +191,7 @@ const commands = [
     category: 'Data Gunung',
     icon: Mountain,
     badge: 'Gunung',
-    action: () => router.push('/data/gunung'),
+    action: () => router.push('/template/data-1'),
   },
   {
     id: 'data-gunung-slameto',
@@ -199,7 +199,7 @@ const commands = [
     category: 'Data Gunung',
     icon: Mountain,
     badge: 'Gunung',
-    action: () => router.push('/data/gunung'),
+    action: () => router.push('/template/data-1'),
   },
   {
     id: 'act-read-docs',

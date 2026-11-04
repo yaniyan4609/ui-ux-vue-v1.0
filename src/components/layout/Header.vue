@@ -321,7 +321,7 @@ onUnmounted(() => {
             <!-- Footer View All -->
             <div class="p-2 border-t border-neutral-100 dark:border-[var(--theme-border)] bg-neutral-50/70 dark:bg-[var(--theme-surface)] text-center">
               <router-link
-                to="/setting/notifikasi"
+                to="/template/notifikasi"
                 @click="notificationOpen = false"
                 class="text-[11px] font-semibold text-[var(--theme-primary)] hover:underline block py-1"
               >
@@ -362,7 +362,7 @@ onUnmounted(() => {
               <p class="text-neutral-400 text-[11px] truncate">{{ currentUser.email }}</p>
             </div>
             <router-link
-              to="/setting"
+              to="/template/umum"
               class="flex items-center gap-2.5 px-4 py-2 hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-muted)] transition"
             >
               <Sliders class="w-3.5 h-3.5 text-neutral-400" />

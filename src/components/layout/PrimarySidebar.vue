@@ -108,7 +108,7 @@ const handlePinSubmenu = (item) => {
       </span>
     </div>
 
-    <!-- Menu Items: Beranda, Pesanan, Data, Setting -->
+    <!-- Menu Items: Beranda, Template -->
     <nav class="w-full flex flex-col items-center gap-2 px-1">
       <div
         v-for="item in items"

@@ -5,64 +5,75 @@ import DataView from '../views/DataView.vue'
 import DataKaryawanView from '../views/DataKaryawanView.vue'
 import SettingView from '../views/SettingView.vue'
 
+// meta.fixedHeight: halaman data/tabel mengunci tinggi sendiri (AppLayout memakai overflow-hidden)
 const routes = [
   {
     path: '/',
     name: 'Beranda',
     component: DashboardView,
   },
+
+  // ===== Menu Template =====
   {
-    path: '/pesanan',
-    redirect: '/pesanan/kanban',
+    path: '/template',
+    redirect: '/template/kanban',
   },
   {
-    path: '/pesanan/kanban',
-    name: 'PesananKanban',
+    path: '/template/kanban',
+    name: 'TemplateKanban',
     component: KanbanView,
   },
   {
-    path: '/data',
-    redirect: '/data/gunung',
-  },
-  {
-    path: '/data/gunung',
-    name: 'DataGunung',
+    path: '/template/data-1',
+    name: 'TemplateData1',
     component: DataView,
+    meta: { fixedHeight: true },
   },
   {
-    path: '/data/karyawan',
-    name: 'DataKaryawan',
+    path: '/template/data-2',
+    name: 'TemplateData2',
     component: DataKaryawanView,
+    meta: { fixedHeight: true },
   },
   {
-    path: '/setting',
-    redirect: '/setting/umum',
-  },
-  {
-    path: '/setting/umum',
-    name: 'SettingUmum',
+    path: '/template/umum',
+    name: 'TemplateUmum',
     component: SettingView,
   },
   {
-    path: '/setting/dasar-pertama',
-    name: 'SettingDasarPertama',
+    path: '/template/dasar-pertama',
+    name: 'TemplateDasarPertama',
     component: SettingView,
   },
   {
-    path: '/setting/modal',
-    name: 'SettingModal',
+    path: '/template/modal',
+    name: 'TemplateModal',
     component: SettingView,
   },
   {
-    path: '/setting/notifikasi',
-    name: 'SettingNotifikasi',
+    path: '/template/notifikasi',
+    name: 'TemplateNotifikasi',
     component: SettingView,
   },
   {
-    path: '/setting/keamanan',
-    name: 'SettingKeamanan',
+    path: '/template/keamanan',
+    name: 'TemplateKeamanan',
     component: SettingView,
   },
+
+  // ===== Rute lama (dialihkan ke menu Template) =====
+  { path: '/pesanan', redirect: '/template/kanban' },
+  { path: '/pesanan/kanban', redirect: '/template/kanban' },
+  { path: '/data', redirect: '/template/data-1' },
+  { path: '/data/gunung', redirect: '/template/data-1' },
+  { path: '/data/karyawan', redirect: '/template/data-2' },
+  { path: '/setting', redirect: '/template/umum' },
+  { path: '/setting/umum', redirect: '/template/umum' },
+  { path: '/setting/dasar-pertama', redirect: '/template/dasar-pertama' },
+  { path: '/setting/modal', redirect: '/template/modal' },
+  { path: '/setting/notifikasi', redirect: '/template/notifikasi' },
+  { path: '/setting/keamanan', redirect: '/template/keamanan' },
+
   {
     path: '/login',
     redirect: '/',

@@ -387,7 +387,7 @@ onUnmounted(() => {
         <BaseButton
           variant="primary"
           size="sm"
-          @click="router.push('/data/karyawan')"
+          @click="router.push('/template/data-2')"
         >
           <Users class="w-3.5 h-3.5" />
           <span>Data Karyawan</span>
@@ -1375,7 +1375,7 @@ onUnmounted(() => {
           </div>
           <button
             type="button"
-            @click="router.push('/data/karyawan')"
+            @click="router.push('/template/data-2')"
             class="text-xs font-semibold text-[var(--theme-primary)] hover:underline flex items-center gap-0.5 cursor-pointer"
           >
             <span>Buka Data Lengkap</span>

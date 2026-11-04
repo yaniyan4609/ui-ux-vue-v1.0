@@ -8,3 +8,4 @@ export const formatRupiah = (val) => {
     maximumFractionDigits: 0,
   }).format(val || 0)
 }
+

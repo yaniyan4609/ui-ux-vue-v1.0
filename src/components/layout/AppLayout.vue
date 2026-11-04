@@ -114,14 +114,8 @@ const collapseToLogin = () => {
 }
 
 const activeMenuId = computed(() => {
-  if (route.path.startsWith('/pesanan')) {
-    return 'pesanan'
-  }
-  if (route.path.startsWith('/data')) {
-    return 'data'
-  }
-  if (route.path.startsWith('/setting')) {
-    return 'setting'
+  if (route.path.startsWith('/template')) {
+    return 'template'
   }
   return 'beranda'
 })
@@ -423,7 +417,7 @@ const baseLayerStyle = computed(() => {
           class="flex-1 min-h-0 flex overflow-hidden w-full relative transition-opacity duration-300"
           :class="authStage === 'authenticated' ? 'opacity-100' : 'opacity-0'"
         >
-          <!-- Kolom MENU (Primary Rail: Beranda & Setting) -->
+          <!-- Kolom MENU (Primary Rail: Beranda & Template) -->
           <PrimarySidebar
             :items="menuItems"
             :active-id="activeMenuId"
@@ -432,7 +426,7 @@ const baseLayerStyle = computed(() => {
             class="hidden lg:flex"
           />
 
-          <!-- Kolom SUBMENU (Muncul bila menu memiliki sub-items, e.g. Setting) -->
+          <!-- Kolom SUBMENU (Muncul bila menu memiliki sub-items, e.g. Template) -->
           <SubmenuSidebar
             v-if="currentMenuItem.submenus && currentMenuItem.submenus.length > 0"
             :submenus="currentMenuItem.submenus"
@@ -457,7 +451,7 @@ const baseLayerStyle = computed(() => {
           <!-- Area Content (Main Class Content Area - var(--theme-layer-main); Default dark: #0c0c0e) -->
           <main
             class="flex-1 min-h-0 flex flex-col p-3.5 sm:p-5 lg:p-6 bg-neutral-50/60 dark:bg-[var(--theme-layer-main)] text-neutral-800 dark:text-[var(--theme-text-primary)]"
-            :class="activeMenuId === 'data' ? 'overflow-hidden' : 'overflow-y-auto'"
+            :class="route.meta.fixedHeight ? 'overflow-hidden' : 'overflow-y-auto'"
           >
             <slot />
           </main>
