@@ -806,6 +806,302 @@ const itemsPerPage = ref(10)
 
 ---
 
+### 4.27 `BaseFormField.vue` (Pembungkus Label, Tanda Wajib, Error & Hint)
+Pembungkus terpadu untuk elemen form input atau select kustom yang tidak memiliki label bawaan:
+- **Tanda Wajib Otomatis**: Menampilkan tanda bintang merah `*` saat `required` bernilai `true`.
+- **Ikon Bantuan & Tooltip**: Menampilkan ikon tanda tanya dengan `BaseTooltip` via prop `helpText`.
+- **Slot Aksi Label**: Slot `#label-extra` di sebelah kanan atas untuk tombol aksi mini atau tautan "Lupa password".
+
+```vue
+<template>
+  <BaseFormField label="Divisi Kerja" required help-text="Pilih divisi sesuai struktur SK penempatan.">
+    <BaseSearchableSelect v-model="divisi" :options="divisiOptions" size="md" />
+  </BaseFormField>
+</template>
+```
+
+---
+
+### 4.28 `BaseRadio.vue` (Radio Button Kustom & Mode Grup)
+Radio button kustom bertema dengan titik aksen tema (`var(--theme-primary)`):
+- **Mode Tunggal**: `<BaseRadio v-model="pilihan" value="a" label="Opsi A" />`
+- **Mode Grup**: `<BaseRadio v-model="pilihan" :options="[...]" direction="horizontal" />`
+
+```vue
+<template>
+  <BaseRadio
+    v-model="skemaGaji"
+    direction="horizontal"
+    :options="[
+      { value: 'bulanan', label: 'Bulanan (Cut-off Tgl 25)' },
+      { value: 'mingguan', label: 'Mingguan (Setiap Jumat)' },
+    ]"
+  />
+</template>
+```
+
+---
+
+### 4.29 `BaseTabs.vue` (Navigasi Tab Underline, Pills, & Cards)
+Komponen tab navigasi dengan 3 varian desain:
+- **`underline`**: Garis bawah dengan border aksen tema (`var(--theme-primary)`) untuk konten halaman panjang.
+- **`pills`**: Kapsul melayang lembut dengan latar belakang rounded.
+- **`cards`**: Tombol kartu mandiri.
+- **Dukungan Slot Dinamis**: Slot `#panel-{value}` otomatis merender konten tab aktif.
+
+```vue
+<template>
+  <BaseTabs
+    v-model="activeTab"
+    variant="underline"
+    :tabs="[
+      { value: 'profil', label: 'Data Pribadi', icon: User },
+      { value: 'payroll', label: 'Rincian Gaji', badge: 'Aktif' },
+    ]"
+  >
+    <template #panel-profil>
+      <p>Konten data pribadi pegawai...</p>
+    </template>
+    <template #panel-payroll>
+      <p>Konten rincian payroll pegawai...</p>
+    </template>
+  </BaseTabs>
+</template>
+```
+
+---
+
+### 4.30 `BasePopover.vue` & `BaseTooltip.vue` (Floating Card & Tooltip)
+Elemen melayang untuk bantuan dan panel popover interaktif:
+- **`BaseTooltip`**: Tooltip teks instan dengan penundaan debouncing halus saat hover/fokus keyboard.
+- **`BasePopover`**: Kartu popup bebas (misal ringkasan notifikasi pada lonceng atau menu profil) dengan slot header, default, dan footer.
+
+```vue
+<template>
+  <!-- BaseTooltip -->
+  <BaseTooltip text="Toleransi keterlambatan dalam menit">
+    <Info class="w-4 h-4 text-neutral-400" />
+  </BaseTooltip>
+
+  <!-- BasePopover -->
+  <BasePopover placement="bottom-end" width-class="w-72">
+    <template #trigger="{ toggle }">
+      <BaseButton size="sm" variant="outline" @click="toggle">Buka Panel</BaseButton>
+    </template>
+    <template #default="{ close }">
+      <p class="text-xs">Isi konten popover...</p>
+    </template>
+  </BasePopover>
+</template>
+```
+
+---
+
+### 4.31 `BaseAlert.vue` (Banner Inline & Notifikasi Sistem)
+Peringatan pesan kontekstual inline dan banner sistem full-width:
+- **Varian**: `info`, `success`, `warning`, `danger`, `neutral`.
+- **Mode Banner**: `banner: true` untuk peringatan penting di strip atas (mis. "Koneksi offline" atau "Tenant ditangguhkan").
+- **Aksi & Dismiss**: Tombol aksi opsional (`actionText`) dan tombol tutup (`dismissible`).
+
+```vue
+<template>
+  <BaseAlert
+    variant="warning"
+    banner
+    title="Pemberitahuan Sistem"
+    description="Pemeliharaan server payroll akan dilakukan malam ini."
+    action-text="Lihat Jadwal"
+    dismissible
+  />
+</template>
+```
+
+---
+
+### 4.32 `BaseAvatar.vue` (Foto Profil & Inisial Otomatis)
+Avatar pengguna dengan fallback inisial otomatis 2 huruf jika gambar tidak tersedia atau gagal dimuat:
+- **Ukuran**: `xs` (24px), `sm` (32px), `md` (36px), `lg` (44px), `xl` (56px).
+- **Titik Status**: `online` (emerald), `busy` (rose), `away` (amber), `offline` (neutral).
+
+```vue
+<template>
+  <BaseAvatar name="Rizky Pratama" size="lg" status="online" tone="primary" />
+</template>
+```
+
+---
+
+### 4.33 `BaseNumberInput.vue` & `BaseTimePicker.vue`
+Input angka non-uang dan pemilih jam:
+- **`BaseNumberInput`**: Stepper tombol `−` dan `+` untuk angka bilangan bulat/desimal (misal menit toleransi atau kuota hari).
+- **`BaseTimePicker`**: Pemilih jam (`HH:mm`) dan rentang shift kerja (`range: true`) dengan preset tombol cepat.
+
+```vue
+<template>
+  <BaseNumberInput v-model="toleransiMenit" label="Toleransi Terlambat" suffix="menit" :min="0" :max="60" />
+  <BaseTimePicker v-model="jamShift" range label="Jam Kerja Shift" />
+</template>
+```
+
+---
+
+### 4.34 `BaseStatCard.vue` (Kartu KPI Dashboard)
+Kartu metrik KPI ringkas dengan animasi angka otomatis `BaseCountUp`, ikon aksen tema, indikator tren kenaikan/penurunan, serta skeleton shimmer loading bawaan.
+
+```vue
+<template>
+  <BaseStatCard
+    title="Total Realisasi Gaji"
+    :value="284500000"
+    prefix="Rp "
+    :icon="Wallet"
+    tone="emerald"
+    trend="+14.2%"
+    trend-direction="up"
+    trend-label="dari bulan lalu"
+    :loading="isLoading"
+  />
+</template>
+```
+
+---
+
+### 4.35 `BasePasswordInput.vue` & `BaseMaskedInput.vue`
+Input kata sandi dan format tanda baca angka:
+- **`BasePasswordInput`**: Tombol tampil/sembunyikan mata + meteran 4 tingkat kekuatan kata sandi dan checklist kriteria keamanan (`showStrength: true`).
+- **`BaseMaskedInput`**: Preset pola NIK 16 digit, NPWP 15 digit, rekening bank, dan nomor telepon. Digit murni disimpan ke `v-model` secara otomatis.
+
+```vue
+<template>
+  <BasePasswordInput v-model="passwordBaru" label="Kata Sandi" show-strength />
+  <BaseMaskedInput v-model="nik" preset="nik" label="Nomor Induk Kependudukan (NIK)" />
+</template>
+```
+
+---
+
+### 4.36 `BaseTree.vue` & `BaseTreeSelect.vue` (Hierarki Struktur Organisasi)
+Pohon data hierarkis (Divisi $ightarrow$ Departemen $ightarrow$ Jabatan):
+- **Cascade Checkbox**: Mencentang induk otomatis mencentang semua anak, serta mendukung status `indeterminate`.
+- **`BaseTreeSelect`**: Dropdown pencarian yang menampilkan hierarki pohon di dalam floating popover.
+
+```vue
+<template>
+  <BaseTreeSelect
+    v-model="selectedUnits"
+    :nodes="organizationNodes"
+    multiple
+    cascade
+    label="Pilih Divisi & Departemen"
+  />
+</template>
+```
+
+---
+
+### 4.37 `BaseStepper.vue` & `BaseProgress.vue`
+Indikator langkah persetujuan dan bilah progres:
+- **`BaseStepper`**: Alur persetujuan bertingkat horizontal (`completed`, `current`, `upcoming`, `rejected`) dengan info approver dan timestamp.
+- **`BaseProgress`**: Bilah progres dengan persentase/fraksi, varian warna tema, mode bergaris (*striped*), dan mode animasi loading (*indeterminate*).
+
+```vue
+<template>
+  <BaseStepper
+    :steps="[
+      { id: 1, title: 'Input HR', approver: 'Sari Rahayu', status: 'completed' },
+      { id: 2, title: 'Verifikasi Finansial', approver: 'Budi Santoso', status: 'current' },
+      { id: 3, title: 'Disetujui Direksi', approver: 'Direktur Utama', status: 'upcoming' },
+    ]"
+    :current-step="1"
+  />
+  <BaseProgress :value="75" :max="100" label="Kapasitas Karyawan" variant="primary" striped />
+</template>
+```
+
+---
+
+### 4.38 `BaseAccordion.vue` & `BaseBreadcrumb.vue`
+- **`BaseAccordion`**: Panel lipat multi-item atau single-open untuk FAQ, ketentuan regulasi, atau rincian panjang.
+- **`BaseBreadcrumb`**: Jejak navigasi bertingkat dengan tombol beranda dan ikon pemisah panah.
+
+```vue
+<template>
+  <BaseBreadcrumb :items="[{ label: 'Karyawan', to: '/template/data-2' }, { label: 'Detail Pegawai', active: true }]" />
+  <BaseAccordion :items="faqItems" default-open="faq-1" />
+</template>
+```
+
+---
+
+### 4.39 `BaseSelectableCard.vue` & `BaseDescriptionList.vue`
+- **`BaseSelectableCard`**: Kartu pilihan klik untuk paket layanan, kanal transfer gaji, atau preferensi sistem.
+- **`BaseDescriptionList`**: Pasangan label-nilai dalam format kartu grid atau daftar terbagi yang rapi di dalam Slide-Over detail pegawai.
+
+```vue
+<template>
+  <BaseSelectableCard v-model="paketDipilih" value="pro" title="Paket Enterprise" badge="Rekomendasi" />
+  <BaseDescriptionList :columns="2" :items="employeeDetails" />
+</template>
+```
+
+---
+
+### 4.40 `BaseCalendar.vue` (Kalender Bulan Agenda & Cuti)
+Kalender bulan 7 kolom (Senin – Minggu) mandiri:
+- **Hari Libur**: Penanda teks merah dan label hari libur nasional otomatis.
+- **Pills Acara**: Chip kegiatan berwarna varian (`primary`, `success`, `warning`, `danger`, `purple`) dengan tooltip judul.
+- **Navigasi Lengkap**: Tombol bulan sebelumnya, berikutnya, dan tombol cepat "Hari Ini".
+
+```vue
+<template>
+  <BaseCalendar
+    v-model="tanggalDipilih"
+    :holidays="[{ date: '2025-01-01', label: 'Tahun Baru' }]"
+    :events="[{ id: 'ev1', date: '2025-01-25', title: 'Cut-off Payroll', variant: 'danger' }]"
+  />
+</template>
+```
+
+---
+
+### 4.41 `BaseCameraCapture.vue` (Foto Selfie Presensi WebRTC)
+Komponen penangkap foto selfie langsung dengan browser WebRTC (`getUserMedia`):
+- **Panduan Garis Wajah**: Bingkai oval SVG di tengah frame untuk memposisikan wajah.
+- **Ganti Kamera & Mirror**: Mendukung kamera depan (*user*, mirrored) dan belakang (*environment*).
+- **Watermark Canvas**: Menempelkan tanggal, waktu, lokasi, dan teks dinamis otomatis di atas file foto hasil tangkapan.
+- **Peringatan Izin Ditolak**: Otomatis memunculkan `BaseAlert` varian `danger` jika akses kamera tidak diizinkan.
+
+```vue
+<template>
+  <BaseCameraCapture
+    v-model="fotoSelfie"
+    watermark-text="Kantor Pusat Jakarta • GPS Valid"
+    @capture="onPhotoCaptured"
+  />
+</template>
+```
+
+---
+
+### 4.42 `BaseMapPolygonEditor.vue` (Editor Geofence Multi-Poligon Tanpa Library Eksternal)
+Kanvas peta interaktif berbasis SVG + tile OpenStreetMap ringan dengan proyeksi Web Mercator:
+- **Multi-Poligon**: Menggambar beberapa area geofence sekaligus.
+- **Interaksi Geser Titik**: Klik untuk menambah titik sudut, drag (*geser*) titik untuk mengubah bentuk radius.
+- **Kalkulasi Luas & Uji Lokasi**: Menghitung estimasi luas area dalam meter persegi ($	ext{m}^2$) dan uji apakah suatu koordinat presensi berada di dalam poligon (*point-in-polygon ray casting*).
+- **Zero External Library**: Berjalan 100% tanpa library peta tambahan di `package.json`.
+
+```vue
+<template>
+  <BaseMapPolygonEditor
+    v-model="geofenceArea"
+    :center="{ lat: -6.2088, lng: 106.8456 }"
+    :zoom="16"
+  />
+</template>
+```
+
+---
+
 ## 5. Standar Desain Dashboard & Visualisasi SVG (Zero Library)
 
 Dashboard operasional di [`DashboardView.vue`](./src/views/template/DashboardView.vue) dibangun menggunakan pure SVG interaktif berkinerja tinggi tanpa library chart eksternal:

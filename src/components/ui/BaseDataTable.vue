@@ -1,10 +1,11 @@
 <script setup>
 import { computed, useSlots } from 'vue'
-import { ArrowUp, ArrowDown, ArrowUpDown, X } from 'lucide-vue-next'
+import { ArrowUp, ArrowDown, ArrowUpDown, X, AlertTriangle, RefreshCw } from 'lucide-vue-next'
 import BaseCheckbox from './BaseCheckbox.vue'
 import BasePagination from './BasePagination.vue'
 import BaseEmptyState from './BaseEmptyState.vue'
 import BaseSkeleton from './BaseSkeleton.vue'
+import BaseButton from './BaseButton.vue'
 
 const props = defineProps({
   columns: {
@@ -60,9 +61,21 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  serverSide: {
+    type: Boolean,
+    default: false,
+  },
   loading: {
     type: Boolean,
     default: false,
+  },
+  error: {
+    type: String,
+    default: '',
+  },
+  errorTitle: {
+    type: String,
+    default: 'Gagal Memuat Data',
   },
   emptyTitle: {
     type: String,
@@ -97,6 +110,8 @@ const emit = defineEmits([
   'update:currentPage',
   'update:itemsPerPage',
   'sort',
+  'change',
+  'retry',
   'row-click',
   'empty-action',
 ])
@@ -175,6 +190,32 @@ const handleSort = (col) => {
   emit('update:sortKey', col.key)
   emit('update:sortOrder', nextOrder)
   emit('sort', { key: col.key, order: nextOrder })
+  emit('change', {
+    page: props.currentPage,
+    itemsPerPage: props.itemsPerPage,
+    sortKey: col.key,
+    sortOrder: nextOrder,
+  })
+}
+
+const handlePageUpdate = (page) => {
+  emit('update:currentPage', page)
+  emit('change', {
+    page,
+    itemsPerPage: props.itemsPerPage,
+    sortKey: props.sortKey,
+    sortOrder: props.sortOrder,
+  })
+}
+
+const handleItemsPerPageUpdate = (perPage) => {
+  emit('update:itemsPerPage', perPage)
+  emit('change', {
+    page: 1,
+    itemsPerPage: perPage,
+    sortKey: props.sortKey,
+    sortOrder: props.sortOrder,
+  })
 }
 
 const alignClass = (align) => {
@@ -265,6 +306,22 @@ const alignClass = (align) => {
             </tr>
           </template>
 
+          <!-- Error State -->
+          <tr v-else-if="error">
+            <td :colspan="totalColumnsCount" class="py-12 px-6">
+              <div class="flex flex-col items-center justify-center text-center max-w-sm mx-auto">
+                <div class="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/50 flex items-center justify-center mb-3 text-rose-600 dark:text-rose-400">
+                  <AlertTriangle class="w-5 h-5" />
+                </div>
+                <p class="text-sm font-bold text-neutral-900 dark:text-white">{{ errorTitle }}</p>
+                <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1 mb-4">{{ error }}</p>
+                <BaseButton size="sm" variant="secondary" @click="emit('retry')">
+                  <RefreshCw class="w-3.5 h-3.5" /> Coba Lagi
+                </BaseButton>
+              </div>
+            </td>
+          </tr>
+
           <!-- Data Rows -->
           <template v-else-if="rows.length > 0">
             <tr
@@ -345,8 +402,8 @@ const alignClass = (align) => {
         :total-items="computedTotalItems"
         :items-per-page="itemsPerPage"
         :per-page-options="perPageOptions"
-        @update:current-page="emit('update:currentPage', $event)"
-        @update:items-per-page="emit('update:itemsPerPage', $event)"
+        @update:current-page="handlePageUpdate"
+        @update:items-per-page="handleItemsPerPageUpdate"
       />
     </div>
   </div>
@@ -360,6 +417,19 @@ const alignClass = (align) => {
       <template v-if="loading">
         <BaseSkeleton v-for="n in 3" :key="`mskel-${n}`" variant="card" />
       </template>
+
+      <!-- Error State Mobile -->
+      <div
+        v-else-if="error"
+        class="p-5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-rose-200 dark:border-rose-900/50 text-center"
+      >
+        <AlertTriangle class="w-6 h-6 text-rose-500 mx-auto mb-2" />
+        <p class="text-xs font-bold text-neutral-900 dark:text-white">{{ errorTitle }}</p>
+        <p class="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1 mb-3">{{ error }}</p>
+        <BaseButton size="sm" variant="secondary" @click="emit('retry')">
+          <RefreshCw class="w-3.5 h-3.5" /> Coba Lagi
+        </BaseButton>
+      </div>
 
       <!-- Empty State Mobile -->
       <div
@@ -449,8 +519,8 @@ const alignClass = (align) => {
         :items-per-page="itemsPerPage"
         :per-page-options="perPageOptions"
         :compact="compactMobilePagination"
-        @update:current-page="emit('update:currentPage', $event)"
-        @update:items-per-page="emit('update:itemsPerPage', $event)"
+        @update:current-page="handlePageUpdate"
+        @update:items-per-page="handleItemsPerPageUpdate"
       />
     </div>
   </div>
@@ -498,4 +568,3 @@ const alignClass = (align) => {
     </div>
   </Transition>
 </template>
-

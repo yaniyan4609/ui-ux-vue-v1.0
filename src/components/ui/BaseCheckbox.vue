@@ -11,6 +11,15 @@ const props = defineProps({
     type: [String, Number, Object, Boolean],
     default: null,
   },
+  options: {
+    type: Array,
+    default: null,
+    // Optional group mode: [{ value, label, description?, disabled? }]
+  },
+  direction: {
+    type: String,
+    default: 'vertical', // 'vertical' | 'horizontal'
+  },
   indeterminate: {
     type: Boolean,
     default: false,
@@ -35,12 +44,38 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'change'])
 
+const isGroupMode = computed(() => Array.isArray(props.options) && props.options.length > 0)
+
+const normalizedGroupOptions = computed(() => {
+  if (!isGroupMode.value) return []
+  return props.options.map((opt) => {
+    if (typeof opt === 'object' && opt !== null) {
+      return {
+        label: opt.label ?? String(opt.value ?? ''),
+        value: opt.value ?? opt.label,
+        description: opt.description ?? '',
+        disabled: Boolean(opt.disabled) || props.disabled,
+      }
+    }
+    return {
+      label: String(opt),
+      value: opt,
+      description: '',
+      disabled: props.disabled,
+    }
+  })
+})
+
 const isChecked = computed(() => {
   if (Array.isArray(props.modelValue)) {
     return props.modelValue.includes(props.value)
   }
   return Boolean(props.modelValue)
 })
+
+const isOptionChecked = (val) => {
+  return Array.isArray(props.modelValue) && props.modelValue.includes(val)
+}
 
 const toggle = () => {
   if (props.disabled) return
@@ -60,6 +95,19 @@ const toggle = () => {
     emit('update:modelValue', next)
     emit('change', next)
   }
+}
+
+const toggleGroupOption = (opt) => {
+  if (opt.disabled) return
+  const current = Array.isArray(props.modelValue) ? [...props.modelValue] : []
+  const idx = current.indexOf(opt.value)
+  if (idx !== -1) {
+    current.splice(idx, 1)
+  } else {
+    current.push(opt.value)
+  }
+  emit('update:modelValue', current)
+  emit('change', current)
 }
 
 const boxSizeClasses = computed(() => {
@@ -82,7 +130,59 @@ const iconSizeClasses = computed(() => {
 </script>
 
 <template>
+  <!-- Group Mode -->
+  <div
+    v-if="isGroupMode"
+    role="group"
+    class="flex"
+    :class="direction === 'horizontal' ? 'flex-row flex-wrap items-center gap-4' : 'flex-col gap-2.5'"
+  >
+    <label
+      v-for="opt in normalizedGroupOptions"
+      :key="String(opt.value)"
+      class="inline-flex items-start gap-2.5 select-none group"
+      :class="opt.disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'"
+      @click.prevent="toggleGroupOption(opt)"
+    >
+      <button
+        type="button"
+        role="checkbox"
+        :aria-checked="isOptionChecked(opt.value)"
+        :disabled="opt.disabled"
+        @keydown.space.prevent.stop="toggleGroupOption(opt)"
+        @keydown.enter.prevent.stop="toggleGroupOption(opt)"
+        class="relative shrink-0 inline-flex items-center justify-center border transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-primary)] focus-visible:ring-offset-1 dark:focus-visible:ring-offset-[var(--theme-surface)] shadow-2xs mt-0.5"
+        :class="[
+          boxSizeClasses,
+          isOptionChecked(opt.value)
+            ? 'bg-[var(--theme-primary)] border-[var(--theme-primary)] text-[var(--theme-primary-text)]'
+            : 'bg-white dark:bg-[var(--theme-surface-raised)] border-neutral-300 dark:border-[var(--theme-border-strong)] group-hover:border-neutral-400 dark:group-hover:border-neutral-500',
+          opt.disabled ? 'cursor-not-allowed' : 'cursor-pointer active:scale-95',
+        ]"
+      >
+        <Check
+          v-if="isOptionChecked(opt.value)"
+          :class="iconSizeClasses"
+          class="transition-transform duration-150 scale-100"
+        />
+      </button>
+      <div class="min-w-0 flex-1 leading-snug">
+        <span class="block text-xs font-semibold text-neutral-800 dark:text-neutral-200 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">
+          {{ opt.label }}
+        </span>
+        <span
+          v-if="opt.description"
+          class="block text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5"
+        >
+          {{ opt.description }}
+        </span>
+      </div>
+    </label>
+  </div>
+
+  <!-- Single Checkbox Mode -->
   <label
+    v-else
     class="inline-flex items-start gap-2.5 select-none group"
     :class="disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'"
     @click.prevent="toggle"
@@ -134,4 +234,3 @@ const iconSizeClasses = computed(() => {
     </div>
   </label>
 </template>
-

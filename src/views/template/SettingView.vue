@@ -19,6 +19,22 @@ import BaseTimeline from '../../components/ui/BaseTimeline.vue'
 import BaseSlideOver from '../../components/ui/BaseSlideOver.vue'
 import BaseInvoiceModal from '../../components/ui/BaseInvoiceModal.vue'
 import BaseCsvImporter from '../../components/ui/BaseCsvImporter.vue'
+import BasePasswordInput from '../../components/ui/BasePasswordInput.vue'
+import BaseAlert from '../../components/ui/BaseAlert.vue'
+import BaseTabs from '../../components/ui/BaseTabs.vue'
+import BaseNumberInput from '../../components/ui/BaseNumberInput.vue'
+import BaseTimePicker from '../../components/ui/BaseTimePicker.vue'
+import BaseMaskedInput from '../../components/ui/BaseMaskedInput.vue'
+import BaseRadio from '../../components/ui/BaseRadio.vue'
+import BaseCheckbox from '../../components/ui/BaseCheckbox.vue'
+import BaseTreeSelect from '../../components/ui/BaseTreeSelect.vue'
+import BaseAccordion from '../../components/ui/BaseAccordion.vue'
+import BaseBreadcrumb from '../../components/ui/BaseBreadcrumb.vue'
+import BaseSelectableCard from '../../components/ui/BaseSelectableCard.vue'
+import BaseProgress from '../../components/ui/BaseProgress.vue'
+import BaseCalendar from '../../components/ui/BaseCalendar.vue'
+import BaseCameraCapture from '../../components/ui/BaseCameraCapture.vue'
+import BaseMapPolygonEditor from '../../components/ui/BaseMapPolygonEditor.vue'
 import { useToast } from '../../composables/useToast'
 import { useBackground } from '../../composables/useBackground'
 import { useThemeColor } from '../../composables/useThemeColor'
@@ -148,6 +164,50 @@ const demoUploadedFiles = ref([])
 const demoSlideOverOpen = ref(false)
 const demoInvoiceOpen = ref(false)
 const demoCsvOpen = ref(false)
+
+// Showcase State untuk Komponen Prioritas 1 & 2
+const demoTabsValue = ref('pills')
+const demoNumberVal = ref(15)
+const demoTimeVal = ref('08:30')
+const demoTimeRange = ref({ start: '08:00', end: '17:00' })
+const demoNik = ref('3201012345670001')
+const demoNpwp = ref('092542943407000')
+const demoPhone = ref('081234567890')
+const demoRadioVal = ref('bulanan')
+const demoCheckboxGroup = ref(['slip', 'wa'])
+const demoTreeVal = ref(['dept-frontend'])
+const demoProgressVal = ref(65)
+const demoCardSelected = ref('paket-pro')
+const demoCalendarDate = ref('2025-01-27')
+const demoSelfiePhoto = ref('')
+const demoGeofence = ref([
+  [
+    { lat: -6.2088, lng: 106.8456 },
+    { lat: -6.2088, lng: 106.8476 },
+    { lat: -6.2104, lng: 106.8476 },
+    { lat: -6.2104, lng: 106.8456 },
+  ],
+])
+
+const demoTreeNodes = [
+  {
+    id: 'div-tech',
+    label: 'Divisi Teknologi & Produk',
+    children: [
+      { id: 'dept-frontend', label: 'Frontend Engineering' },
+      { id: 'dept-backend', label: 'Backend & Cloud' },
+      { id: 'dept-qa', label: 'QA & Automation' },
+    ],
+  },
+  {
+    id: 'div-hr',
+    label: 'Divisi Human Capital & Payroll',
+    children: [
+      { id: 'dept-recruitment', label: 'Talent Acquisition' },
+      { id: 'dept-payroll', label: 'Kompensasi & Benefit' },
+    ],
+  },
+]
 
 const demoTimelineItems = [
   { id: 1, title: 'Pembayaran Dikonfirmasi Lunas', description: 'Metode transfer QRIS BCA terverifikasi.', time: '10:30 WIB', variant: 'success', author: 'Payment Gateway' },
@@ -572,6 +632,197 @@ const handleSavePassword = () => {
             </div>
           </div>
 
+          <!-- Showcase BaseTabs & BaseBreadcrumb -->
+          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs space-y-4">
+            <h2 class="text-sm font-bold text-neutral-900 dark:text-white">Navigasi Tab & Breadcrumb (BaseTabs & BaseBreadcrumb)</h2>
+            <BaseBreadcrumb
+              :items="[
+                { label: 'Template' },
+                { label: 'Pengaturan' },
+                { label: 'Umum', active: true },
+              ]"
+            />
+            <BaseTabs
+              v-model="demoTabsValue"
+              variant="pills"
+              :tabs="[
+                { value: 'pills', label: 'Tab Format Pills', badge: '3' },
+                { value: 'underline', label: 'Tab Format Underline' },
+                { value: 'cards', label: 'Tab Format Cards' },
+              ]"
+            >
+              <template #panel-pills>
+                <p class="text-xs text-neutral-500 py-1">Konten aktif varian <strong>Pills</strong>: Desain kapsul lembut untuk navigasi sub-menu internal.</p>
+              </template>
+              <template #panel-underline>
+                <p class="text-xs text-neutral-500 py-1">Konten aktif varian <strong>Underline</strong>: Desain garis bawah aksen tema untuk konten tab panjang.</p>
+              </template>
+              <template #panel-cards>
+                <p class="text-xs text-neutral-500 py-1">Konten aktif varian <strong>Cards</strong>: Tombol kartu solid untuk kategori mandiri.</p>
+              </template>
+            </BaseTabs>
+          </div>
+
+          <!-- Showcase Input Angka, Jam, & Masked Input -->
+          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs space-y-4">
+            <h2 class="text-sm font-bold text-neutral-900 dark:text-white">Input Angka, Jam, & Format Bertanda Baca (Masked Input)</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+              <BaseNumberInput
+                v-model="demoNumberVal"
+                label="Toleransi Presensi (BaseNumberInput)"
+                suffix="menit"
+                :min="0"
+                :max="60"
+              />
+              <BaseTimePicker
+                v-model="demoTimeVal"
+                label="Jam Masuk Kerja (BaseTimePicker)"
+              />
+              <BaseTimePicker
+                v-model="demoTimeRange"
+                range
+                label="Rentang Shift (Range Time)"
+              />
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-1">
+              <BaseMaskedInput
+                v-model="demoNik"
+                preset="nik"
+                label="NIK 16 Digit (BaseMaskedInput)"
+              />
+              <BaseMaskedInput
+                v-model="demoNpwp"
+                preset="npwp"
+                label="NPWP 15 Digit (BaseMaskedInput)"
+              />
+              <BaseMaskedInput
+                v-model="demoPhone"
+                preset="phone"
+                label="Nomor WhatsApp (BaseMaskedInput)"
+              />
+            </div>
+          </div>
+
+          <!-- Showcase Radio & Checkbox Groups, Tree Select, Accordion -->
+          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs space-y-4">
+            <h2 class="text-sm font-bold text-neutral-900 dark:text-white">Pilihan Grup, Tree Hierarkis & Accordion</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-2">Periode Cut-Off (BaseRadio Group)</label>
+                <BaseRadio
+                  v-model="demoRadioVal"
+                  direction="horizontal"
+                  :options="[
+                    { value: 'bulanan', label: 'Bulanan (Tgl 25)' },
+                    { value: 'mingguan', label: 'Mingguan (Jumat)' },
+                  ]"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-2">Kanal Notifikasi (BaseCheckbox Group)</label>
+                <BaseCheckbox
+                  v-model="demoCheckboxGroup"
+                  direction="horizontal"
+                  :options="[
+                    { value: 'slip', label: 'Kirim Slip Email' },
+                    { value: 'wa', label: 'Kirim WhatsApp' },
+                  ]"
+                />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <BaseTreeSelect
+                v-model="demoTreeVal"
+                :nodes="demoTreeNodes"
+                multiple
+                label="Struktur Organisasi (BaseTreeSelect)"
+              />
+              <div class="space-y-1">
+                <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1">Panduan Pengaturan (BaseAccordion)</label>
+                <BaseAccordion
+                  :items="[
+                    { id: 'acc1', title: 'Kebijakan Lembur Standar Kemnaker', content: 'Jam kerja lembur dihitung 1,5x untuk jam pertama dan 2x untuk jam berikutnya.' },
+                    { id: 'acc2', title: 'Aturan Pajak PPh 21 TER', content: 'Kategori TER A, B, dan C otomatis dipetakan sesuai status PTKP pegawai.' },
+                  ]"
+                  default-open="acc1"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Showcase Kartu Pilihan, Progres Bar & Kalender -->
+          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs space-y-4">
+            <h2 class="text-sm font-bold text-neutral-900 dark:text-white">Kartu Pilihan Paket (BaseSelectableCard) & Progres (BaseProgress)</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <BaseSelectableCard
+                v-model="demoCardSelected"
+                value="paket-starter"
+                title="Paket Starter HRIS"
+                description="Hingga 50 karyawan aktif dengan modul presensi GPS & slip gaji digital."
+                badge="Dasar"
+              />
+              <BaseSelectableCard
+                v-model="demoCardSelected"
+                value="paket-pro"
+                title="Paket Enterprise Multi-Cabang"
+                description="Unlimited karyawan, approval bertingkat, integrasi BPJS & geofence multi-polygon."
+                badge="Rekomendasi"
+                badge-variant="info"
+              />
+            </div>
+
+            <div class="pt-2">
+              <BaseProgress
+                :value="demoProgressVal"
+                :max="100"
+                label="Kapasitas Lisensi Karyawan Digunakan"
+                variant="primary"
+                striped
+              />
+            </div>
+
+            <!-- Kalender Bulanan Agenda -->
+            <div class="pt-2">
+              <BaseCalendar
+                v-model="demoCalendarDate"
+                :holidays="[
+                  { date: '2025-01-01', label: 'Tahun Baru' },
+                  { date: '2025-01-27', label: 'Isra Miraj' },
+                  { date: '2025-01-29', label: 'Tahun Baru Imlek' },
+                ]"
+                :events="[
+                  { id: 'ev1', date: '2025-01-25', title: 'Cut-off Payroll Bulanan', variant: 'danger' },
+                  { id: 'ev2', date: '2025-01-28', title: 'Transfer Gaji Batch A', variant: 'success' },
+                ]"
+              />
+            </div>
+          </div>
+
+          <!-- Showcase Kamera Selfie & Geofence Multi-Polygon -->
+          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs space-y-5">
+            <div>
+              <h2 class="text-sm font-bold text-neutral-900 dark:text-white">Kamera Selfie Presensi & Geofence Map Editor</h2>
+              <p class="text-xs text-neutral-500 mt-0.5">
+                Pengambilan foto selfie langsung via WebRTC dengan bingkai wajah dan editor geofence poligon tanpa library eksternal.
+              </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
+              <div>
+                <BaseCameraCapture
+                  v-model="demoSelfiePhoto"
+                  watermark-text="Kantor Pusat Jakarta • GPS: Valid"
+                />
+              </div>
+              <div>
+                <BaseMapPolygonEditor
+                  v-model="demoGeofence"
+                />
+              </div>
+            </div>
+          </div>
+
           <div class="flex justify-end">
             <BaseButton variant="primary" size="md" @click="handleSaveGeneral">
               <Save class="w-4 h-4" />
@@ -967,6 +1218,34 @@ const handleSavePassword = () => {
         <!-- 4. SUBMENU: NOTIFIKASI & TOAST                           -->
         <!-- ======================================================== -->
         <div v-else-if="activeTab === 'notifikasi'" class="space-y-5">
+          <!-- BaseAlert Banner & Inline Showcase -->
+          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs space-y-3">
+            <h2 class="text-sm font-bold text-neutral-900 dark:text-white">Peringatan Banner & Inline (BaseAlert)</h2>
+            <BaseAlert
+              variant="warning"
+              banner
+              title="Pemberitahuan Sistem Multi-Tenant"
+              description="Sinkronisasi otomatis dengan server BPJS Ketenagakerjaan akan dilakukan malam ini pukul 23:00 WIB."
+              dismissible
+            />
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <BaseAlert
+                variant="info"
+                title="Pembaruan Skema Gaji"
+                description="Perhitungan PPh 21 TER 2024 telah aktif secara default."
+                action-text="Pelajari"
+                @action="toast.info('Membuka dokumentasi PPh 21 TER')"
+              />
+              <BaseAlert
+                variant="danger"
+                title="Izin Kamera Ditolak"
+                description="Presensi selfie membutuhkan izin kamera di browser."
+                action-text="Coba Lagi"
+                @action="toast.warning('Meminta ulang izin kamera...')"
+              />
+            </div>
+          </div>
+
           <!-- Toast Notification Service Showcase -->
           <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs space-y-4">
             <div class="flex items-center justify-between">
@@ -1072,20 +1351,19 @@ const handleSavePassword = () => {
             </div>
 
             <div class="space-y-3.5 max-w-md">
-              <BaseInput
+              <BasePasswordInput
                 v-model="currentPassword"
-                type="password"
                 label="Kata Sandi Saat Ini"
                 placeholder="Masukkan kata sandi lama..."
                 required
               />
 
-              <BaseInput
+              <BasePasswordInput
                 v-model="newPassword"
-                type="password"
                 label="Kata Sandi Baru"
                 placeholder="Minimal 8 karakter..."
                 required
+                show-strength
                 hint="Gunakan kombinasi huruf, angka, dan simbol untuk keamanan maksimal."
               />
 

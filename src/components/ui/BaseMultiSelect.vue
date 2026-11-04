@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
-import { Search, ChevronDown, X, AlertCircle } from 'lucide-vue-next'
+import { Search, ChevronDown, X, AlertCircle, Loader2 } from 'lucide-vue-next'
 import BaseCheckbox from './BaseCheckbox.vue'
 
 const props = defineProps({
@@ -13,6 +13,23 @@ const props = defineProps({
     default: () => [],
     // Each option can be a primitive (string/number)
     // or an object: { label: string, value: any, badge?: string|number, icon?: any, disabled?: boolean }
+  },
+  asyncSearch: {
+    type: Function,
+    default: null,
+    // Optional async (query) => Array<{ label, value, badge?, icon?, disabled? }>
+  },
+  debounceMs: {
+    type: Number,
+    default: 300,
+  },
+  loading: {
+    type: Boolean,
+    default: false,
+  },
+  cacheOptions: {
+    type: Array,
+    default: () => [],
   },
   label: {
     type: String,
@@ -80,7 +97,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:modelValue', 'change', 'clear'])
+const emit = defineEmits(['update:modelValue', 'change', 'clear', 'search'])
 
 const isOpen = ref(false)
 const searchQuery = ref('')
@@ -88,33 +105,65 @@ const highlightedIndex = ref(0)
 const searchInputRef = ref(null)
 const containerRef = ref(null)
 const listContainerRef = ref(null)
+const remoteOptions = ref([])
+const internalLoading = ref(false)
+const cachedSelectedMap = ref(new Map())
+let debounceTimer = null
+
+const normalizeSingleOption = (opt) => {
+  if (typeof opt === 'object' && opt !== null) {
+    return {
+      label: opt.label ?? String(opt.value ?? ''),
+      value: opt.value ?? opt.label,
+      badge: opt.badge ?? null,
+      icon: opt.icon ?? null,
+      disabled: Boolean(opt.disabled),
+    }
+  }
+  return {
+    label: String(opt),
+    value: opt,
+    badge: null,
+    icon: null,
+    disabled: false,
+  }
+}
+
+const isAsyncMode = computed(() => typeof props.asyncSearch === 'function')
+const isBusy = computed(() => props.loading || internalLoading.value)
 
 // Normalize options to uniform { label, value, badge, icon, disabled }
 const normalizedOptions = computed(() => {
-  return props.options.map((opt) => {
-    if (typeof opt === 'object' && opt !== null) {
-      return {
-        label: opt.label ?? String(opt.value ?? ''),
-        value: opt.value ?? opt.label,
-        badge: opt.badge ?? null,
-        icon: opt.icon ?? null,
-        disabled: Boolean(opt.disabled),
+  const source = isAsyncMode.value && remoteOptions.value.length > 0 ? remoteOptions.value : props.options
+  return source.map(normalizeSingleOption)
+})
+
+// Keep cache updated whenever options or cacheOptions change
+watch(
+  [normalizedOptions, () => props.cacheOptions],
+  ([opts, cacheOpts]) => {
+    for (const opt of opts) {
+      cachedSelectedMap.value.set(opt.value, opt)
+    }
+    if (Array.isArray(cacheOpts)) {
+      for (const raw of cacheOpts) {
+        const norm = normalizeSingleOption(raw)
+        cachedSelectedMap.value.set(norm.value, norm)
       }
     }
-    return {
-      label: String(opt),
-      value: opt,
-      badge: null,
-      icon: null,
-      disabled: false,
-    }
-  })
-})
+  },
+  { immediate: true }
+)
 
 const selectedSet = computed(() => new Set(props.modelValue || []))
 
 const selectedOptions = computed(() => {
-  return normalizedOptions.value.filter((opt) => selectedSet.value.has(opt.value))
+  return (props.modelValue || []).map((val) => {
+    const found = normalizedOptions.value.find((o) => o.value === val)
+    if (found) return found
+    if (cachedSelectedMap.value.has(val)) return cachedSelectedMap.value.get(val)
+    return { label: String(val), value: val, badge: null, icon: null, disabled: false }
+  })
 })
 
 const visibleChips = computed(() => {
@@ -127,6 +176,9 @@ const overflowCount = computed(() => {
 
 // Filtered options based on search query
 const filteredOptions = computed(() => {
+  if (isAsyncMode.value) {
+    return normalizedOptions.value
+  }
   if (!props.searchable || !searchQuery.value.trim()) {
     return normalizedOptions.value
   }
@@ -136,6 +188,27 @@ const filteredOptions = computed(() => {
     const valMatch = typeof opt.value === 'string' && opt.value.toLowerCase().includes(q)
     return labelMatch || valMatch
   })
+})
+
+const runSearch = async (query) => {
+  emit('search', query)
+  if (!isAsyncMode.value) return
+  internalLoading.value = true
+  try {
+    const res = await props.asyncSearch(query)
+    if (Array.isArray(res)) {
+      remoteOptions.value = res
+    }
+  } finally {
+    internalLoading.value = false
+  }
+}
+
+watch(searchQuery, (q) => {
+  clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    runSearch(q)
+  }, props.debounceMs)
 })
 
 const enabledFilteredOptions = computed(() => {
@@ -166,6 +239,9 @@ watch(isOpen, async (val) => {
   if (val) {
     searchQuery.value = ''
     highlightedIndex.value = 0
+    if (isAsyncMode.value && remoteOptions.value.length === 0) {
+      runSearch('')
+    }
     await nextTick()
     if (props.searchable) {
       searchInputRef.value?.focus()
@@ -175,6 +251,7 @@ watch(isOpen, async (val) => {
 
 const toggleOption = (opt) => {
   if (opt.disabled) return
+  cachedSelectedMap.value.set(opt.value, opt)
   const next = [...(props.modelValue || [])]
   const idx = next.indexOf(opt.value)
   if (idx !== -1) {
@@ -195,7 +272,10 @@ const removeChip = (val, e) => {
 }
 
 const toggleSelectAllFiltered = () => {
-  const targetValues = enabledFilteredOptions.value.map((o) => o.value)
+  const targetValues = enabledFilteredOptions.value.map((o) => {
+    cachedSelectedMap.value.set(o.value, o)
+    return o.value
+  })
   let next
   if (isAllFilteredSelected.value) {
     const removeSet = new Set(targetValues)
@@ -271,6 +351,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  clearTimeout(debounceTimer)
   document.removeEventListener('click', handleClickOutside)
   document.removeEventListener('keydown', handleKeydown)
 })
@@ -361,6 +442,11 @@ const sizeClasses = computed(() => {
 
         <!-- Right Content: Clear Button & Chevron -->
         <div class="flex items-center gap-1 shrink-0 ml-1.5">
+          <Loader2
+            v-if="isBusy"
+            class="w-3.5 h-3.5 text-[var(--theme-primary)] animate-spin"
+          />
+
           <span
             v-if="clearable && selectedOptions.length > 0"
             role="button"
@@ -417,7 +503,7 @@ const sizeClasses = computed(() => {
 
           <!-- Select All / Clear Header Bar -->
           <div
-            v-if="selectAll && enabledFilteredOptions.length > 0"
+            v-if="selectAll && enabledFilteredOptions.length > 0 && !isBusy"
             class="flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-neutral-50/80 dark:bg-[var(--theme-layer-2)] border border-neutral-200/60 dark:border-[var(--theme-border)] text-[11px]"
           >
             <BaseCheckbox
@@ -428,7 +514,7 @@ const sizeClasses = computed(() => {
               @change="toggleSelectAllFiltered"
             />
             <span class="text-[10.5px] font-mono text-neutral-500 dark:text-neutral-400">
-              {{ selectedOptions.length }}/{{ normalizedOptions.length }} dipilih
+              {{ selectedOptions.length }} dipilih
             </span>
           </div>
 
@@ -437,57 +523,68 @@ const sizeClasses = computed(() => {
             ref="listContainerRef"
             class="max-h-56 overflow-y-auto space-y-0.5 pr-0.5 custom-scroll"
           >
+            <!-- Async Loading Indicator -->
             <div
-              v-for="(opt, idx) in filteredOptions"
-              :key="opt.value"
-              :data-index="idx"
-              @click="toggleOption(opt)"
-              @mouseenter="highlightedIndex = idx"
-              class="px-2.5 py-1.5 rounded-xl text-xs flex items-center justify-between gap-2 transition-all select-none"
-              :class="[
-                opt.disabled
-                  ? 'opacity-40 cursor-not-allowed'
-                  : 'cursor-pointer',
-                selectedSet.has(opt.value)
-                  ? 'bg-neutral-100/90 dark:bg-[var(--theme-surface-muted)] font-semibold text-neutral-900 dark:text-white'
-                  : highlightedIndex === idx
-                  ? 'bg-neutral-50 dark:bg-[var(--theme-surface-muted)] text-neutral-900 dark:text-white'
-                  : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-muted)] hover:text-neutral-900 dark:hover:text-white',
-              ]"
-              role="option"
-              :aria-selected="selectedSet.has(opt.value)"
+              v-if="isBusy"
+              class="py-5 px-2 flex flex-col items-center justify-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400"
             >
-              <!-- Checkbox + Option Icon + Label -->
-              <div class="flex items-center gap-2.5 min-w-0 flex-1 pointer-events-none">
-                <BaseCheckbox
-                  :model-value="selectedSet.has(opt.value)"
-                  :disabled="opt.disabled"
-                  size="sm"
-                />
-                <component
-                  :is="opt.icon"
-                  v-if="opt.icon"
-                  class="w-3.5 h-3.5 text-neutral-400 shrink-0"
-                />
-                <span class="truncate">{{ opt.label }}</span>
+              <Loader2 class="w-4 h-4 text-[var(--theme-primary)] animate-spin" />
+              <span>Memuat pilihan...</span>
+            </div>
+
+            <template v-else>
+              <div
+                v-for="(opt, idx) in filteredOptions"
+                :key="opt.value"
+                :data-index="idx"
+                @click="toggleOption(opt)"
+                @mouseenter="highlightedIndex = idx"
+                class="px-2.5 py-1.5 rounded-xl text-xs flex items-center justify-between gap-2 transition-all select-none"
+                :class="[
+                  opt.disabled
+                    ? 'opacity-40 cursor-not-allowed'
+                    : 'cursor-pointer',
+                  selectedSet.has(opt.value)
+                    ? 'bg-neutral-100/90 dark:bg-[var(--theme-surface-muted)] font-semibold text-neutral-900 dark:text-white'
+                    : highlightedIndex === idx
+                    ? 'bg-neutral-50 dark:bg-[var(--theme-surface-muted)] text-neutral-900 dark:text-white'
+                    : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-muted)] hover:text-neutral-900 dark:hover:text-white',
+                ]"
+                role="option"
+                :aria-selected="selectedSet.has(opt.value)"
+              >
+                <!-- Checkbox + Option Icon + Label -->
+                <div class="flex items-center gap-2.5 min-w-0 flex-1 pointer-events-none">
+                  <BaseCheckbox
+                    :model-value="selectedSet.has(opt.value)"
+                    :disabled="opt.disabled"
+                    size="sm"
+                  />
+                  <component
+                    :is="opt.icon"
+                    v-if="opt.icon"
+                    class="w-3.5 h-3.5 text-neutral-400 shrink-0"
+                  />
+                  <span class="truncate">{{ opt.label }}</span>
+                </div>
+
+                <!-- Optional Right Badge -->
+                <span
+                  v-if="opt.badge !== null && opt.badge !== undefined"
+                  class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-500 dark:text-neutral-400 border border-neutral-200/60 dark:border-[var(--theme-border-strong)] shrink-0"
+                >
+                  {{ opt.badge }}
+                </span>
               </div>
 
-              <!-- Optional Right Badge -->
-              <span
-                v-if="opt.badge !== null && opt.badge !== undefined"
-                class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-500 dark:text-neutral-400 border border-neutral-200/60 dark:border-[var(--theme-border-strong)] shrink-0"
+              <!-- Empty State when search returns 0 results -->
+              <div
+                v-if="filteredOptions.length === 0"
+                class="py-4 px-2 text-center text-xs text-neutral-400 dark:text-neutral-500"
               >
-                {{ opt.badge }}
-              </span>
-            </div>
-
-            <!-- Empty State when search returns 0 results -->
-            <div
-              v-if="filteredOptions.length === 0"
-              class="py-4 px-2 text-center text-xs text-neutral-400 dark:text-neutral-500"
-            >
-              <p>{{ emptyText }}</p>
-            </div>
+                <p>{{ emptyText }}</p>
+              </div>
+            </template>
           </div>
         </div>
       </Transition>
@@ -525,4 +622,3 @@ const sizeClasses = computed(() => {
   background: rgba(160, 160, 160, 0.4);
 }
 </style>
-

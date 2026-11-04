@@ -20,6 +20,10 @@ import BaseFileUploader from '../../components/ui/BaseFileUploader.vue'
 import BaseCheckbox from '../../components/ui/BaseCheckbox.vue'
 import BaseMultiSelect from '../../components/ui/BaseMultiSelect.vue'
 import BaseDataTable from '../../components/ui/BaseDataTable.vue'
+import BaseFormField from '../../components/ui/BaseFormField.vue'
+import BaseAvatar from '../../components/ui/BaseAvatar.vue'
+import BaseDescriptionList from '../../components/ui/BaseDescriptionList.vue'
+import BaseStepper from '../../components/ui/BaseStepper.vue'
 import { useToast } from '../../composables/useToast'
 import { karyawanList } from '../../data/karyawanData'
 import { formatRupiah } from '../../utils/format.js'
@@ -979,21 +983,15 @@ const getRowActionItems = (item) => [
             :error="formErrors.jabatan"
           />
 
-          <div>
-            <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1">
-              Divisi / Departemen
-            </label>
+          <BaseFormField label="Divisi / Departemen">
             <BaseSearchableSelect
               v-model="formData.divisi"
               :options="formDivisiOptions"
               size="md"
             />
-          </div>
+          </BaseFormField>
 
-          <div>
-            <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1">
-              Status Kerja
-            </label>
+          <BaseFormField label="Status Kerja">
             <BaseSearchableSelect
               v-model="formData.status"
               :options="formStatusOptions"
@@ -1001,7 +999,7 @@ const getRowActionItems = (item) => [
               size="md"
               align="right"
             />
-          </div>
+          </BaseFormField>
         </div>
 
         <!-- Baris 4: Kompensasi Payroll & Tanggal Masuk (BaseDatePicker) -->
@@ -1151,9 +1149,12 @@ const getRowActionItems = (item) => [
       <div v-if="selectedEmployee" class="space-y-5 text-xs">
         <!-- Avatar & Header Identity Card -->
         <div class="p-4 rounded-2xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] flex items-center gap-3.5">
-          <div class="w-12 h-12 rounded-2xl bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-bold text-base flex items-center justify-center shrink-0 shadow-xs">
-            {{ selectedEmployee.avatar }}
-          </div>
+          <BaseAvatar
+            :name="selectedEmployee.nama"
+            size="lg"
+            status="online"
+            tone="primary"
+          />
           <div class="min-w-0">
             <h4 class="font-bold text-sm sm:text-base text-neutral-900 dark:text-white truncate">
               {{ selectedEmployee.nama }}
@@ -1166,29 +1167,37 @@ const getRowActionItems = (item) => [
           </div>
         </div>
 
-        <!-- Contact & Profile Metadata Grid -->
+        <!-- Approval Stepper Flow -->
+        <div class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] space-y-2">
+          <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Status Alur Persetujuan</span>
+          <BaseStepper
+            :steps="[
+              { id: 1, title: 'Input HR', approver: 'Sari Rahayu', status: 'completed' },
+              { id: 2, title: 'Audit Finansial', approver: 'Budi Santoso', status: 'completed' },
+              { id: 3, title: 'Disetujui Direksi', approver: 'Direktur Utama', status: 'current' },
+            ]"
+            :current-step="2"
+            size="sm"
+          />
+        </div>
+
+        <!-- Contact & Profile Metadata (BaseDescriptionList) -->
         <div class="space-y-2">
           <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Kontak & Kepegawaian</span>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)]">
-              <span class="text-neutral-400 text-[10px] block">Email Kantor:</span>
-              <span class="font-semibold text-neutral-900 dark:text-white truncate block">{{ selectedEmployee.email }}</span>
-            </div>
-            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)]">
-              <span class="text-neutral-400 text-[10px] block">Nomor Telepon:</span>
-              <span class="font-semibold text-neutral-900 dark:text-white font-mono block">{{ selectedEmployee.telepon }}</span>
-            </div>
-            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)]">
-              <span class="text-neutral-400 text-[10px] block">Tanggal Bergabung:</span>
-              <span class="font-semibold text-neutral-900 dark:text-white block">{{ selectedEmployee.tanggalMasuk }}</span>
-            </div>
-            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)]">
-              <span class="text-neutral-400 text-[10px] block">Asuransi BPJS:</span>
-              <span class="font-semibold text-emerald-600 dark:text-emerald-400 block">
-                {{ selectedEmployee.bpjs ? 'Aktif (Kesehatan & TK)' : 'Tidak Terdaftar' }}
-              </span>
-            </div>
-          </div>
+          <BaseDescriptionList
+            :columns="2"
+            :items="[
+              { label: 'Email Kantor', value: selectedEmployee.email },
+              { label: 'Nomor Telepon', value: selectedEmployee.telepon, mono: true },
+              { label: 'Tanggal Bergabung', value: selectedEmployee.tanggalMasuk },
+              {
+                label: 'Asuransi BPJS',
+                value: selectedEmployee.bpjs ? 'Aktif (Kesehatan & TK)' : 'Tidak Terdaftar',
+                badge: selectedEmployee.bpjs ? 'Aktif' : 'Non-BPJS',
+                badgeVariant: selectedEmployee.bpjs ? 'success' : 'neutral',
+              },
+            ]"
+          />
         </div>
 
         <!-- Compensation Payroll Card -->

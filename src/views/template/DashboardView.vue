@@ -6,6 +6,7 @@ import BaseBadge from '../../components/ui/BaseBadge.vue'
 import BaseModal from '../../components/ui/BaseModal.vue'
 import BaseSkeleton from '../../components/ui/BaseSkeleton.vue'
 import BaseCountUp from '../../components/ui/BaseCountUp.vue'
+import BaseStatCard from '../../components/ui/BaseStatCard.vue'
 import BaseDatePicker from '../../components/ui/BaseDatePicker.vue'
 import BaseSlideOver from '../../components/ui/BaseSlideOver.vue'
 import BaseInvoiceModal from '../../components/ui/BaseInvoiceModal.vue'
@@ -396,166 +397,81 @@ onUnmounted(() => {
     </div>
 
     <!-- ======================================================== -->
-    <!-- BARIS 1: 6 TOP STAT KPI CARDS (DENGAN SKELETON & COUNTUP)-->
+    <!-- BARIS 1: 6 TOP STAT KPI CARDS (DENGAN BASESTATCARD)     -->
     <!-- ======================================================== -->
-    <!-- Mode Skeleton Loading -->
-    <div
-      v-if="isLoading"
-      class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 anim-fade-up"
-    >
-      <div
-        v-for="i in 6"
-        :key="'kpi-skel-' + i"
-        class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs space-y-3"
-      >
-        <div class="flex items-center justify-between">
-          <BaseSkeleton width="60%" height="11px" />
-          <BaseSkeleton variant="rectangular" width="28px" height="28px" class="rounded-lg" />
-        </div>
-        <div class="space-y-1.5 pt-1">
-          <BaseSkeleton width="75%" height="22px" />
-          <BaseSkeleton width="50%" height="11px" />
-        </div>
-      </div>
-    </div>
-
-    <!-- Mode Loaded (Real Cards with Smooth BaseCountUp) -->
-    <div
-      v-else
-      class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 anim-fade-up anim-delay-1"
-    >
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 anim-fade-up">
       <!-- KPI 1: Total Payroll Batch -->
-      <div class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-700 transition flex flex-col justify-between space-y-2 group">
-        <div class="flex items-center justify-between">
-          <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Batch Payroll Bulan Ini</span>
-          <div class="w-7 h-7 rounded-lg bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-            <ShoppingBag class="w-3.5 h-3.5" />
-          </div>
-        </div>
-        <div>
-          <div class="flex items-baseline gap-1.5 leading-none">
-            <span class="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white font-mono">
-              <BaseCountUp :to="kpiSummary.totalOrder.value" />
-            </span>
-            <span class="text-xs font-normal text-neutral-500 font-sans">batch</span>
-          </div>
-          <div class="flex items-center gap-1 text-[10.5px] text-emerald-600 dark:text-emerald-400 font-medium mt-1.5">
-            <ArrowUp class="w-3 h-3 stroke-[3]" />
-            <span>{{ kpiSummary.totalOrder.growth }}</span>
-            <span class="text-neutral-400 dark:text-neutral-500 font-normal">dari periode lalu</span>
-          </div>
-        </div>
-      </div>
+      <BaseStatCard
+        title="Batch Payroll Bulan Ini"
+        :value="kpiSummary.totalOrder.value"
+        unit="batch"
+        :icon="ShoppingBag"
+        tone="sky"
+        :trend="kpiSummary.totalOrder.growth"
+        trend-direction="up"
+        trend-label="dari periode lalu"
+        :loading="isLoading"
+      />
 
       <!-- KPI 2: Realisasi Gaji Disalurkan -->
-      <div class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-700 transition flex flex-col justify-between space-y-2 group">
-        <div class="flex items-center justify-between">
-          <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Realisasi Gaji Disalurkan</span>
-          <div class="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-            <Wallet class="w-3.5 h-3.5" />
-          </div>
-        </div>
-        <div>
-          <div class="flex items-baseline leading-none">
-            <span class="text-base sm:text-lg font-bold text-neutral-900 dark:text-white font-mono">
-              <BaseCountUp :to="kpiSummary.omzet.value" prefix="Rp " />
-            </span>
-          </div>
-          <div class="flex items-center gap-1 text-[10.5px] text-emerald-600 dark:text-emerald-400 font-medium mt-1.5">
-            <ArrowUp class="w-3 h-3 stroke-[3]" />
-            <span>{{ kpiSummary.omzet.growth }}</span>
-            <span class="text-neutral-400 dark:text-neutral-500 font-normal">dari bulan lalu</span>
-          </div>
-        </div>
-      </div>
+      <BaseStatCard
+        title="Realisasi Gaji Disalurkan"
+        :value="kpiSummary.omzet.value"
+        prefix="Rp "
+        :icon="Wallet"
+        tone="emerald"
+        :trend="kpiSummary.omzet.growth"
+        trend-direction="up"
+        trend-label="dari bulan lalu"
+        :loading="isLoading"
+      />
 
       <!-- KPI 3: Tiket Klaim & Lembur -->
-      <div class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-700 transition flex flex-col justify-between space-y-2 group">
-        <div class="flex items-center justify-between">
-          <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Klaim & Pengajuan</span>
-          <div class="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-            <RefreshCw class="w-3.5 h-3.5" />
-          </div>
-        </div>
-        <div>
-          <div class="flex items-baseline gap-1.5 leading-none">
-            <span class="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white font-mono">
-              <BaseCountUp :to="kpiSummary.orderDiproses.value" />
-            </span>
-            <span class="text-xs font-normal text-neutral-500 font-sans">tiket</span>
-          </div>
-          <p class="text-[10.5px] text-neutral-400 dark:text-neutral-500 mt-1.5 truncate">
-            Sedang antrean verifikasi HR
-          </p>
-        </div>
-      </div>
+      <BaseStatCard
+        title="Klaim & Pengajuan"
+        :value="kpiSummary.orderDiproses.value"
+        unit="tiket"
+        :icon="RefreshCw"
+        tone="amber"
+        subtitle="Sedang antrean verifikasi HR"
+        :loading="isLoading"
+      />
 
       <!-- KPI 4: Karyawan Aktif -->
-      <div class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-700 transition flex flex-col justify-between space-y-2 group">
-        <div class="flex items-center justify-between">
-          <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Total Karyawan Aktif</span>
-          <div class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-            <Users class="w-3.5 h-3.5" />
-          </div>
-        </div>
-        <div>
-          <div class="flex items-baseline gap-1.5 leading-none">
-            <span class="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white font-mono">
-              <BaseCountUp :to="1248" />
-            </span>
-            <span class="text-xs font-normal text-neutral-500 font-sans">pegawai</span>
-          </div>
-          <div class="flex items-center gap-1 text-[10.5px] text-emerald-600 dark:text-emerald-400 font-medium mt-1.5">
-            <ArrowUp class="w-3 h-3 stroke-[3]" />
-            <span>{{ kpiSummary.pelangganAktif.growth }}</span>
-            <span class="text-neutral-400 dark:text-neutral-500 font-normal">6 cabang aktif</span>
-          </div>
-        </div>
-      </div>
+      <BaseStatCard
+        title="Total Karyawan Aktif"
+        :value="1248"
+        unit="pegawai"
+        :icon="Users"
+        tone="indigo"
+        :trend="kpiSummary.pelangganAktif.growth"
+        trend-direction="up"
+        trend-label="6 cabang aktif"
+        :loading="isLoading"
+      />
 
       <!-- KPI 5: Sistem ERP & Modul -->
-      <div class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-700 transition flex flex-col justify-between space-y-2 group">
-        <div class="flex items-center justify-between">
-          <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Sistem ERP & Modul</span>
-          <div class="w-7 h-7 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-            <Cpu class="w-3.5 h-3.5" />
-          </div>
-        </div>
-        <div>
-          <div class="flex items-baseline gap-1.5 leading-none">
-            <span class="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white font-mono">
-              <BaseCountUp :to="kpiSummary.mesinAktif.aktif" /> / {{ kpiSummary.mesinAktif.total }}
-            </span>
-            <span class="text-xs font-normal text-neutral-500 font-sans">modul</span>
-          </div>
-          <p class="text-[10.5px] text-sky-600 dark:text-sky-400 font-medium mt-1.5">
-            {{ kpiSummary.mesinAktif.subtitle }}
-          </p>
-        </div>
-      </div>
+      <BaseStatCard
+        title="Sistem ERP & Modul"
+        :value="kpiSummary.mesinAktif.aktif"
+        :secondary-value="' / ' + kpiSummary.mesinAktif.total"
+        unit="modul"
+        :icon="Cpu"
+        tone="cyan"
+        :subtitle="kpiSummary.mesinAktif.subtitle"
+        :loading="isLoading"
+      />
 
       <!-- KPI 6: Evaluasi PKWT Segera -->
-      <div class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs hover:border-rose-300 dark:hover:border-rose-900/50 transition flex flex-col justify-between space-y-2 group">
-        <div class="flex items-center justify-between">
-          <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Evaluasi PKWT</span>
-          <div class="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-            <AlertTriangle class="w-3.5 h-3.5" />
-          </div>
-        </div>
-        <div>
-          <div class="flex items-baseline gap-1.5 leading-none">
-            <span class="text-lg sm:text-xl font-bold text-rose-600 dark:text-rose-400 font-mono">
-              <BaseCountUp :to="kpiSummary.stokMenipis.count" />
-            </span>
-            <span class="text-xs font-normal text-neutral-500 font-sans">staf</span>
-          </div>
-          <div class="flex items-center gap-1 text-[10.5px] text-rose-600 dark:text-rose-400 font-medium mt-1.5 truncate">
-            <AlertTriangle class="w-2.5 h-2.5 shrink-0" />
-            <span class="truncate">{{ kpiSummary.stokMenipis.warning }}</span>
-          </div>
-        </div>
-      </div>
-
+      <BaseStatCard
+        title="Evaluasi PKWT"
+        :value="kpiSummary.stokMenipis.count"
+        unit="staf"
+        :icon="AlertTriangle"
+        tone="rose"
+        :subtitle="kpiSummary.stokMenipis.warning"
+        :loading="isLoading"
+      />
     </div>
 
     <!-- ======================================================== -->

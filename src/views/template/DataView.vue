@@ -10,6 +10,7 @@ import BasePagination from '../../components/ui/BasePagination.vue'
 import BaseDropdownMenu from '../../components/ui/BaseDropdownMenu.vue'
 import BaseEmptyState from '../../components/ui/BaseEmptyState.vue'
 import BaseDataTable from '../../components/ui/BaseDataTable.vue'
+import BaseFormField from '../../components/ui/BaseFormField.vue'
 import { useToast } from '../../composables/useToast'
 import { gunungJawaList } from '../../data/gunungJawaData'
 import {
@@ -711,22 +712,16 @@ const handleResetDefault = () => {
             :error="formErrors.ketinggian"
           />
 
-          <div>
-            <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1">
-              Provinsi
-            </label>
+          <BaseFormField label="Provinsi">
             <BaseSearchableSelect
               v-model="formData.provinsi"
               :options="formProvinsiOptions"
               :searchable="false"
               size="md"
             />
-          </div>
+          </BaseFormField>
 
-          <div>
-            <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1">
-              Kategori
-            </label>
+          <BaseFormField label="Kategori">
             <BaseSearchableSelect
               v-model="formData.kategori"
               :options="formKategoriOptions"
@@ -734,7 +729,7 @@ const handleResetDefault = () => {
               size="md"
               align="right"
             />
-          </div>
+          </BaseFormField>
         </div>
 
         <!-- Wilayah / Kabupaten -->
