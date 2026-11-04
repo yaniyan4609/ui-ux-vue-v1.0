@@ -232,17 +232,17 @@ const handleSavePassword = () => {
 <template>
   <div class="space-y-6 w-full max-w-4xl mx-auto">
     <!-- Header Setting -->
-    <div class="border-b border-neutral-200 dark:border-[#27272a] pb-4 flex items-center justify-between">
+    <div class="border-b border-neutral-200 dark:border-[var(--theme-border)] pb-4 flex items-center justify-between">
       <div>
         <div class="flex items-center gap-2 mb-1">
-          <span class="text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-md bg-neutral-200 text-neutral-800 dark:bg-[#222226] dark:text-neutral-300">
+          <span class="text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-md bg-neutral-200 text-neutral-800 dark:bg-[var(--theme-surface-muted)] dark:text-neutral-300">
             SETTING
           </span>
           <BaseBadge variant="neutral" size="sm">
             {{ activeTab.toUpperCase() }}
           </BaseBadge>
         </div>
-        <h1 class="text-2xl font-bold text-neutral-900 dark:text-[#f4f4f5] tracking-tight">
+        <h1 class="text-2xl font-bold text-neutral-900 dark:text-[var(--theme-text-primary)] tracking-tight">
           Pengaturan Sistem
         </h1>
         <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
@@ -260,7 +260,7 @@ const handleSavePassword = () => {
         <!-- ======================================================== -->
         <div v-if="activeTab === 'umum'" class="space-y-5">
           <!-- Card Form Pengaturan Umum Menggunakan BaseInput & BaseTextarea -->
-          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417] shadow-2xs space-y-4">
+          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs space-y-4">
             <h2 class="text-sm font-bold text-neutral-900 dark:text-white flex items-center gap-2">
               <Sliders class="w-4 h-4 text-neutral-700 dark:text-neutral-300" />
               <span>Profil & Informasi Aplikasi</span>
@@ -287,7 +287,7 @@ const handleSavePassword = () => {
           </div>
 
           <!-- Showcase Komponen BaseCurrencyInput.vue (Auto Rupiah & Terbilang) -->
-          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417] shadow-2xs space-y-4">
+          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs space-y-4">
             <div class="flex items-center justify-between">
               <div>
                 <h2 class="text-sm font-bold text-neutral-900 dark:text-white flex items-center gap-2">
@@ -313,7 +313,7 @@ const handleSavePassword = () => {
               />
 
               <!-- Preview State Output -->
-              <div class="p-3 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-200/80 dark:border-[#242428] text-xs space-y-1.5">
+              <div class="p-3 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-200/80 dark:border-[var(--theme-border)] text-xs space-y-1.5">
                 <div class="flex items-center justify-between">
                   <span class="text-neutral-500 font-medium">Nilai Murni v-model (Number):</span>
                   <span class="font-mono font-bold text-neutral-900 dark:text-white">{{ demoNominal }}</span>
@@ -323,14 +323,14 @@ const handleSavePassword = () => {
                   <span class="font-mono text-emerald-600 dark:text-emerald-400 font-bold">{{ typeof demoNominal }}</span>
                 </div>
                 <!-- Quick Test Buttons -->
-                <div class="pt-2 border-t border-neutral-200/60 dark:border-[#282830] flex items-center gap-2 flex-wrap">
+                <div class="pt-2 border-t border-neutral-200/60 dark:border-[var(--theme-border)] flex items-center gap-2 flex-wrap">
                   <span class="text-[11px] text-neutral-400 font-medium">Uji Cepat:</span>
                   <button
                     v-for="amt in [1000, 50000, 1500000, 75000000]"
                     :key="amt"
                     type="button"
                     @click="demoNominal = amt"
-                    class="px-2 py-0.5 rounded-md bg-white dark:bg-[#222228] border border-neutral-200 dark:border-[#32323a] text-[10.5px] font-mono text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 transition cursor-pointer"
+                    class="px-2 py-0.5 rounded-md bg-white dark:bg-[var(--theme-surface-muted)] border border-neutral-200 dark:border-[var(--theme-border-strong)] text-[10.5px] font-mono text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 transition cursor-pointer"
                   >
                     {{ amt.toLocaleString('id-ID') }}
                   </button>
@@ -340,7 +340,7 @@ const handleSavePassword = () => {
           </div>
 
           <!-- Showcase Komponen BaseCountUp.vue & BaseSkeleton.vue -->
-          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417] shadow-2xs space-y-4">
+          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs space-y-4">
             <div class="flex items-center justify-between">
               <div>
                 <h2 class="text-sm font-bold text-neutral-900 dark:text-white flex items-center gap-2">
@@ -356,7 +356,7 @@ const handleSavePassword = () => {
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <!-- Demo BaseCountUp -->
-              <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-200/80 dark:border-[#242428] space-y-3">
+              <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-200/80 dark:border-[var(--theme-border)] space-y-3">
                 <div class="flex items-center justify-between">
                   <span class="text-xs font-bold text-neutral-700 dark:text-neutral-300">Live BaseCountUp</span>
                   <BaseBadge variant="info" size="sm">Ease-out Cubic</BaseBadge>
@@ -370,7 +370,7 @@ const handleSavePassword = () => {
                     :key="val"
                     type="button"
                     @click="demoCountVal = val"
-                    class="px-2 py-0.5 rounded-md bg-white dark:bg-[#222228] border border-neutral-200 dark:border-[#32323a] text-[10.5px] font-mono hover:border-neutral-400 transition cursor-pointer"
+                    class="px-2 py-0.5 rounded-md bg-white dark:bg-[var(--theme-surface-muted)] border border-neutral-200 dark:border-[var(--theme-border-strong)] text-[10.5px] font-mono hover:border-neutral-400 transition cursor-pointer"
                   >
                     Rp {{ val.toLocaleString('id-ID') }}
                   </button>
@@ -378,7 +378,7 @@ const handleSavePassword = () => {
               </div>
 
               <!-- Demo BaseSkeleton -->
-              <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-200/80 dark:border-[#242428] space-y-3">
+              <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-200/80 dark:border-[var(--theme-border)] space-y-3">
                 <div class="flex items-center justify-between">
                   <span class="text-xs font-bold text-neutral-700 dark:text-neutral-300">Live BaseSkeleton (Shimmer)</span>
                   <button
@@ -405,7 +405,7 @@ const handleSavePassword = () => {
           </div>
 
           <!-- Showcase Komponen BaseDatePicker & BaseEmptyState -->
-          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417] shadow-2xs space-y-5">
+          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs space-y-5">
             <div class="flex items-center justify-between">
               <div>
                 <h2 class="text-sm font-bold text-neutral-900 dark:text-white flex items-center gap-2">
@@ -422,7 +422,7 @@ const handleSavePassword = () => {
             <!-- Grid 2 Kolom untuk DatePicker Single vs Range -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <!-- Mode Single Date -->
-              <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-200/80 dark:border-[#242428] space-y-3">
+              <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-200/80 dark:border-[var(--theme-border)] space-y-3">
                 <div class="flex items-center justify-between">
                   <span class="text-xs font-bold text-neutral-800 dark:text-neutral-200">1. Single Date Picker</span>
                   <BaseBadge variant="primary" size="sm">Single Mode</BaseBadge>
@@ -432,14 +432,14 @@ const handleSavePassword = () => {
                   label="Pilih Tanggal"
                   placeholder="Pilih satu tanggal..."
                 />
-                <div class="p-2.5 rounded-lg bg-white dark:bg-[#121214] border border-neutral-200 dark:border-[#242428] text-xs font-mono flex items-center justify-between">
+                <div class="p-2.5 rounded-lg bg-white dark:bg-[var(--theme-layer-2)] border border-neutral-200 dark:border-[var(--theme-border)] text-xs font-mono flex items-center justify-between">
                   <span class="text-neutral-400">v-model:</span>
                   <span class="font-bold text-[var(--theme-primary)]">{{ demoSingleDate || '(kosong)' }}</span>
                 </div>
               </div>
 
               <!-- Mode Range Date -->
-              <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-200/80 dark:border-[#242428] space-y-3">
+              <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-200/80 dark:border-[var(--theme-border)] space-y-3">
                 <div class="flex items-center justify-between">
                   <span class="text-xs font-bold text-neutral-800 dark:text-neutral-200">2. Date Range Picker (Presets)</span>
                   <BaseBadge variant="success" size="sm">Range Mode</BaseBadge>
@@ -450,7 +450,7 @@ const handleSavePassword = () => {
                   label="Pilih Rentang Tanggal"
                   placeholder="Pilih rentang tanggal..."
                 />
-                <div class="p-2.5 rounded-lg bg-white dark:bg-[#121214] border border-neutral-200 dark:border-[#242428] text-xs font-mono flex items-center justify-between">
+                <div class="p-2.5 rounded-lg bg-white dark:bg-[var(--theme-layer-2)] border border-neutral-200 dark:border-[var(--theme-border)] text-xs font-mono flex items-center justify-between">
                   <span class="text-neutral-400">v-model:</span>
                   <span class="font-bold text-emerald-600 dark:text-emerald-400">
                     {{ demoRangeDate?.start ? `${demoRangeDate.start} s/d ${demoRangeDate.end}` : '(kosong)' }}
@@ -460,13 +460,13 @@ const handleSavePassword = () => {
             </div>
 
             <!-- Demo BaseEmptyState -->
-            <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-200/80 dark:border-[#242428] space-y-3">
+            <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-200/80 dark:border-[var(--theme-border)] space-y-3">
               <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-neutral-800 dark:text-neutral-200">3. Live BaseEmptyState (Ilustrasi Soft Badge)</span>
                 <BaseBadge variant="neutral" size="sm">Modular Empty State</BaseBadge>
               </div>
 
-              <div class="p-4 rounded-xl bg-white dark:bg-[#121214] border border-dashed border-neutral-200 dark:border-[#2b2b32]">
+              <div class="p-4 rounded-xl bg-white dark:bg-[var(--theme-layer-2)] border border-dashed border-neutral-200 dark:border-[var(--theme-border)]">
                 <BaseEmptyState
                   :icon="FolderSearch"
                   title="Belum Ada Dokumen Lampiran"
@@ -480,7 +480,7 @@ const handleSavePassword = () => {
           </div>
 
           <!-- Showcase Komponen Enterprise: FileUploader, Timeline, SlideOver, Invoice -->
-          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417] shadow-2xs space-y-5">
+          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs space-y-5">
             <div class="flex items-center justify-between">
               <div>
                 <h2 class="text-sm font-bold text-neutral-900 dark:text-white flex items-center gap-2">
@@ -497,7 +497,7 @@ const handleSavePassword = () => {
             <!-- Grid 2 Kolom: FileUploader vs Timeline -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <!-- Live BaseFileUploader -->
-              <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-200/80 dark:border-[#242428] space-y-3">
+              <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-200/80 dark:border-[var(--theme-border)] space-y-3">
                 <div class="flex items-center justify-between">
                   <span class="text-xs font-bold text-neutral-800 dark:text-neutral-200">1. BaseFileUploader (Drag & Drop)</span>
                   <BaseBadge variant="neutral" size="sm">Maks 5 MB</BaseBadge>
@@ -512,19 +512,19 @@ const handleSavePassword = () => {
               </div>
 
               <!-- Live BaseTimeline -->
-              <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-200/80 dark:border-[#242428] space-y-3">
+              <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-200/80 dark:border-[var(--theme-border)] space-y-3">
                 <div class="flex items-center justify-between">
                   <span class="text-xs font-bold text-neutral-800 dark:text-neutral-200">2. BaseTimeline (Jejak Audit Aktivitas)</span>
                   <BaseBadge variant="primary" size="sm">Audit Log</BaseBadge>
                 </div>
-                <div class="p-3 rounded-xl bg-white dark:bg-[#141417] border border-neutral-200/80 dark:border-[#242428]">
+                <div class="p-3 rounded-xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200/80 dark:border-[var(--theme-border)]">
                   <BaseTimeline :items="demoTimelineItems" compact />
                 </div>
               </div>
             </div>
 
             <!-- Interactive Trigger Demos: Slide-Over, Invoice & CSV Importer -->
-            <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-200/80 dark:border-[#242428] space-y-3">
+            <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-200/80 dark:border-[var(--theme-border)] space-y-3">
               <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-neutral-800 dark:text-neutral-200">3. Demo Langsung Slide-Over Drawer & Faktur Cetak</span>
                 <span class="text-[11px] text-neutral-400">Klik tombol di bawah untuk menguji</span>
@@ -549,13 +549,13 @@ const handleSavePassword = () => {
           </div>
 
           <!-- Card Preferensi Sistem Menggunakan BaseSwitch -->
-          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417] shadow-2xs space-y-4">
+          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs space-y-4">
             <h2 class="text-sm font-bold text-neutral-900 dark:text-white flex items-center gap-2">
               <Sparkles class="w-4 h-4 text-neutral-700 dark:text-neutral-300" />
               <span>Preferensi Fitur Sistem</span>
             </h2>
 
-            <div class="space-y-4 divide-y divide-neutral-100 dark:divide-[#242428] pt-1">
+            <div class="space-y-4 divide-y divide-neutral-100 dark:divide-[var(--theme-border)] pt-1">
               <BaseSwitch
                 v-model="autoSaveEnabled"
                 label="Simpan Otomatis (Auto-save)"
@@ -585,7 +585,7 @@ const handleSavePassword = () => {
         <!-- ======================================================== -->
         <div v-else-if="activeTab === 'dasar1'" class="space-y-5">
           <!-- CARD 1: THEME COLOR PALETTE PICKER -->
-          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417] shadow-2xs space-y-4">
+          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs space-y-4">
             <div class="flex items-start justify-between">
               <div>
                 <div class="flex items-center gap-2">
@@ -619,8 +619,8 @@ const handleSavePassword = () => {
                 @click="handleThemeColorSelect('default')"
                 class="group text-left p-3.5 rounded-xl border-2 transition-all cursor-pointer relative flex flex-col justify-between"
                 :class="themeColor === 'default'
-                  ? 'border-neutral-900 dark:border-white bg-neutral-50 dark:bg-[#1c1c20] shadow-sm'
-                  : 'border-neutral-200 dark:border-[#27272a] hover:border-neutral-300 dark:hover:border-neutral-600 bg-white dark:bg-[#141417]'"
+                  ? 'border-neutral-900 dark:border-white bg-neutral-50 dark:bg-[var(--theme-surface-muted)] shadow-sm'
+                  : 'border-neutral-200 dark:border-[var(--theme-border)] hover:border-neutral-300 dark:hover:border-neutral-600 bg-white dark:bg-[var(--theme-surface)]'"
               >
                 <div>
                   <div class="flex items-center justify-between mb-2">
@@ -638,7 +638,7 @@ const handleSavePassword = () => {
                     Monokrom & Pure Neutral Dark (Zero Blue Tint).
                   </p>
                 </div>
-                <div class="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-neutral-100 dark:border-[#27272a]">
+                <div class="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-neutral-100 dark:border-[var(--theme-border)]">
                   <span class="w-4 h-4 rounded-full bg-[#18181b] border border-neutral-400" title="#18181b" />
                   <span class="w-4 h-4 rounded-full bg-[#27272a]" title="#27272a" />
                   <span class="w-4 h-4 rounded-full bg-[#f4f4f5] border border-neutral-300" title="#f4f4f5" />
@@ -654,7 +654,7 @@ const handleSavePassword = () => {
                 class="group text-left p-3.5 rounded-xl border-2 transition-all cursor-pointer relative flex flex-col justify-between"
                 :class="themeColor === 'pink'
                   ? 'border-[#E85D88] bg-pink-50/50 dark:bg-pink-950/20 shadow-sm'
-                  : 'border-neutral-200 dark:border-[#27272a] hover:border-pink-300 dark:hover:border-pink-800 bg-white dark:bg-[#141417]'"
+                  : 'border-neutral-200 dark:border-[var(--theme-border)] hover:border-pink-300 dark:hover:border-pink-800 bg-white dark:bg-[var(--theme-surface)]'"
               >
                 <div>
                   <div class="flex items-center justify-between mb-2">
@@ -673,7 +673,7 @@ const handleSavePassword = () => {
                     Identitas modern soft pink berry dengan aksen elegan.
                   </p>
                 </div>
-                <div class="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-neutral-100 dark:border-[#27272a]">
+                <div class="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-neutral-100 dark:border-[var(--theme-border)]">
                   <span class="w-4 h-4 rounded-full bg-[#E85D88]" title="Primary Brand: #E85D88" />
                   <span class="w-4 h-4 rounded-full bg-[#C83D6A]" title="Primary Action: #C83D6A" />
                   <span class="w-4 h-4 rounded-full bg-[#FCE7EF] border border-pink-200" title="Primary Soft: #FCE7EF" />
@@ -689,7 +689,7 @@ const handleSavePassword = () => {
                 class="group text-left p-3.5 rounded-xl border-2 transition-all cursor-pointer relative flex flex-col justify-between"
                 :class="themeColor === 'blue'
                   ? 'border-[#007AFF] bg-blue-50/50 dark:bg-blue-950/20 shadow-sm'
-                  : 'border-neutral-200 dark:border-[#27272a] hover:border-blue-300 dark:hover:border-blue-800 bg-white dark:bg-[#141417]'"
+                  : 'border-neutral-200 dark:border-[var(--theme-border)] hover:border-blue-300 dark:hover:border-blue-800 bg-white dark:bg-[var(--theme-surface)]'"
               >
                 <div>
                   <div class="flex items-center justify-between mb-2">
@@ -708,7 +708,7 @@ const handleSavePassword = () => {
                     CTA tajam Apple iOS Slate Blue untuk tampilan clean & pro.
                   </p>
                 </div>
-                <div class="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-neutral-100 dark:border-[#27272a]">
+                <div class="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-neutral-100 dark:border-[var(--theme-border)]">
                   <span class="w-4 h-4 rounded-full bg-[#007AFF]" title="Primary: #007AFF" />
                   <span class="w-4 h-4 rounded-full bg-[#0062CC]" title="Primary Hover: #0062CC" />
                   <span class="w-4 h-4 rounded-full bg-[#E5F1FF] border border-blue-200" title="Primary Soft: #E5F1FF" />
@@ -724,7 +724,7 @@ const handleSavePassword = () => {
                 class="group text-left p-3.5 rounded-xl border-2 transition-all cursor-pointer relative flex flex-col justify-between"
                 :class="themeColor === 'terracotta'
                   ? 'border-[#c03a18] bg-amber-50/50 dark:bg-amber-950/20 shadow-sm'
-                  : 'border-neutral-200 dark:border-[#27272a] hover:border-amber-400 dark:hover:border-amber-800 bg-white dark:bg-[#141417]'"
+                  : 'border-neutral-200 dark:border-[var(--theme-border)] hover:border-amber-400 dark:hover:border-amber-800 bg-white dark:bg-[var(--theme-surface)]'"
               >
                 <div>
                   <div class="flex items-center justify-between mb-2">
@@ -743,7 +743,7 @@ const handleSavePassword = () => {
                     Terracotta Rust & Warm Sand Linen terinspirasi landing page VisionID.
                   </p>
                 </div>
-                <div class="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-neutral-100 dark:border-[#27272a]">
+                <div class="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-neutral-100 dark:border-[var(--theme-border)]">
                   <span class="w-4 h-4 rounded-full bg-[#c03a18]" title="Primary Brand & Action: #c03a18" />
                   <span class="w-4 h-4 rounded-full bg-[#ab3315]" title="Primary Hover: #ab3315" />
                   <span class="w-4 h-4 rounded-full bg-[#FDF2EE] border border-amber-200" title="Primary Soft: #FDF2EE" />
@@ -754,7 +754,7 @@ const handleSavePassword = () => {
             </div>
 
             <!-- Token Matrix Table Viewer -->
-            <div class="pt-3 border-t border-neutral-100 dark:border-[#27272a]">
+            <div class="pt-3 border-t border-neutral-100 dark:border-[var(--theme-border)]">
               <div class="flex items-center justify-between mb-2">
                 <span class="text-xs font-bold text-neutral-700 dark:text-neutral-300">
                   Token Desain Tema Aktif:
@@ -763,17 +763,17 @@ const handleSavePassword = () => {
                   CSS Variables Auto-Cascade
                 </span>
               </div>
-              <div class="max-h-48 overflow-y-auto rounded-xl border border-neutral-200 dark:border-[#27272a] text-xs">
+              <div class="max-h-48 overflow-y-auto rounded-xl border border-neutral-200 dark:border-[var(--theme-border)] text-xs">
                 <table class="w-full text-left">
-                  <thead class="bg-neutral-50 dark:bg-[#18181b] text-neutral-500 dark:text-neutral-400 border-b border-neutral-200 dark:border-[#27272a] text-[10.5px]">
+                  <thead class="bg-neutral-50 dark:bg-[var(--theme-surface-raised)] text-neutral-500 dark:text-neutral-400 border-b border-neutral-200 dark:border-[var(--theme-border)] text-[10.5px]">
                     <tr>
                       <th class="py-1.5 px-3 font-semibold">Token</th>
                       <th class="py-1.5 px-3 font-semibold">HEX / Value</th>
                       <th class="py-1.5 px-3 font-semibold">Keterangan</th>
                     </tr>
                   </thead>
-                  <tbody class="divide-y divide-neutral-100 dark:divide-[#242428] text-neutral-700 dark:text-neutral-300 text-[11px]">
-                    <tr v-for="t in currentTokens" :key="t.token" class="hover:bg-neutral-50/50 dark:hover:bg-[#1a1a1e]">
+                  <tbody class="divide-y divide-neutral-100 dark:divide-[var(--theme-border)] text-neutral-700 dark:text-neutral-300 text-[11px]">
+                    <tr v-for="t in currentTokens" :key="t.token" class="hover:bg-neutral-50/50 dark:hover:bg-[var(--theme-surface-raised)]">
                       <td class="py-1.5 px-3 font-medium">{{ t.token }}</td>
                       <td class="py-1.5 px-3 font-mono text-[10px] flex items-center gap-1.5">
                         <span
@@ -792,7 +792,7 @@ const handleSavePassword = () => {
           </div>
 
           <!-- CARD 2: KUSTOMISASI DASAR PERTAMA (BACKGROUND) -->
-          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417] shadow-2xs space-y-4">
+          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs space-y-4">
             <div>
               <h2 class="text-sm font-bold text-neutral-900 dark:text-white flex items-center gap-2">
                 <Palette class="w-4 h-4 text-neutral-700 dark:text-neutral-300" />
@@ -809,7 +809,7 @@ const handleSavePassword = () => {
                 type="button"
                 @click="setBgType('grid'); toast.info('Mode Grid aktif', 'Background')"
                 class="flex flex-col items-center justify-center p-3.5 rounded-xl border transition cursor-pointer text-center"
-                :class="bgType === 'grid' ? 'border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-950 font-bold' : 'border-neutral-200 dark:border-[#27272a] hover:bg-neutral-50 dark:hover:bg-[#1c1c20] text-neutral-700 dark:text-neutral-300'"
+                :class="bgType === 'grid' ? 'border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-950 font-bold' : 'border-neutral-200 dark:border-[var(--theme-border)] hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300'"
               >
                 <Grid class="w-5 h-5 mb-1.5" />
                 <span class="text-xs">Grid Kotak</span>
@@ -819,7 +819,7 @@ const handleSavePassword = () => {
                 type="button"
                 @click="setBgType('dots'); toast.info('Mode Titik-titik aktif', 'Background')"
                 class="flex flex-col items-center justify-center p-3.5 rounded-xl border transition cursor-pointer text-center"
-                :class="bgType === 'dots' ? 'border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-950 font-bold' : 'border-neutral-200 dark:border-[#27272a] hover:bg-neutral-50 dark:hover:bg-[#1c1c20] text-neutral-700 dark:text-neutral-300'"
+                :class="bgType === 'dots' ? 'border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-950 font-bold' : 'border-neutral-200 dark:border-[var(--theme-border)] hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300'"
               >
                 <CircleDot class="w-5 h-5 mb-1.5" />
                 <span class="text-xs">Titik-titik (Dots)</span>
@@ -829,7 +829,7 @@ const handleSavePassword = () => {
                 type="button"
                 @click="setBgType('solid'); setSolidColor('#18181b'); toast.info('Mode Warna Solid aktif', 'Background')"
                 class="flex flex-col items-center justify-center p-3.5 rounded-xl border transition cursor-pointer text-center"
-                :class="bgType === 'solid' ? 'border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-950 font-bold' : 'border-neutral-200 dark:border-[#27272a] hover:bg-neutral-50 dark:hover:bg-[#1c1c20] text-neutral-700 dark:text-neutral-300'"
+                :class="bgType === 'solid' ? 'border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-950 font-bold' : 'border-neutral-200 dark:border-[var(--theme-border)] hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300'"
               >
                 <Palette class="w-5 h-5 mb-1.5" />
                 <span class="text-xs">Warna Solid</span>
@@ -839,7 +839,7 @@ const handleSavePassword = () => {
                 type="button"
                 @click="setBgType('image'); toast.info('Mode Gambar aktif', 'Background')"
                 class="flex flex-col items-center justify-center p-3.5 rounded-xl border transition cursor-pointer text-center"
-                :class="bgType === 'image' ? 'border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-950 font-bold' : 'border-neutral-200 dark:border-[#27272a] hover:bg-neutral-50 dark:hover:bg-[#1c1c20] text-neutral-700 dark:text-neutral-300'"
+                :class="bgType === 'image' ? 'border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-950 font-bold' : 'border-neutral-200 dark:border-[var(--theme-border)] hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300'"
               >
                 <ImageIcon class="w-5 h-5 mb-1.5" />
                 <span class="text-xs">Gambar (Image)</span>
@@ -847,7 +847,7 @@ const handleSavePassword = () => {
             </div>
 
             <!-- Opsi Tambahan untuk Solid Color -->
-            <div v-if="bgType === 'solid'" class="pt-3 border-t border-neutral-100 dark:border-[#27272a] space-y-2">
+            <div v-if="bgType === 'solid'" class="pt-3 border-t border-neutral-100 dark:border-[var(--theme-border)] space-y-2">
               <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300">
                 Pilih Palet Warna Latar:
               </label>
@@ -867,7 +867,7 @@ const handleSavePassword = () => {
             </div>
 
             <!-- Opsi Tambahan untuk Image -->
-            <div v-if="bgType === 'image'" class="pt-3 border-t border-neutral-100 dark:border-[#27272a] space-y-2 max-w-lg">
+            <div v-if="bgType === 'image'" class="pt-3 border-t border-neutral-100 dark:border-[var(--theme-border)] space-y-2 max-w-lg">
               <BaseInput
                 v-model="imageUrl"
                 label="URL Gambar Background"
@@ -883,7 +883,7 @@ const handleSavePassword = () => {
         <!-- ======================================================== -->
         <div v-else-if="activeTab === 'modal'" class="space-y-5">
           <!-- Modal Dialog Showcase -->
-          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417] shadow-2xs space-y-4">
+          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs space-y-4">
             <div class="flex items-center justify-between">
               <div>
                 <h2 class="text-sm font-bold text-neutral-900 dark:text-white flex items-center gap-2">
@@ -917,7 +917,7 @@ const handleSavePassword = () => {
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <!-- Card 1: Confirmation Simpan -->
-              <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417] shadow-2xs flex flex-col justify-between space-y-4">
+              <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs flex flex-col justify-between space-y-4">
                 <div class="flex items-start justify-between">
                   <BaseBadge variant="info">Confirmation — Simpan</BaseBadge>
                   <div class="w-2 h-2 rounded-full bg-blue-500" />
@@ -939,7 +939,7 @@ const handleSavePassword = () => {
               </div>
 
               <!-- Card 2: Confirmation Delete -->
-              <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417] shadow-2xs flex flex-col justify-between space-y-4">
+              <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs flex flex-col justify-between space-y-4">
                 <div class="flex items-start justify-between">
                   <BaseBadge variant="danger">Confirmation — Delete</BaseBadge>
                   <div class="w-2 h-2 rounded-full bg-rose-500" />
@@ -968,7 +968,7 @@ const handleSavePassword = () => {
         <!-- ======================================================== -->
         <div v-else-if="activeTab === 'notifikasi'" class="space-y-5">
           <!-- Toast Notification Service Showcase -->
-          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417] shadow-2xs space-y-4">
+          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs space-y-4">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2 text-xs font-bold text-neutral-900 dark:text-white">
                 <Bell class="w-4 h-4 text-neutral-600 dark:text-neutral-300" />
@@ -995,7 +995,7 @@ const handleSavePassword = () => {
               <button
                 type="button"
                 @click="triggerSaveErrorDemo"
-                class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-semibold bg-neutral-100 text-neutral-800 hover:bg-neutral-200 dark:bg-[#202024] dark:text-neutral-200 dark:hover:bg-[#27272e] border border-neutral-300 dark:border-[#2f2f35] transition cursor-pointer shadow-xs active:scale-[0.99]"
+                class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-semibold bg-neutral-100 text-neutral-800 hover:bg-neutral-200 dark:bg-[var(--theme-surface-muted)] dark:text-neutral-200 dark:hover:bg-[var(--theme-surface-muted)] border border-neutral-300 dark:border-[var(--theme-border-strong)] transition cursor-pointer shadow-xs active:scale-[0.99]"
               >
                 <span class="w-2 h-2 rounded-full bg-rose-400 animate-pulse" />
                 <span>Simpan (Loading &rarr; Gagal)</span>
@@ -1003,7 +1003,7 @@ const handleSavePassword = () => {
             </div>
 
             <!-- Standard Toast Types -->
-            <div class="pt-3 border-t border-neutral-100 dark:border-[#242428] space-y-2">
+            <div class="pt-3 border-t border-neutral-100 dark:border-[var(--theme-border)] space-y-2">
               <span class="text-[11px] font-semibold text-neutral-500 block">Toast Sekali Panggil:</span>
               <div class="flex flex-wrap items-center gap-2">
                 <BaseButton variant="outline" size="sm" @click="triggerSuccess">
@@ -1027,9 +1027,9 @@ const handleSavePassword = () => {
           </div>
 
           <!-- Preferensi Notifikasi -->
-          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417] shadow-2xs space-y-4">
+          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs space-y-4">
             <h3 class="text-sm font-bold text-neutral-900 dark:text-white">Preferensi Toast</h3>
-            <div class="space-y-4 divide-y divide-neutral-100 dark:divide-[#242428]">
+            <div class="space-y-4 divide-y divide-neutral-100 dark:divide-[var(--theme-border)]">
               <BaseSwitch
                 v-model="soundNotification"
                 label="Suara Efek Notifikasi"
@@ -1051,7 +1051,7 @@ const handleSavePassword = () => {
         <!-- ======================================================== -->
         <div v-else-if="activeTab === 'keamanan'" class="space-y-5">
           <!-- 2FA Switcher -->
-          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417] shadow-2xs space-y-4">
+          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs space-y-4">
             <div class="flex items-center gap-2">
               <Shield class="w-4 h-4 text-emerald-500" />
               <h2 class="text-sm font-bold text-neutral-900 dark:text-white">Autentikasi & Perlindungan Akun</h2>
@@ -1065,7 +1065,7 @@ const handleSavePassword = () => {
           </div>
 
           <!-- Form Ubah Password Menggunakan BaseInput dengan Eye Toggle -->
-          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417] shadow-2xs space-y-4">
+          <div class="p-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs space-y-4">
             <div class="flex items-center gap-2">
               <KeyRound class="w-4 h-4 text-neutral-700 dark:text-neutral-300" />
               <h2 class="text-sm font-bold text-neutral-900 dark:text-white">Perbarui Kata Sandi</h2>
@@ -1113,7 +1113,7 @@ const handleSavePassword = () => {
         <p>
           Ini adalah contoh <strong>BaseModal.vue</strong> yang dapat dikonfigurasi ukurannya (sm, md, lg, xl, full).
         </p>
-        <div class="p-3 rounded-xl bg-neutral-100 dark:bg-[#18181b] border border-neutral-200 dark:border-[#27272a]">
+        <div class="p-3 rounded-xl bg-neutral-100 dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)]">
           Mendukung tombol Esc, click-outside backdrop, serta auto-lock scroll pada body dokumen.
         </div>
       </div>
@@ -1176,7 +1176,7 @@ const handleSavePassword = () => {
           Komponen <code>BaseSlideOver.vue</code> sangat cocok untuk melihat detail pesanan, profil lengkap pengguna, atau log tanpa meninggalkan halaman saat ini.
         </p>
 
-        <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[#161619] border border-neutral-200 dark:border-[#27272a] space-y-2">
+        <div class="p-4 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] space-y-2">
           <span class="font-bold text-neutral-900 dark:text-white">Aktivitas Terkini:</span>
           <BaseTimeline :items="demoTimelineItems" compact />
         </div>

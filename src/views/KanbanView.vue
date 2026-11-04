@@ -342,7 +342,7 @@ const submitNewOrder = () => {
   <div class="h-full flex flex-col space-y-4 select-none">
     
     <!-- Top Action Bar -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-neutral-200 dark:border-[#27272a] shrink-0">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-neutral-200 dark:border-[var(--theme-border)] shrink-0">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[var(--theme-primary)] text-[var(--theme-primary-text)] flex items-center justify-center shrink-0 shadow-2xs">
           <KanbanSquare class="w-5 h-5" />
@@ -370,7 +370,7 @@ const submitNewOrder = () => {
             v-model="searchQuery"
             type="text"
             placeholder="Cari order atau klien..."
-            class="w-full text-xs py-1.5 pl-8 pr-3 rounded-xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417] text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary)]"
+            class="w-full text-xs py-1.5 pl-8 pr-3 rounded-xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary)]"
           />
         </div>
 
@@ -400,11 +400,11 @@ const submitNewOrder = () => {
           @dragover="onDragOver($event, col.id)"
           @dragleave="onDragLeave"
           @drop="onDrop(col.id)"
-          class="flex flex-col rounded-2xl bg-neutral-100/70 dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] p-3 transition-colors h-full"
+          class="flex flex-col rounded-2xl bg-neutral-100/70 dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] p-3 transition-colors h-full"
           :class="dragOverCol === col.id ? 'ring-2 ring-[var(--theme-primary)] bg-[var(--theme-primary-soft)]' : ''"
         >
           <!-- Column Header -->
-          <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-neutral-200/80 dark:border-[#202025] shrink-0">
+          <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-neutral-200/80 dark:border-[var(--theme-border)] shrink-0">
             <div class="flex items-center gap-2">
               <span class="w-2.5 h-2.5 rounded-full shrink-0" :class="col.dotBg" />
               <h3 class="text-xs font-bold text-neutral-900 dark:text-white">
@@ -413,13 +413,13 @@ const submitNewOrder = () => {
             </div>
 
             <!-- Card Counter Badge -->
-            <span class="text-[10.5px] font-mono font-bold px-2 py-0.5 rounded-lg bg-white dark:bg-[#202025] text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-[#2c2c34]">
+            <span class="text-[10.5px] font-mono font-bold px-2 py-0.5 rounded-lg bg-white dark:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-[var(--theme-border-strong)]">
               {{ getCardsByStatus(col.id).length }}
             </span>
           </div>
 
           <!-- Column Total Rupiah Header Metric -->
-          <div class="px-2 py-1.5 rounded-xl bg-white/60 dark:bg-[#18181c] border border-neutral-200/60 dark:border-[#222226] text-[11px] flex items-center justify-between mb-3 shrink-0">
+          <div class="px-2 py-1.5 rounded-xl bg-white/60 dark:bg-[var(--theme-surface-raised)] border border-neutral-200/60 dark:border-[var(--theme-border)] text-[11px] flex items-center justify-between mb-3 shrink-0">
             <span class="text-neutral-400">Total Nilai:</span>
             <span class="font-bold font-mono text-neutral-800 dark:text-neutral-200">
               Rp {{ getColumnTotalNominal(col.id).toLocaleString('id-ID') }}
@@ -435,7 +435,7 @@ const submitNewOrder = () => {
               draggable="true"
               @dragstart="onDragStart(card)"
               @click="openDetail(card)"
-              class="p-3.5 rounded-xl bg-white dark:bg-[#1a1a1e] border border-neutral-200 dark:border-[#27272a] shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-600 transition-all cursor-pointer space-y-2.5 group relative"
+              class="p-3.5 rounded-xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-600 transition-all cursor-pointer space-y-2.5 group relative"
             >
               <!-- Card Top: ID & Category Badge -->
               <div class="flex items-center justify-between gap-2">
@@ -468,7 +468,7 @@ const submitNewOrder = () => {
               </div>
 
               <!-- Nominal & Deadline -->
-              <div class="flex items-center justify-between pt-2 border-t border-neutral-100 dark:border-[#222226] text-[11px]">
+              <div class="flex items-center justify-between pt-2 border-t border-neutral-100 dark:border-[var(--theme-border)] text-[11px]">
                 <span class="font-mono font-bold text-neutral-900 dark:text-white">
                   Rp {{ card.nominal.toLocaleString('id-ID') }}
                 </span>
@@ -512,7 +512,7 @@ const submitNewOrder = () => {
                 <button
                   type="button"
                   @click.stop="openInvoice(card)"
-                  class="p-1 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#25252b] transition"
+                  class="p-1 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] transition"
                   title="Cetak Faktur / Struk"
                 >
                   <Printer class="w-3.5 h-3.5" />
@@ -523,7 +523,7 @@ const submitNewOrder = () => {
             <!-- Empty Column State -->
             <div
               v-if="getCardsByStatus(col.id).length === 0"
-              class="py-8 text-center text-xs text-neutral-400 border border-dashed border-neutral-300 dark:border-[#27272a] rounded-xl space-y-1"
+              class="py-8 text-center text-xs text-neutral-400 border border-dashed border-neutral-300 dark:border-[var(--theme-border)] rounded-xl space-y-1"
             >
               <Package class="w-5 h-5 mx-auto text-neutral-300 dark:text-neutral-600 mb-1" />
               <p class="font-medium">Tidak ada kartu</p>
@@ -556,7 +556,7 @@ const submitNewOrder = () => {
 
       <div v-if="selectedCard" class="space-y-5 text-xs">
         <!-- Customer & Contact Card -->
-        <div class="p-3.5 rounded-2xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-200 dark:border-[#27272a] space-y-2">
+        <div class="p-3.5 rounded-2xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] space-y-2">
           <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Informasi Pemesan</span>
           <div class="flex items-center justify-between">
             <div>
@@ -570,19 +570,19 @@ const submitNewOrder = () => {
         <div class="space-y-2">
           <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Spesifikasi Order</span>
           <div class="grid grid-cols-2 gap-2 text-xs">
-            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417]">
+            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)]">
               <span class="text-neutral-400 text-[10px] block">Layanan:</span>
               <span class="font-bold text-neutral-900 dark:text-white">{{ selectedCard.layanan }}</span>
             </div>
-            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417]">
+            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)]">
               <span class="text-neutral-400 text-[10px] block">Jumlah (Qty):</span>
               <span class="font-bold text-neutral-900 dark:text-white">{{ selectedCard.qty }}</span>
             </div>
-            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417]">
+            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)]">
               <span class="text-neutral-400 text-[10px] block">Total Nominal:</span>
               <span class="font-bold font-mono text-[var(--theme-primary)]">Rp {{ selectedCard.nominal.toLocaleString('id-ID') }}</span>
             </div>
-            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417]">
+            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)]">
               <span class="text-neutral-400 text-[10px] block">Batas Waktu (Deadline):</span>
               <span class="font-bold text-neutral-900 dark:text-white">{{ selectedCard.deadline }}</span>
             </div>
@@ -592,7 +592,7 @@ const submitNewOrder = () => {
         <!-- Activity Timeline Audit Log Component -->
         <div class="space-y-2 pt-2">
           <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Riwayat & Timeline Proses</span>
-          <div class="p-4 rounded-2xl bg-white dark:bg-[#16161a] border border-neutral-200 dark:border-[#27272a]">
+          <div class="p-4 rounded-2xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)]">
             <BaseTimeline :items="selectedCard.timeline" compact />
           </div>
         </div>

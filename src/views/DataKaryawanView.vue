@@ -562,14 +562,14 @@ const getRowActionItems = (item) => [
   <div class="h-full flex flex-col min-h-0 overflow-hidden gap-2.5 w-full max-w-7xl mx-auto select-none relative">
     
     <!-- Top Compact Header: Title & Action Buttons -->
-    <div class="flex items-center justify-between gap-3 pb-2 border-b border-neutral-200 dark:border-[#27272a] shrink-0">
+    <div class="flex items-center justify-between gap-3 pb-2 border-b border-neutral-200 dark:border-[var(--theme-border)] shrink-0">
       <div class="flex items-center gap-2.5 min-w-0">
         <div class="w-8 h-8 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 flex items-center justify-center shrink-0 shadow-2xs">
           <Users class="w-4 h-4" />
         </div>
         <div class="min-w-0">
           <div class="flex items-center gap-2">
-            <h1 class="text-base sm:text-lg font-bold text-neutral-900 dark:text-[#f4f4f5] leading-none truncate">
+            <h1 class="text-base sm:text-lg font-bold text-neutral-900 dark:text-[var(--theme-text-primary)] leading-none truncate">
               Data Karyawan & Payroll
             </h1>
             <BaseBadge variant="success" size="sm">
@@ -615,7 +615,7 @@ const getRowActionItems = (item) => [
           v-model="searchQuery"
           type="text"
           placeholder="Cari nama pegawai, NIP, jabatan, atau divisi..."
-          class="w-full pl-9 pr-8 py-2 rounded-xl text-xs bg-white dark:bg-[#18181b] border border-neutral-200 dark:border-[#27272a] text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-[#333338] transition shadow-2xs"
+          class="w-full pl-9 pr-8 py-2 rounded-xl text-xs bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-[var(--theme-border-strong)] transition shadow-2xs"
         />
         <button
           v-if="searchQuery"
@@ -650,8 +650,8 @@ const getRowActionItems = (item) => [
 
     <!-- Quick Stats Summary Strip -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 shrink-0">
-      <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex items-center gap-2">
-        <div class="w-6 h-6 rounded-lg bg-neutral-100 dark:bg-[#202025] text-neutral-700 dark:text-neutral-300 flex items-center justify-center shrink-0">
+      <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300 flex items-center justify-center shrink-0">
           <Users class="w-3.5 h-3.5" />
         </div>
         <div class="flex items-center gap-1.5 min-w-0 truncate text-xs">
@@ -660,7 +660,7 @@ const getRowActionItems = (item) => [
         </div>
       </div>
 
-      <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex items-center gap-2">
+      <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex items-center gap-2">
         <div class="w-6 h-6 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
           <Coins class="w-3.5 h-3.5" />
         </div>
@@ -670,7 +670,7 @@ const getRowActionItems = (item) => [
         </div>
       </div>
 
-      <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex items-center gap-2">
+      <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex items-center gap-2">
         <div class="w-6 h-6 rounded-lg bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
           <CheckCircle2 class="w-3.5 h-3.5" />
         </div>
@@ -680,7 +680,7 @@ const getRowActionItems = (item) => [
         </div>
       </div>
 
-      <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex items-center gap-2">
+      <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex items-center gap-2">
         <div class="w-6 h-6 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
           <Clock class="w-3.5 h-3.5" />
         </div>
@@ -694,12 +694,12 @@ const getRowActionItems = (item) => [
     <!-- ======================================================== -->
     <!-- DESKTOP TABLE VIEW                                       -->
     <!-- ======================================================== -->
-    <div class="hidden md:flex flex-1 min-h-0 flex-col rounded-2xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417] shadow-2xs overflow-hidden">
+    <div class="hidden md:flex flex-1 min-h-0 flex-col rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs overflow-hidden">
       <!-- Area Scroll Mandiri -->
       <div class="flex-1 min-h-0 overflow-y-auto overflow-x-auto">
         <table class="w-full text-left border-collapse text-xs">
           <!-- STICKY THEAD -->
-          <thead class="sticky top-0 z-20 bg-neutral-100/95 dark:bg-[#18181b]/95 backdrop-blur-md border-b border-neutral-200 dark:border-[#27272a] shadow-2xs">
+          <thead class="sticky top-0 z-20 bg-neutral-100/95 dark:bg-[var(--theme-surface-raised)]/95 backdrop-blur-md border-b border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs">
             <tr class="text-neutral-600 dark:text-neutral-400 font-semibold select-none text-[11px] uppercase tracking-wider">
               <!-- Checkbox Select All -->
               <th class="py-2.5 px-3 text-center w-10">
@@ -765,11 +765,11 @@ const getRowActionItems = (item) => [
           </thead>
 
           <!-- TABLE BODY -->
-          <tbody class="divide-y divide-neutral-200/70 dark:divide-[#242428]">
+          <tbody class="divide-y divide-neutral-200/70 dark:divide-[var(--theme-border)]">
             <tr
               v-for="(item, idx) in paginatedList"
               :key="item.id"
-              class="hover:bg-neutral-50/80 dark:hover:bg-[#18181c] transition-colors"
+              class="hover:bg-neutral-50/80 dark:hover:bg-[var(--theme-surface-raised)] transition-colors"
               :class="selectedIds.includes(item.id) ? 'bg-[var(--theme-primary-soft)]/40 dark:bg-[var(--theme-primary-soft)]/20' : ''"
             >
               <!-- Checkbox Row -->
@@ -790,7 +790,7 @@ const getRowActionItems = (item) => [
               <!-- Pegawai (Avatar + Nama + NIP) -->
               <td class="py-2.5 px-3 whitespace-nowrap">
                 <div class="flex items-center gap-2.5">
-                  <div class="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-[#222228] border border-neutral-200/80 dark:border-[#2e2e36] text-neutral-800 dark:text-neutral-200 font-bold text-xs flex items-center justify-center shrink-0">
+                  <div class="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-[var(--theme-surface-muted)] border border-neutral-200/80 dark:border-[var(--theme-border-strong)] text-neutral-800 dark:text-neutral-200 font-bold text-xs flex items-center justify-center shrink-0">
                     {{ item.avatar }}
                   </div>
                   <div class="min-w-0">
@@ -856,7 +856,7 @@ const getRowActionItems = (item) => [
                   <button
                     type="button"
                     @click="openEditModal(item)"
-                    class="p-1.5 rounded-lg text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:text-white dark:hover:bg-[#222226] transition cursor-pointer"
+                    class="p-1.5 rounded-lg text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:text-white dark:hover:bg-[var(--theme-surface-muted)] transition cursor-pointer"
                     title="Edit Pegawai"
                   >
                     <Pencil class="w-3.5 h-3.5" />
@@ -882,7 +882,7 @@ const getRowActionItems = (item) => [
       </div>
 
       <!-- Table Footer: BasePagination -->
-      <div class="py-2.5 px-4 border-t border-neutral-200 dark:border-[#27272a] bg-neutral-50/70 dark:bg-[#121214] shrink-0">
+      <div class="py-2.5 px-4 border-t border-neutral-200 dark:border-[var(--theme-border)] bg-neutral-50/70 dark:bg-[var(--theme-layer-2)] shrink-0">
         <BasePagination
           v-model:current-page="currentPage"
           :total-items="processedList.length"
@@ -910,7 +910,7 @@ const getRowActionItems = (item) => [
         <div
           v-for="item in paginatedList"
           :key="item.id"
-          class="p-3.5 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-xs space-y-3"
+          class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-xs space-y-3"
           :class="selectedIds.includes(item.id) ? 'ring-2 ring-[var(--theme-primary)]' : ''"
         >
           <!-- Top Row: Checkbox, Avatar, Nama, Status -->
@@ -922,7 +922,7 @@ const getRowActionItems = (item) => [
                 @change="toggleSelect(item.id)"
                 class="rounded border-neutral-300 text-[var(--theme-primary)] focus:ring-[var(--theme-primary)] cursor-pointer mt-0.5"
               />
-              <div class="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-[#202024] font-bold text-xs flex items-center justify-center shrink-0">
+              <div class="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-[var(--theme-surface-muted)] font-bold text-xs flex items-center justify-center shrink-0">
                 {{ item.avatar }}
               </div>
               <div>
@@ -948,7 +948,7 @@ const getRowActionItems = (item) => [
           </div>
 
           <!-- Mid Row: Kompensasi Gaji & Lokasi -->
-          <div class="p-2.5 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-100 dark:border-[#242428] flex items-center justify-between text-xs">
+          <div class="p-2.5 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-100 dark:border-[var(--theme-border)] flex items-center justify-between text-xs">
             <div>
               <span class="text-[10px] text-neutral-400 block font-semibold uppercase">Gaji Pokok</span>
               <span class="font-bold font-mono text-neutral-900 dark:text-white">
@@ -973,7 +973,7 @@ const getRowActionItems = (item) => [
               <button
                 type="button"
                 @click="openEditModal(item)"
-                class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-neutral-100 dark:bg-[#202025] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 transition"
+                class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 transition"
               >
                 Edit
               </button>
@@ -990,7 +990,7 @@ const getRowActionItems = (item) => [
       </div>
 
       <!-- Mobile Pagination -->
-      <div class="pt-2 border-t border-neutral-200 dark:border-[#27272a] shrink-0">
+      <div class="pt-2 border-t border-neutral-200 dark:border-[var(--theme-border)] shrink-0">
         <BasePagination
           v-model:current-page="currentPage"
           :total-items="processedList.length"
@@ -1013,9 +1013,9 @@ const getRowActionItems = (item) => [
     >
       <div
         v-if="selectedIds.length > 0"
-        class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-[#18181c]/95 backdrop-blur-md border border-neutral-300 dark:border-[#383842] shadow-2xl rounded-2xl px-4 py-2.5 flex items-center gap-3 text-xs will-change-transform max-w-[calc(100vw-32px)]"
+        class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-[var(--theme-surface-raised)]/95 backdrop-blur-md border border-neutral-300 dark:border-[var(--theme-border-strong)] shadow-2xl rounded-2xl px-4 py-2.5 flex items-center gap-3 text-xs will-change-transform max-w-[calc(100vw-32px)]"
       >
-        <div class="flex items-center gap-2 pr-2 border-r border-neutral-200 dark:border-[#2a2a30]">
+        <div class="flex items-center gap-2 pr-2 border-r border-neutral-200 dark:border-[var(--theme-border)]">
           <span class="w-5 h-5 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] flex items-center justify-center font-bold text-[11px]">
             {{ selectedIds.length }}
           </span>
@@ -1196,7 +1196,7 @@ const getRowActionItems = (item) => [
         />
 
         <!-- Baris 7: Switch BPJS Asuransi (BaseSwitch) -->
-        <div class="p-3.5 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-200/80 dark:border-[#26262a]">
+        <div class="p-3.5 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-200/80 dark:border-[var(--theme-border)]">
           <BaseSwitch
             v-model="formData.bpjsAktif"
             label="Kepesertaan BPJS Ketenagakerjaan & Kesehatan"
@@ -1269,7 +1269,7 @@ const getRowActionItems = (item) => [
 
       <div v-if="selectedEmployee" class="space-y-5 text-xs">
         <!-- Avatar & Header Identity Card -->
-        <div class="p-4 rounded-2xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-200 dark:border-[#27272a] flex items-center gap-3.5">
+        <div class="p-4 rounded-2xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] flex items-center gap-3.5">
           <div class="w-12 h-12 rounded-2xl bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-bold text-base flex items-center justify-center shrink-0 shadow-xs">
             {{ selectedEmployee.avatar }}
           </div>
@@ -1289,19 +1289,19 @@ const getRowActionItems = (item) => [
         <div class="space-y-2">
           <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Kontak & Kepegawaian</span>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417]">
+            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)]">
               <span class="text-neutral-400 text-[10px] block">Email Kantor:</span>
               <span class="font-semibold text-neutral-900 dark:text-white truncate block">{{ selectedEmployee.email }}</span>
             </div>
-            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417]">
+            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)]">
               <span class="text-neutral-400 text-[10px] block">Nomor Telepon:</span>
               <span class="font-semibold text-neutral-900 dark:text-white font-mono block">{{ selectedEmployee.telepon }}</span>
             </div>
-            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417]">
+            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)]">
               <span class="text-neutral-400 text-[10px] block">Tanggal Bergabung:</span>
               <span class="font-semibold text-neutral-900 dark:text-white block">{{ selectedEmployee.tanggalMasuk }}</span>
             </div>
-            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417]">
+            <div class="p-2.5 rounded-xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)]">
               <span class="text-neutral-400 text-[10px] block">Asuransi BPJS:</span>
               <span class="font-semibold text-emerald-600 dark:text-emerald-400 block">
                 {{ selectedEmployee.bpjs ? 'Aktif (Kesehatan & TK)' : 'Tidak Terdaftar' }}
@@ -1311,7 +1311,7 @@ const getRowActionItems = (item) => [
         </div>
 
         <!-- Compensation Payroll Card -->
-        <div class="p-4 rounded-2xl bg-white dark:bg-[#16161a] border border-neutral-200 dark:border-[#27272a] space-y-2.5 shadow-2xs">
+        <div class="p-4 rounded-2xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] space-y-2.5 shadow-2xs">
           <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Kompensasi Bulanan</span>
           <div class="flex items-center justify-between text-xs">
             <span class="text-neutral-500">Gaji Pokok:</span>
@@ -1321,7 +1321,7 @@ const getRowActionItems = (item) => [
             <span class="text-neutral-500">Tunjangan Kinerja:</span>
             <span class="font-mono font-bold text-neutral-900 dark:text-white">{{ formatRupiah(selectedEmployee.tunjangan) }}</span>
           </div>
-          <div class="pt-2 border-t border-neutral-100 dark:border-[#242428] flex items-center justify-between text-sm">
+          <div class="pt-2 border-t border-neutral-100 dark:border-[var(--theme-border)] flex items-center justify-between text-sm">
             <span class="font-bold text-neutral-900 dark:text-white">Take Home Pay:</span>
             <span class="font-mono font-bold text-[var(--theme-primary)]">
               {{ formatRupiah((selectedEmployee.gaji || 0) + (selectedEmployee.tunjangan || 0)) }}
@@ -1332,7 +1332,7 @@ const getRowActionItems = (item) => [
         <!-- Career History Timeline Component -->
         <div class="space-y-2 pt-1">
           <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Jejak Karier & Riwayat Payroll</span>
-          <div class="p-4 rounded-2xl bg-neutral-50/50 dark:bg-[#16161a] border border-neutral-200 dark:border-[#27272a]">
+          <div class="p-4 rounded-2xl bg-neutral-50/50 dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)]">
             <BaseTimeline :items="getEmployeeTimeline(selectedEmployee)" compact />
           </div>
         </div>

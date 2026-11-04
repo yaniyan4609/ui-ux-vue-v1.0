@@ -384,14 +384,14 @@ const handleResetDefault = () => {
   <div class="h-full flex flex-col min-h-0 overflow-hidden gap-2.5 w-full max-w-7xl mx-auto select-none">
     
     <!-- Top Compact Header: Title & Action Buttons -->
-    <div class="flex items-center justify-between gap-3 pb-2 border-b border-neutral-200 dark:border-[#27272a] shrink-0">
+    <div class="flex items-center justify-between gap-3 pb-2 border-b border-neutral-200 dark:border-[var(--theme-border)] shrink-0">
       <div class="flex items-center gap-2.5 min-w-0">
         <div class="w-8 h-8 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 flex items-center justify-center shrink-0 shadow-2xs">
           <Mountain class="w-4 h-4" />
         </div>
         <div class="min-w-0">
           <div class="flex items-center gap-2">
-            <h1 class="text-base sm:text-lg font-bold text-neutral-900 dark:text-[#f4f4f5] leading-none truncate">
+            <h1 class="text-base sm:text-lg font-bold text-neutral-900 dark:text-[var(--theme-text-primary)] leading-none truncate">
               Data Gunung di Pulau Jawa
             </h1>
             <span class="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200/60 dark:border-emerald-800/40 shrink-0">
@@ -429,7 +429,7 @@ const handleResetDefault = () => {
           v-model="searchQuery"
           type="text"
           placeholder="Cari dari 159 gunung, wilayah, basecamp..."
-          class="w-full pl-9 pr-8 py-2 rounded-xl text-xs bg-white dark:bg-[#18181b] border border-neutral-200 dark:border-[#27272a] text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-[#333338] transition shadow-2xs"
+          class="w-full pl-9 pr-8 py-2 rounded-xl text-xs bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-[var(--theme-border-strong)] transition shadow-2xs"
         />
         <button
           v-if="searchQuery"
@@ -469,7 +469,7 @@ const handleResetDefault = () => {
     </div>
 
     <!-- Garis Pembatas (Sesuai Wireframe) -->
-    <div class="border-b border-neutral-200 dark:border-[#27272a] shrink-0" />
+    <div class="border-b border-neutral-200 dark:border-[var(--theme-border)] shrink-0" />
 
     <!-- ======================================================== -->
     <!-- BARIS 2 (SESUAI WIREFRAME): 4 COMPACT ICON STAT PILLS   -->
@@ -477,8 +477,8 @@ const handleResetDefault = () => {
     <!-- ======================================================== -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 shrink-0">
       <!-- Pill 1: Total Gunung -->
-      <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex items-center gap-2">
-        <div class="w-6 h-6 rounded-lg bg-neutral-100 dark:bg-[#202024] text-neutral-700 dark:text-neutral-300 flex items-center justify-center shrink-0">
+      <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300 flex items-center justify-center shrink-0">
           <Mountain class="w-3.5 h-3.5" />
         </div>
         <div class="flex items-center gap-1.5 min-w-0 truncate text-xs">
@@ -488,7 +488,7 @@ const handleResetDefault = () => {
       </div>
 
       <!-- Pill 2: Tertinggi (Semeru) -->
-      <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex items-center gap-2">
+      <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex items-center gap-2">
         <div class="w-6 h-6 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
           <TrendingUp class="w-3.5 h-3.5" />
         </div>
@@ -499,7 +499,7 @@ const handleResetDefault = () => {
       </div>
 
       <!-- Pill 3: Puncak > 3.000 mdpl -->
-      <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex items-center gap-2">
+      <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex items-center gap-2">
         <div class="w-6 h-6 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
           <Flame class="w-3.5 h-3.5" />
         </div>
@@ -510,7 +510,7 @@ const handleResetDefault = () => {
       </div>
 
       <!-- Pill 4: Ramah Pemula & Wisata -->
-      <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex items-center gap-2">
+      <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex items-center gap-2">
         <div class="w-6 h-6 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
           <Trees class="w-3.5 h-3.5" />
         </div>
@@ -525,12 +525,12 @@ const handleResetDefault = () => {
     <!-- DESKTOP TABLE VIEW: FIX LENGTH / SCROLL HANYA DI DALAM  -->
     <!-- Tidak menyebabkan scroll di Layer 2                      -->
     <!-- ======================================================== -->
-    <div class="hidden md:flex flex-1 min-h-0 flex-col rounded-2xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417] shadow-2xs overflow-hidden">
+    <div class="hidden md:flex flex-1 min-h-0 flex-col rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs overflow-hidden">
       <!-- Area Gulir Tabel Mandiri: flex-1 min-h-0 overflow-y-auto -->
       <div class="flex-1 min-h-0 overflow-y-auto overflow-x-auto">
         <table class="w-full text-left border-collapse text-xs">
           <!-- STICKY THEAD -->
-          <thead class="sticky top-0 z-20 bg-neutral-100/95 dark:bg-[#18181b]/95 backdrop-blur-md border-b border-neutral-200 dark:border-[#27272a] shadow-2xs">
+          <thead class="sticky top-0 z-20 bg-neutral-100/95 dark:bg-[var(--theme-surface-raised)]/95 backdrop-blur-md border-b border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs">
             <tr class="text-neutral-600 dark:text-neutral-400 font-semibold select-none text-[11px] uppercase tracking-wider">
               <th class="py-2.5 px-3.5 text-center w-12">No</th>
 
@@ -599,11 +599,11 @@ const handleResetDefault = () => {
           </thead>
 
           <!-- TABLE BODY -->
-          <tbody class="divide-y divide-neutral-200/70 dark:divide-[#242428]">
+          <tbody class="divide-y divide-neutral-200/70 dark:divide-[var(--theme-border)]">
             <tr
               v-for="(item, idx) in paginatedList"
               :key="item.id"
-              class="hover:bg-neutral-50/80 dark:hover:bg-[#18181c] transition-colors"
+              class="hover:bg-neutral-50/80 dark:hover:bg-[var(--theme-surface-raised)] transition-colors"
             >
               <!-- Nomor -->
               <td class="py-2.5 px-3.5 text-center font-bold text-neutral-400 text-xs">
@@ -623,7 +623,7 @@ const handleResetDefault = () => {
 
               <!-- Ketinggian -->
               <td class="py-2.5 px-3 whitespace-nowrap">
-                <span class="font-bold text-neutral-900 dark:text-neutral-100 font-mono bg-neutral-100 dark:bg-[#202024] px-2 py-0.5 rounded-lg border border-neutral-200/80 dark:border-[#2d2d32]">
+                <span class="font-bold text-neutral-900 dark:text-neutral-100 font-mono bg-neutral-100 dark:bg-[var(--theme-surface-muted)] px-2 py-0.5 rounded-lg border border-neutral-200/80 dark:border-[var(--theme-border-strong)]">
                   {{ item.ketinggian.toLocaleString('id-ID') }} mdpl
                 </span>
               </td>
@@ -662,7 +662,7 @@ const handleResetDefault = () => {
                   <button
                     type="button"
                     @click="openEditModal(item)"
-                    class="p-1.5 rounded-lg text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:text-white dark:hover:bg-[#222226] transition cursor-pointer"
+                    class="p-1.5 rounded-lg text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:text-white dark:hover:bg-[var(--theme-surface-muted)] transition cursor-pointer"
                     title="Edit Gunung"
                   >
                     <Pencil class="w-3.5 h-3.5" />
@@ -689,7 +689,7 @@ const handleResetDefault = () => {
       </div>
 
       <!-- Table Footer: Pinned at bottom of card using BasePagination (shrink-0) -->
-      <div class="py-2.5 px-4 border-t border-neutral-200 dark:border-[#27272a] bg-neutral-50/70 dark:bg-[#121214] shrink-0">
+      <div class="py-2.5 px-4 border-t border-neutral-200 dark:border-[var(--theme-border)] bg-neutral-50/70 dark:bg-[var(--theme-layer-2)] shrink-0">
         <BasePagination
           v-model:current-page="currentPage"
           :total-items="processedList.length"
@@ -707,12 +707,12 @@ const handleResetDefault = () => {
         <div
           v-for="(item, idx) in paginatedList"
           :key="item.id"
-          class="p-3.5 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-xs space-y-2.5"
+          class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-xs space-y-2.5"
         >
           <!-- Card Top Bar: No, Nama, & Ketinggian Badge -->
           <div class="flex items-start justify-between gap-2">
             <div class="flex items-center gap-2">
-              <span class="w-6 h-6 rounded-lg bg-neutral-100 dark:bg-[#202024] text-neutral-700 dark:text-neutral-300 font-bold text-xs flex items-center justify-center shrink-0">
+              <span class="w-6 h-6 rounded-lg bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300 font-bold text-xs flex items-center justify-center shrink-0">
                 #{{ (itemsPerPage === 'all' ? 0 : (currentPage - 1) * itemsPerPage) + idx + 1 }}
               </span>
               <div>
@@ -731,13 +731,13 @@ const handleResetDefault = () => {
               </div>
             </div>
 
-            <span class="font-bold text-xs text-neutral-900 dark:text-neutral-100 font-mono bg-neutral-100 dark:bg-[#202024] px-2 py-0.5 rounded-lg border border-neutral-200/80 dark:border-[#2d2d32] shrink-0">
+            <span class="font-bold text-xs text-neutral-900 dark:text-neutral-100 font-mono bg-neutral-100 dark:bg-[var(--theme-surface-muted)] px-2 py-0.5 rounded-lg border border-neutral-200/80 dark:border-[var(--theme-border-strong)] shrink-0">
               {{ item.ketinggian.toLocaleString('id-ID') }} mdpl
             </span>
           </div>
 
           <!-- Card Detail Grid Compact -->
-          <div class="p-2.5 rounded-xl bg-neutral-50 dark:bg-[#18181c] text-xs space-y-1.5 border border-neutral-100 dark:border-[#222226]">
+          <div class="p-2.5 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] text-xs space-y-1.5 border border-neutral-100 dark:border-[var(--theme-border)]">
             <div class="flex items-start gap-2 text-neutral-700 dark:text-neutral-300">
               <MapPin class="w-3.5 h-3.5 text-neutral-400 shrink-0 mt-0.5" />
               <div class="min-w-0">
@@ -756,11 +756,11 @@ const handleResetDefault = () => {
           </div>
 
           <!-- Card Actions: Edit & Hapus -->
-          <div class="grid grid-cols-2 gap-2 pt-1 border-t border-neutral-100 dark:border-[#202024]">
+          <div class="grid grid-cols-2 gap-2 pt-1 border-t border-neutral-100 dark:border-[var(--theme-border)]">
             <button
               type="button"
               @click="openEditModal(item)"
-              class="w-full py-1.5 px-3 rounded-xl text-xs font-semibold border border-neutral-200 dark:border-[#2a2a30] bg-white hover:bg-neutral-50 dark:bg-[#1a1a1e] dark:hover:bg-[#222228] text-neutral-700 dark:text-neutral-200 transition flex items-center justify-center gap-1.5 cursor-pointer"
+              class="w-full py-1.5 px-3 rounded-xl text-xs font-semibold border border-neutral-200 dark:border-[var(--theme-border)] bg-white hover:bg-neutral-50 dark:bg-[var(--theme-surface-raised)] dark:hover:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-200 transition flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <Pencil class="w-3.5 h-3.5" />
               <span>Edit</span>
@@ -778,7 +778,7 @@ const handleResetDefault = () => {
         </div>
 
         <!-- Mobile Empty State -->
-        <div v-if="processedList.length === 0" class="p-4 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a]">
+        <div v-if="processedList.length === 0" class="p-4 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)]">
           <BaseEmptyState
             :icon="Mountain"
             title="Tidak ada data gunung"

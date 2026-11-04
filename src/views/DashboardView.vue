@@ -341,7 +341,7 @@ onUnmounted(() => {
     <!-- ======================================================== -->
     <!-- TOP HEADER: TITLE, BADGES, REFRESH & SKELETON DEMO       -->
     <!-- ======================================================== -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-neutral-200 dark:border-[#27272a] anim-fade-up">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-neutral-200 dark:border-[var(--theme-border)] anim-fade-up">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[var(--theme-primary)] text-[var(--theme-primary-text)] flex items-center justify-center shrink-0 shadow-2xs">
           <Activity class="w-5 h-5" />
@@ -406,7 +406,7 @@ onUnmounted(() => {
       <div
         v-for="i in 6"
         :key="'kpi-skel-' + i"
-        class="p-3.5 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs space-y-3"
+        class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs space-y-3"
       >
         <div class="flex items-center justify-between">
           <BaseSkeleton width="60%" height="11px" />
@@ -425,7 +425,7 @@ onUnmounted(() => {
       class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 anim-fade-up anim-delay-1"
     >
       <!-- KPI 1: Total Payroll Batch -->
-      <div class="p-3.5 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-700 transition flex flex-col justify-between space-y-2 group">
+      <div class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-700 transition flex flex-col justify-between space-y-2 group">
         <div class="flex items-center justify-between">
           <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Batch Payroll Bulan Ini</span>
           <div class="w-7 h-7 rounded-lg bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
@@ -448,7 +448,7 @@ onUnmounted(() => {
       </div>
 
       <!-- KPI 2: Realisasi Gaji Disalurkan -->
-      <div class="p-3.5 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-700 transition flex flex-col justify-between space-y-2 group">
+      <div class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-700 transition flex flex-col justify-between space-y-2 group">
         <div class="flex items-center justify-between">
           <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Realisasi Gaji Disalurkan</span>
           <div class="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
@@ -470,7 +470,7 @@ onUnmounted(() => {
       </div>
 
       <!-- KPI 3: Tiket Klaim & Lembur -->
-      <div class="p-3.5 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-700 transition flex flex-col justify-between space-y-2 group">
+      <div class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-700 transition flex flex-col justify-between space-y-2 group">
         <div class="flex items-center justify-between">
           <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Klaim & Pengajuan</span>
           <div class="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
@@ -491,7 +491,7 @@ onUnmounted(() => {
       </div>
 
       <!-- KPI 4: Karyawan Aktif -->
-      <div class="p-3.5 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-700 transition flex flex-col justify-between space-y-2 group">
+      <div class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-700 transition flex flex-col justify-between space-y-2 group">
         <div class="flex items-center justify-between">
           <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Total Karyawan Aktif</span>
           <div class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
@@ -514,7 +514,7 @@ onUnmounted(() => {
       </div>
 
       <!-- KPI 5: Sistem ERP & Modul -->
-      <div class="p-3.5 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-700 transition flex flex-col justify-between space-y-2 group">
+      <div class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs hover:border-neutral-300 dark:hover:border-neutral-700 transition flex flex-col justify-between space-y-2 group">
         <div class="flex items-center justify-between">
           <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Sistem ERP & Modul</span>
           <div class="w-7 h-7 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
@@ -535,7 +535,7 @@ onUnmounted(() => {
       </div>
 
       <!-- KPI 6: Evaluasi PKWT Segera -->
-      <div class="p-3.5 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs hover:border-rose-300 dark:hover:border-rose-900/50 transition flex flex-col justify-between space-y-2 group">
+      <div class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs hover:border-rose-300 dark:hover:border-rose-900/50 transition flex flex-col justify-between space-y-2 group">
         <div class="flex items-center justify-between">
           <span class="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400">Evaluasi PKWT</span>
           <div class="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
@@ -569,7 +569,7 @@ onUnmounted(() => {
       <!-- ====================================================== -->
       <!-- DIAGRAM 1: Tren Omzet & Order                          -->
       <!-- ====================================================== -->
-      <div class="lg:col-span-5 p-4 sm:p-4.5 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex flex-col justify-between space-y-3">
+      <div class="lg:col-span-5 p-4 sm:p-4.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex flex-col justify-between space-y-3">
         <!-- Skeleton Chart 1 -->
         <template v-if="isLoading">
           <div class="flex items-center justify-between gap-2">
@@ -609,7 +609,7 @@ onUnmounted(() => {
                 type="button"
                 @click="toggleWave"
                 class="w-8.5 h-8.5 rounded-xl border flex items-center justify-center transition cursor-pointer shrink-0"
-                :class="isWaveActive ? 'bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 border-sky-300 dark:border-sky-800' : 'bg-neutral-100 dark:bg-[#18181b] text-neutral-400 border-neutral-200 dark:border-[#27272a] hover:text-neutral-600 dark:hover:text-neutral-200'"
+                :class="isWaveActive ? 'bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 border-sky-300 dark:border-sky-800' : 'bg-neutral-100 dark:bg-[var(--theme-surface-raised)] text-neutral-400 border-neutral-200 dark:border-[var(--theme-border)] hover:text-neutral-600 dark:hover:text-neutral-200'"
                 :title="isWaveActive ? 'Matikan Animasi Gelombang' : 'Aktifkan Animasi Gelombang'"
               >
                 <Waves class="w-4 h-4" :class="isWaveActive ? 'animate-pulse' : ''" />
@@ -636,7 +636,7 @@ onUnmounted(() => {
                 <span>Realisasi Gaji (Rp)</span>
               </div>
               <div class="flex items-center gap-1.5">
-                <span class="w-2.5 h-2.5 rounded-full border-2 border-sky-400 bg-white dark:bg-[#141417] inline-block" />
+                <span class="w-2.5 h-2.5 rounded-full border-2 border-sky-400 bg-white dark:bg-[var(--theme-surface)] inline-block" />
                 <span>Batch Transaksi</span>
               </div>
             </div>
@@ -664,10 +664,10 @@ onUnmounted(() => {
               </defs>
 
               <!-- Horizontal Grid lines -->
-              <line :x1="padX" :y1="getOmzetY(10000000)" :x2="svgWidth - padX" :y2="getOmzetY(10000000)" stroke="currentColor" class="text-neutral-200/70 dark:text-[#25252a]" stroke-dasharray="3 3" />
-              <line :x1="padX" :y1="getOmzetY(6000000)" :x2="svgWidth - padX" :y2="getOmzetY(6000000)" stroke="currentColor" class="text-neutral-200/70 dark:text-[#25252a]" stroke-dasharray="3 3" />
-              <line :x1="padX" :y1="getOmzetY(2000000)" :x2="svgWidth - padX" :y2="getOmzetY(2000000)" stroke="currentColor" class="text-neutral-200/70 dark:text-[#25252a]" stroke-dasharray="3 3" />
-              <line :x1="padX" :y1="svgHeight - padYBottom" :x2="svgWidth - padX" :y2="svgHeight - padYBottom" stroke="currentColor" class="text-neutral-300 dark:text-[#2d2d34]" />
+              <line :x1="padX" :y1="getOmzetY(10000000)" :x2="svgWidth - padX" :y2="getOmzetY(10000000)" stroke="currentColor" class="text-neutral-200/70 dark:text-[var(--theme-border)]" stroke-dasharray="3 3" />
+              <line :x1="padX" :y1="getOmzetY(6000000)" :x2="svgWidth - padX" :y2="getOmzetY(6000000)" stroke="currentColor" class="text-neutral-200/70 dark:text-[var(--theme-border)]" stroke-dasharray="3 3" />
+              <line :x1="padX" :y1="getOmzetY(2000000)" :x2="svgWidth - padX" :y2="getOmzetY(2000000)" stroke="currentColor" class="text-neutral-200/70 dark:text-[var(--theme-border)]" stroke-dasharray="3 3" />
+              <line :x1="padX" :y1="svgHeight - padYBottom" :x2="svgWidth - padX" :y2="svgHeight - padYBottom" stroke="currentColor" class="text-neutral-300 dark:text-[var(--theme-border-strong)]" />
 
               <!-- Y-Axis Ticks (Omzet) -->
               <text :x="padX - 8" :y="getOmzetY(10000000) + 3" text-anchor="end" class="text-[9.5px] fill-neutral-400 dark:fill-neutral-500 font-mono">10Jt</text>
@@ -758,13 +758,13 @@ onUnmounted(() => {
             <!-- Interactive Hover Tooltip Box -->
             <div
               v-if="omzetPoints[activeChartHoverIdx]"
-              class="absolute top-1 pointer-events-none transition-all duration-150 p-2.5 rounded-xl bg-white/95 dark:bg-[#1a1a1e]/95 backdrop-blur-xs border border-neutral-200 dark:border-[#27272a] shadow-lg text-xs"
+              class="absolute top-1 pointer-events-none transition-all duration-150 p-2.5 rounded-xl bg-white/95 dark:bg-[var(--theme-surface-raised)]/95 backdrop-blur-xs border border-neutral-200 dark:border-[var(--theme-border)] shadow-lg text-xs"
               :style="{
                 left: `${Math.min(75, Math.max(15, (activeChartHoverIdx / (currentTren.dates.length - 1)) * 100))}%`,
                 transform: 'translateX(-50%)',
               }"
             >
-              <div class="font-bold text-neutral-900 dark:text-white border-b border-neutral-100 dark:border-[#27272a] pb-1 mb-1">
+              <div class="font-bold text-neutral-900 dark:text-white border-b border-neutral-100 dark:border-[var(--theme-border)] pb-1 mb-1">
                 {{ currentTren.dates[activeChartHoverIdx] }}
               </div>
               <div class="flex items-center gap-2 text-[11px] text-neutral-600 dark:text-neutral-300">
@@ -789,7 +789,7 @@ onUnmounted(() => {
       <!-- ====================================================== -->
       <!-- DIAGRAM 2: Volume Order per Layanan (Horizontal Bar)   -->
       <!-- ====================================================== -->
-      <div class="lg:col-span-4 p-4 sm:p-4.5 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex flex-col justify-between space-y-3">
+      <div class="lg:col-span-4 p-4 sm:p-4.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex flex-col justify-between space-y-3">
         <!-- Skeleton Chart 2 -->
         <template v-if="isLoading">
           <div class="flex items-center justify-between">
@@ -808,7 +808,7 @@ onUnmounted(() => {
               <BaseSkeleton height="8px" class="rounded-full" />
             </div>
           </div>
-          <div class="pt-1 border-t border-neutral-100 dark:border-[#27272a]">
+          <div class="pt-1 border-t border-neutral-100 dark:border-[var(--theme-border)]">
             <BaseSkeleton width="100%" height="10px" />
           </div>
         </template>
@@ -823,7 +823,7 @@ onUnmounted(() => {
                 Distribusi SDM per Divisi
               </h2>
             </div>
-            <span class="text-[10.5px] font-semibold text-neutral-400 bg-neutral-100 dark:bg-[#202025] px-2 py-0.5 rounded-md">
+            <span class="text-[10.5px] font-semibold text-neutral-400 bg-neutral-100 dark:bg-[var(--theme-surface-muted)] px-2 py-0.5 rounded-md">
               Aktif
             </span>
           </div>
@@ -846,7 +846,7 @@ onUnmounted(() => {
               </div>
 
               <!-- Animated Progress Bar (Ekspansi Halus) -->
-              <div class="h-2 rounded-full bg-neutral-100 dark:bg-[#202025] overflow-hidden flex">
+              <div class="h-2 rounded-full bg-neutral-100 dark:bg-[var(--theme-surface-muted)] overflow-hidden flex">
                 <div
                   class="h-full rounded-full transition-all duration-1000 ease-out"
                   :style="{
@@ -859,7 +859,7 @@ onUnmounted(() => {
           </div>
 
           <!-- Axis helper label -->
-          <div class="flex items-center justify-between text-[10px] text-neutral-400 font-mono pt-1 border-t border-neutral-100 dark:border-[#27272a]">
+          <div class="flex items-center justify-between text-[10px] text-neutral-400 font-mono pt-1 border-t border-neutral-100 dark:border-[var(--theme-border)]">
             <span>0</span>
             <span>100</span>
             <span>200</span>
@@ -872,7 +872,7 @@ onUnmounted(() => {
       <!-- ====================================================== -->
       <!-- DIAGRAM 3: Distribusi Status Order (Donut Chart)       -->
       <!-- ====================================================== -->
-      <div class="lg:col-span-3 p-4 sm:p-4.5 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex flex-col justify-between space-y-3">
+      <div class="lg:col-span-3 p-4 sm:p-4.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex flex-col justify-between space-y-3">
         <!-- Skeleton Chart 3 -->
         <template v-if="isLoading">
           <div class="flex items-center justify-between">
@@ -883,11 +883,11 @@ onUnmounted(() => {
             <BaseSkeleton width="55px" height="18px" class="rounded-md" />
           </div>
           <div class="flex items-center justify-center py-2">
-            <div class="w-28 h-28 rounded-full border-[12px] border-neutral-200 dark:border-[#242428] skeleton-shimmer flex items-center justify-center">
+            <div class="w-28 h-28 rounded-full border-[12px] border-neutral-200 dark:border-[var(--theme-border)] skeleton-shimmer flex items-center justify-center">
               <BaseSkeleton width="40px" height="14px" />
             </div>
           </div>
-          <div class="space-y-2 pt-1 border-t border-neutral-100 dark:border-[#27272a]">
+          <div class="space-y-2 pt-1 border-t border-neutral-100 dark:border-[var(--theme-border)]">
             <div v-for="i in 4" :key="'donut-skel-' + i" class="flex items-center justify-between">
               <BaseSkeleton width="70px" height="12px" />
               <BaseSkeleton width="45px" height="12px" />
@@ -918,7 +918,7 @@ onUnmounted(() => {
                 :r="donutRadius"
                 fill="transparent"
                 stroke="currentColor"
-                class="text-neutral-100 dark:text-[#202025]"
+                class="text-neutral-100 dark:text-[var(--theme-surface-muted)]"
                 stroke-width="14"
               />
 
@@ -953,12 +953,12 @@ onUnmounted(() => {
           </div>
 
           <!-- Legend with values & CountUp -->
-          <div class="space-y-1.5 pt-1 border-t border-neutral-100 dark:border-[#27272a] text-xs">
+          <div class="space-y-1.5 pt-1 border-t border-neutral-100 dark:border-[var(--theme-border)] text-xs">
             <div
               v-for="st in statusDistribusi"
               :key="st.id"
               class="flex items-center justify-between cursor-pointer transition p-1 rounded-lg"
-              :class="hoveredDonutSlice === st.id ? 'bg-neutral-100 dark:bg-[#202025]' : ''"
+              :class="hoveredDonutSlice === st.id ? 'bg-neutral-100 dark:bg-[var(--theme-surface-muted)]' : ''"
               @mouseenter="hoveredDonutSlice = st.id"
               @mouseleave="hoveredDonutSlice = null"
             >
@@ -988,7 +988,7 @@ onUnmounted(() => {
       <!-- ====================================================== -->
       <!-- KARTU 1: Ringkasan Finansial ERP                       -->
       <!-- ====================================================== -->
-      <div class="p-4 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex flex-col justify-between space-y-3">
+      <div class="p-4 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex flex-col justify-between space-y-3">
         <template v-if="isLoading">
           <div class="flex items-center gap-2">
             <BaseSkeleton variant="circular" width="16px" height="16px" />
@@ -1012,7 +1012,7 @@ onUnmounted(() => {
             </div>
           </div>
 
-          <div class="space-y-2 divide-y divide-neutral-100 dark:divide-[#242428] text-xs">
+          <div class="space-y-2 divide-y divide-neutral-100 dark:divide-[var(--theme-border)] text-xs">
             <div class="flex items-center justify-between pt-1">
               <span class="flex items-center gap-1.5 text-neutral-500">
                 <ArrowUp class="w-3.5 h-3.5 text-emerald-500" /> Pendapatan
@@ -1051,7 +1051,7 @@ onUnmounted(() => {
       <!-- ====================================================== -->
       <!-- KARTU 2: Utilisasi Cloud & Modul ERP (Gauge Radial)    -->
       <!-- ====================================================== -->
-      <div class="p-4 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex flex-col justify-between space-y-3">
+      <div class="p-4 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex flex-col justify-between space-y-3">
         <template v-if="isLoading">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -1061,7 +1061,7 @@ onUnmounted(() => {
             <BaseSkeleton width="50px" height="18px" class="rounded-md" />
           </div>
           <div class="flex items-center gap-4 py-1">
-            <div class="w-16 h-16 rounded-full border-[6px] border-neutral-200 dark:border-[#242428] skeleton-shimmer" />
+            <div class="w-16 h-16 rounded-full border-[6px] border-neutral-200 dark:border-[var(--theme-border)] skeleton-shimmer" />
             <div class="flex-1 space-y-2">
               <BaseSkeleton width="100%" height="11px" />
               <BaseSkeleton width="85%" height="11px" />
@@ -1085,7 +1085,7 @@ onUnmounted(() => {
             <!-- Radial Gauge Mini dengan Animated Stroke -->
             <div class="relative w-16 h-16 shrink-0 flex items-center justify-center">
               <svg class="w-full h-full -rotate-90" viewBox="0 0 60 60">
-                <circle cx="30" cy="30" r="24" fill="none" stroke="currentColor" class="text-neutral-100 dark:text-[#202025]" stroke-width="6" />
+                <circle cx="30" cy="30" r="24" fill="none" stroke="currentColor" class="text-neutral-100 dark:text-[var(--theme-surface-muted)]" stroke-width="6" />
                 <circle
                   cx="30"
                   cy="30"
@@ -1137,7 +1137,7 @@ onUnmounted(() => {
       <!-- ====================================================== -->
       <!-- KARTU 3: Kepatuhan & Regulasi HR                        -->
       <!-- ====================================================== -->
-      <div class="p-4 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex flex-col justify-between space-y-3">
+      <div class="p-4 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex flex-col justify-between space-y-3">
         <template v-if="isLoading">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -1179,7 +1179,7 @@ onUnmounted(() => {
             <div
               v-for="item in inventarisWarning"
               :key="item.id"
-              class="flex items-center justify-between py-1 border-b border-neutral-100 dark:border-[#242428] last:border-b-0"
+              class="flex items-center justify-between py-1 border-b border-neutral-100 dark:border-[var(--theme-border)] last:border-b-0"
             >
               <div class="min-w-0 pr-2">
                 <span class="font-medium text-neutral-800 dark:text-neutral-200 truncate block text-[11.5px]">
@@ -1200,7 +1200,7 @@ onUnmounted(() => {
       <!-- ====================================================== -->
       <!-- KARTU 4: Presensi & Distribusi Tim                      -->
       <!-- ====================================================== -->
-      <div class="p-4 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex flex-col justify-between space-y-3">
+      <div class="p-4 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex flex-col justify-between space-y-3">
         <template v-if="isLoading">
           <div class="flex items-center gap-2">
             <BaseSkeleton variant="circular" width="16px" height="16px" />
@@ -1210,7 +1210,7 @@ onUnmounted(() => {
             <div class="p-2.5 rounded-xl skeleton-shimmer h-14" />
             <div class="p-2.5 rounded-xl skeleton-shimmer h-14" />
           </div>
-          <div class="pt-1 border-t border-neutral-100 dark:border-[#27272a] space-y-1.5">
+          <div class="pt-1 border-t border-neutral-100 dark:border-[var(--theme-border)] space-y-1.5">
             <BaseSkeleton width="80%" height="11px" />
             <BaseSkeleton height="6px" class="rounded-full" />
           </div>
@@ -1228,7 +1228,7 @@ onUnmounted(() => {
 
           <!-- 2 Column WFO & WFH dengan CountUp -->
           <div class="grid grid-cols-2 gap-2 text-xs">
-            <div class="p-2 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-100 dark:border-[#242428]">
+            <div class="p-2 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-100 dark:border-[var(--theme-border)]">
               <span class="text-[10px] text-neutral-400 block font-semibold uppercase">WFO (Kantor)</span>
               <span class="font-bold font-mono text-neutral-900 dark:text-white block mt-0.5 text-sm">
                 <BaseCountUp :to="logistikDanKaryawan.pickup.count" suffix=" " />
@@ -1237,7 +1237,7 @@ onUnmounted(() => {
               <span class="text-[10px] text-emerald-600 font-semibold">{{ logistikDanKaryawan.pickup.growth }}</span>
             </div>
 
-            <div class="p-2 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-100 dark:border-[#242428]">
+            <div class="p-2 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-100 dark:border-[var(--theme-border)]">
               <span class="text-[10px] text-neutral-400 block font-semibold uppercase">WFH (Remote)</span>
               <span class="font-bold font-mono text-neutral-900 dark:text-white block mt-0.5 text-sm">
                 <BaseCountUp :to="logistikDanKaryawan.delivery.count" suffix=" " />
@@ -1248,14 +1248,14 @@ onUnmounted(() => {
           </div>
 
           <!-- Absensi Karyawan Bar dengan Animation -->
-          <div class="pt-1.5 border-t border-neutral-100 dark:border-[#27272a] space-y-1">
+          <div class="pt-1.5 border-t border-neutral-100 dark:border-[var(--theme-border)] space-y-1">
             <div class="flex items-center justify-between text-xs">
               <span class="text-neutral-500 text-[11px]">Presensi Hari Ini:</span>
               <span class="font-bold font-mono text-neutral-900 dark:text-white text-[11px]">
                 <BaseCountUp :to="logistikDanKaryawan.absensi.hadir" /> / {{ logistikDanKaryawan.absensi.total }} hadir
               </span>
             </div>
-            <div class="h-1.5 rounded-full bg-neutral-100 dark:bg-[#222228] overflow-hidden">
+            <div class="h-1.5 rounded-full bg-neutral-100 dark:bg-[var(--theme-surface-muted)] overflow-hidden">
               <div
                 class="h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-out"
                 :style="{ width: `${logistikDanKaryawan.absensi.pct}%` }"
@@ -1277,7 +1277,7 @@ onUnmounted(() => {
       <!-- ====================================================== -->
       <!-- TIMELINE AKTIVITAS OPERASIONAL (5 Col Desktop)         -->
       <!-- ====================================================== -->
-      <div class="lg:col-span-5 p-4 sm:p-4.5 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex flex-col justify-between space-y-3">
+      <div class="lg:col-span-5 p-4 sm:p-4.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex flex-col justify-between space-y-3">
         <template v-if="isLoading">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -1319,7 +1319,7 @@ onUnmounted(() => {
           </div>
 
           <!-- Vertical Timeline List -->
-          <div class="relative space-y-3.5 pl-2 pt-1 before:absolute before:left-5.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-neutral-200 dark:before:bg-[#25252a]">
+          <div class="relative space-y-3.5 pl-2 pt-1 before:absolute before:left-5.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-neutral-200 dark:before:bg-[var(--theme-surface-muted)]">
             <div
               v-for="act in aktivitasOperasional"
               :key="act.id"
@@ -1327,7 +1327,7 @@ onUnmounted(() => {
             >
               <!-- Timeline Icon Bubble -->
               <div
-                class="w-7 h-7 rounded-full bg-white dark:bg-[#1e1e24] border-2 border-neutral-300 dark:border-[#383842] flex items-center justify-center shrink-0 z-10 group-hover:scale-110 transition-transform shadow-xs"
+                class="w-7 h-7 rounded-full bg-white dark:bg-[var(--theme-surface-muted)] border-2 border-neutral-300 dark:border-[var(--theme-border-strong)] flex items-center justify-center shrink-0 z-10 group-hover:scale-110 transition-transform shadow-xs"
                 :class="
                   act.color === 'emerald' ? 'text-emerald-600 border-emerald-400' :
                   act.color === 'blue' ? 'text-blue-600 border-blue-400' :
@@ -1365,7 +1365,7 @@ onUnmounted(() => {
       <!-- ====================================================== -->
       <!-- TABEL ORDER TERBARU (7 Col Desktop)                    -->
       <!-- ====================================================== -->
-      <div class="lg:col-span-7 p-4 sm:p-4.5 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex flex-col justify-between space-y-3">
+      <div class="lg:col-span-7 p-4 sm:p-4.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex flex-col justify-between space-y-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <ShoppingBag class="w-4 h-4 text-blue-500" />
@@ -1384,9 +1384,9 @@ onUnmounted(() => {
         </div>
 
         <!-- Table Container -->
-        <div class="overflow-x-auto rounded-xl border border-neutral-200/80 dark:border-[#27272a]">
+        <div class="overflow-x-auto rounded-xl border border-neutral-200/80 dark:border-[var(--theme-border)]">
           <table class="w-full text-left text-xs">
-            <thead class="bg-neutral-50/90 dark:bg-[#18181c] text-neutral-500 dark:text-neutral-400 font-semibold border-b border-neutral-200 dark:border-[#27272a] text-[10.5px]">
+            <thead class="bg-neutral-50/90 dark:bg-[var(--theme-surface-raised)] text-neutral-500 dark:text-neutral-400 font-semibold border-b border-neutral-200 dark:border-[var(--theme-border)] text-[10.5px]">
               <tr>
                 <th class="py-2 px-3">No. Tiket</th>
                 <th class="py-2 px-3">Nama Pegawai</th>
@@ -1399,7 +1399,7 @@ onUnmounted(() => {
             </thead>
 
             <!-- Skeleton Table Body -->
-            <tbody v-if="isLoading" class="divide-y divide-neutral-100 dark:divide-[#242428]">
+            <tbody v-if="isLoading" class="divide-y divide-neutral-100 dark:divide-[var(--theme-border)]">
               <tr v-for="i in 5" :key="'tbl-skel-' + i">
                 <td class="py-3 px-3"><BaseSkeleton width="85px" height="14px" /></td>
                 <td class="py-3 px-3"><BaseSkeleton width="95px" height="14px" /></td>
@@ -1412,12 +1412,12 @@ onUnmounted(() => {
             </tbody>
 
             <!-- Real Loaded Table Body -->
-            <tbody v-else class="divide-y divide-neutral-100 dark:divide-[#242428] text-neutral-700 dark:text-neutral-300 text-[11px]">
+            <tbody v-else class="divide-y divide-neutral-100 dark:divide-[var(--theme-border)] text-neutral-700 dark:text-neutral-300 text-[11px]">
               <tr
                 v-for="order in orderTerbaruList"
                 :key="order.noOrder"
                 @click="openOrderDetail(order)"
-                class="hover:bg-neutral-50/60 dark:hover:bg-[#1a1a20] transition cursor-pointer group"
+                class="hover:bg-neutral-50/60 dark:hover:bg-[var(--theme-surface-raised)] transition cursor-pointer group"
               >
                 <td class="py-2.5 px-3 font-mono font-medium text-neutral-900 dark:text-white whitespace-nowrap">
                   {{ order.noOrder }}
@@ -1443,7 +1443,7 @@ onUnmounted(() => {
                   <button
                     type="button"
                     @click="openOrderDetail(order)"
-                    class="p-1 rounded-lg text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[#202025] transition cursor-pointer"
+                    class="p-1 rounded-lg text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] transition cursor-pointer"
                     title="Lihat Detail Order"
                   >
                     <Eye class="w-3.5 h-3.5" />
@@ -1473,7 +1473,7 @@ onUnmounted(() => {
       </template>
 
       <div v-if="selectedOrder" class="space-y-5 text-xs">
-        <div class="p-4 rounded-2xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-100 dark:border-[#27272a] space-y-3">
+        <div class="p-4 rounded-2xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-100 dark:border-[var(--theme-border)] space-y-3">
           <div class="flex items-center justify-between">
             <span class="text-neutral-400 uppercase font-semibold text-[10px]">Nama Pegawai</span>
             <span class="text-sm font-bold text-neutral-900 dark:text-white">{{ selectedOrder.pelanggan }}</span>
@@ -1486,7 +1486,7 @@ onUnmounted(() => {
             <span class="text-neutral-400 uppercase font-semibold text-[10px]">Divisi Kerja</span>
             <span class="font-mono font-bold text-neutral-900 dark:text-white">{{ selectedOrder.berat }}</span>
           </div>
-          <div class="flex items-center justify-between pt-2 border-t border-neutral-200 dark:border-[#27272a]">
+          <div class="flex items-center justify-between pt-2 border-t border-neutral-200 dark:border-[var(--theme-border)]">
             <span class="font-bold text-neutral-900 dark:text-white">Nominal Transaksi</span>
             <span class="text-base font-bold font-mono text-[var(--theme-primary)]">
               Rp {{ selectedOrder.total.toLocaleString('id-ID') }}
@@ -1497,7 +1497,7 @@ onUnmounted(() => {
         <!-- Activity Timeline for Order -->
         <div class="space-y-2">
           <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Timeline Jejak Audit Transaksi</span>
-          <div class="p-4 rounded-2xl bg-white dark:bg-[#16161a] border border-neutral-200 dark:border-[#27272a]">
+          <div class="p-4 rounded-2xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)]">
             <BaseTimeline :items="getOrderTimeline(selectedOrder)" compact />
           </div>
         </div>
