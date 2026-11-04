@@ -97,13 +97,13 @@ const handlePinSubmenu = (item) => {
     class="shrink-0 flex flex-col items-center select-none transition-all duration-200 z-30"
     :class="[
       capsule
-        ? 'w-18 sm:w-20 my-3 ml-3 mr-1 py-4 px-1 rounded-[26px] border-2 border-neutral-300 dark:border-[#2e2e36] bg-neutral-100/90 dark:bg-[#1a1a1e] shadow-2xs h-[calc(100%-24px)]'
-        : 'w-20 sm:w-22 bg-white dark:bg-[#121214] border-r border-neutral-200 dark:border-[#27272a] py-5'
+        ? 'w-18 sm:w-20 my-3 ml-3 mr-1 py-4 px-1 rounded-[26px] border-2 border-neutral-300 dark:border-[var(--theme-border-strong)] bg-neutral-100/90 dark:bg-[var(--theme-surface-raised)] shadow-2xs h-[calc(100%-24px)]'
+        : 'w-20 sm:w-22 bg-white dark:bg-[var(--theme-layer-2)] border-r border-neutral-200 dark:border-[var(--theme-border)] py-5'
     ]"
   >
     <!-- Wireframe "MENU" Text Indicator -->
     <div class="mb-5 px-2 text-center">
-      <span class="text-[10px] font-bold tracking-widest text-neutral-600 dark:text-neutral-400 uppercase px-2 py-0.5 rounded-md border border-neutral-300 dark:border-[#27272a] bg-white dark:bg-[#1c1c20] shadow-2xs">
+      <span class="text-[10px] font-bold tracking-widest text-neutral-600 dark:text-neutral-400 uppercase px-2 py-0.5 rounded-md border border-neutral-300 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface-muted)] shadow-2xs">
         MENU
       </span>
     </div>
@@ -124,7 +124,7 @@ const handlePinSubmenu = (item) => {
           :class="[
             activeId === item.id
               ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm font-semibold'
-              : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200/60 dark:hover:bg-[#25252b] hover:text-neutral-900 dark:hover:text-white',
+              : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200/60 dark:hover:bg-[var(--theme-surface-muted)] hover:text-neutral-900 dark:hover:text-white',
           ]"
         >
           <component
@@ -161,10 +161,10 @@ const handlePinSubmenu = (item) => {
             @mouseleave="handleMouseLeave"
           >
             <div
-              class="w-56 sm:w-60 rounded-2xl bg-white/95 dark:bg-[#18181c]/95 backdrop-blur-md border border-neutral-200 dark:border-[#2c2c34] shadow-2xl overflow-hidden"
+              class="w-56 sm:w-60 rounded-2xl bg-white/95 dark:bg-[var(--theme-surface-raised)]/95 backdrop-blur-md border border-neutral-200 dark:border-[var(--theme-border-strong)] shadow-2xl overflow-hidden"
             >
               <!-- Card Header -->
-              <div class="px-3.5 py-2.5 bg-neutral-50/80 dark:bg-[#141416]/80 border-b border-neutral-200/80 dark:border-[#26262c] flex items-center justify-between">
+              <div class="px-3.5 py-2.5 bg-neutral-50/80 dark:bg-[var(--theme-surface)]/80 border-b border-neutral-200/80 dark:border-[var(--theme-border)] flex items-center justify-between">
                 <div class="flex items-center gap-2">
                   <div class="w-6 h-6 rounded-lg bg-[var(--theme-primary-soft)] text-[var(--theme-primary)] flex items-center justify-center shrink-0">
                     <component :is="item.icon" class="w-3.5 h-3.5" />
@@ -184,7 +184,7 @@ const handlePinSubmenu = (item) => {
                   v-if="submenuCollapsed"
                   type="button"
                   @click.stop="handlePinSubmenu(item)"
-                  class="px-1.5 py-1 rounded-md text-[10px] font-medium text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200 hover:bg-neutral-200/60 dark:hover:bg-[#25252b] transition flex items-center gap-0.5 cursor-pointer"
+                  class="px-1.5 py-1 rounded-md text-[10px] font-medium text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200 hover:bg-neutral-200/60 dark:hover:bg-[var(--theme-surface-muted)] transition flex items-center gap-0.5 cursor-pointer"
                   title="Sematkan / Buka Kolom Submenu Permanen"
                 >
                   <span>Buka</span>
@@ -203,7 +203,7 @@ const handlePinSubmenu = (item) => {
                   :class="[
                     isSubActive(sub.route)
                       ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs font-semibold'
-                      : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-[#232328] hover:text-neutral-900 dark:hover:text-white',
+                      : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] hover:text-neutral-900 dark:hover:text-white',
                   ]"
                 >
                   <div class="flex items-center gap-2.5 truncate">

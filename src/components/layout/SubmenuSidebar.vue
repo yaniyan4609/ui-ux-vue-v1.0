@@ -146,11 +146,11 @@ onUnmounted(() => {
     :class="[
       drawerMode
         ? 'w-52 sm:w-56 bg-transparent border-0'
-        : (collapsed ? 'w-0 opacity-0 pointer-events-none' : 'w-56 sm:w-60 opacity-100 bg-neutral-50/90 dark:bg-[#151518] border-r border-neutral-200 dark:border-[#27272a]'),
+        : (collapsed ? 'w-0 opacity-0 pointer-events-none' : 'w-56 sm:w-60 opacity-100 bg-neutral-50/90 dark:bg-[var(--theme-surface)] border-r border-neutral-200 dark:border-[var(--theme-border)]'),
     ]"
   >
     <!-- Wireframe "SUBMENU" Header -->
-    <div class="p-3.5 border-b border-neutral-200 dark:border-[#27272a] flex items-center justify-between">
+    <div class="p-3.5 border-b border-neutral-200 dark:border-[var(--theme-border)] flex items-center justify-between">
       <div>
         <span class="text-[10px] font-bold tracking-widest text-neutral-400 dark:text-neutral-500 uppercase block">
           SUBMENU
@@ -164,7 +164,7 @@ onUnmounted(() => {
       <button
         type="button"
         @click="emit('toggle-collapse')"
-        class="p-1 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-200/60 dark:hover:bg-[#27272a] dark:hover:text-neutral-200 transition cursor-pointer"
+        class="p-1 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-200/60 dark:hover:bg-[var(--theme-surface-muted)] dark:hover:text-neutral-200 transition cursor-pointer"
         title="Tutup Submenu"
       >
         <ChevronLeft class="w-4 h-4" />
@@ -176,7 +176,7 @@ onUnmounted(() => {
       <div class="relative flex flex-col gap-1">
         <!-- Floating Active Card Pill (Geser ke Atas/Bawah dengan Kurva Halus & Elegan) -->
         <div
-          class="absolute left-0 right-0 rounded-xl pointer-events-none z-0 bg-white dark:bg-[#222226] border border-neutral-200/90 dark:border-[#333338] shadow-xs will-change-transform"
+          class="absolute left-0 right-0 rounded-xl pointer-events-none z-0 bg-white dark:bg-[var(--theme-surface-muted)] border border-neutral-200/90 dark:border-[var(--theme-border-strong)] shadow-xs will-change-transform"
           :class="
             isReady
               ? 'transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]'

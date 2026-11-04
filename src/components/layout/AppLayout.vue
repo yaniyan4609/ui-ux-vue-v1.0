@@ -169,7 +169,7 @@ const baseLayerStyle = computed(() => {
     :class="[
       bgType === 'grid' ? 'bg-grid-pattern' : '',
       bgType === 'dots' ? 'bg-dots-pattern' : '',
-      bgType !== 'solid' && bgType !== 'image' ? 'bg-neutral-100 dark:bg-[#09090b] text-neutral-800 dark:text-[#f4f4f5]' : 'text-neutral-800 dark:text-[#f4f4f5]',
+      bgType !== 'solid' && bgType !== 'image' ? 'bg-neutral-100 dark:bg-[var(--theme-bg)] text-neutral-800 dark:text-[var(--theme-text-primary)]' : 'text-neutral-800 dark:text-[var(--theme-text-primary)]',
     ]"
     :style="baseLayerStyle"
   >
@@ -192,11 +192,11 @@ const baseLayerStyle = computed(() => {
     >
       <!-- THE DASAR KEDUA CARD (Hardware Layer Promoted with will-change & adaptive shadow) -->
       <div
-        class="relative bg-white dark:bg-[#121214] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden flex will-change-[width,height] transform-gpu"
+        class="relative bg-white dark:bg-[var(--theme-layer-2)] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden flex will-change-[width,height] transform-gpu"
         :class="[
           isExpanded
-            ? 'w-full h-full max-w-full max-h-full rounded-t-[32px] sm:rounded-2xl lg:rounded-3xl border-t-2 sm:border-2 border-neutral-300 dark:border-[#27272a] border-x-0 sm:border-x-2 border-b-0 sm:border-b-2'
-            : 'w-[calc(100vw-32px)] max-w-[390px] sm:max-w-[410px] h-[490px] sm:h-[510px] max-h-[92vh] rounded-3xl border-2 border-neutral-200 dark:border-[#27272a]',
+            ? 'w-full h-full max-w-full max-h-full rounded-t-[32px] sm:rounded-2xl lg:rounded-3xl border-t-2 sm:border-2 border-neutral-300 dark:border-[var(--theme-border)] border-x-0 sm:border-x-2 border-b-0 sm:border-b-2'
+            : 'w-[calc(100vw-32px)] max-w-[390px] sm:max-w-[410px] h-[490px] sm:h-[510px] max-h-[92vh] rounded-3xl border-2 border-neutral-200 dark:border-[var(--theme-border)]',
           authStage === 'expanding' ? 'shadow-md' : 'shadow-2xl'
         ]"
       >
@@ -209,7 +209,7 @@ const baseLayerStyle = computed(() => {
         <!-- ==================================================== -->
         <div
           v-if="authStage !== 'authenticated'"
-          class="absolute inset-0 z-20 w-full h-full flex flex-col justify-between p-6 sm:p-7 bg-white dark:bg-[#121214] transition-all duration-400 ease-out select-none will-change-[opacity]"
+          class="absolute inset-0 z-20 w-full h-full flex flex-col justify-between p-6 sm:p-7 bg-white dark:bg-[var(--theme-layer-2)] transition-all duration-400 ease-out select-none will-change-[opacity]"
           :class="authStage === 'expanding' ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'"
         >
           <!-- -------------------------------------------------- -->
@@ -254,7 +254,7 @@ const baseLayerStyle = computed(() => {
                       type="text"
                       v-model="loginForm.identifier"
                       placeholder="admin@digaji.id / 08123456789"
-                      class="w-full pl-10 pr-3.5 py-2.5 rounded-xl text-xs sm:text-sm border border-neutral-300 dark:border-[#27272a] bg-neutral-50/50 dark:bg-[#18181b] text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] transition"
+                      class="w-full pl-10 pr-3.5 py-2.5 rounded-xl text-xs sm:text-sm border border-neutral-300 dark:border-[var(--theme-border)] bg-neutral-50/50 dark:bg-[var(--theme-surface-raised)] text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] transition"
                       required
                     />
                   </div>
@@ -283,7 +283,7 @@ const baseLayerStyle = computed(() => {
                       :type="showPassword ? 'text' : 'password'"
                       v-model="loginForm.password"
                       placeholder="••••••••"
-                      class="w-full pl-10 pr-10 py-2.5 rounded-xl text-xs sm:text-sm border border-neutral-300 dark:border-[#27272a] bg-neutral-50/50 dark:bg-[#18181b] text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] transition"
+                      class="w-full pl-10 pr-10 py-2.5 rounded-xl text-xs sm:text-sm border border-neutral-300 dark:border-[var(--theme-border)] bg-neutral-50/50 dark:bg-[var(--theme-surface-raised)] text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] transition"
                       required
                     />
                     <button
@@ -327,7 +327,7 @@ const baseLayerStyle = computed(() => {
                     r="50"
                     fill="none"
                     stroke="currentColor"
-                    class="text-neutral-200 dark:text-[#222226]"
+                    class="text-neutral-200 dark:text-[var(--theme-surface-muted)]"
                     stroke-width="2"
                   />
                   <!-- Busur Berputar Mengikuti Warna Theme Aktif -->
@@ -368,7 +368,7 @@ const baseLayerStyle = computed(() => {
               :class="[
                 authStage === 'form' || authStage === 'collapsing'
                   ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-95 cursor-pointer active:scale-[0.99]'
-                  : 'border border-neutral-300 dark:border-[#2e2e34] bg-neutral-100 dark:bg-[#18181b]'
+                  : 'border border-neutral-300 dark:border-[var(--theme-border-strong)] bg-neutral-100 dark:bg-[var(--theme-surface-raised)]'
               ]"
               @click="authStage === 'form' && startLoginFlow('Standard')"
             >
@@ -397,10 +397,10 @@ const baseLayerStyle = computed(() => {
               v-if="authStage === 'form' || authStage === 'collapsing'"
               type="button"
               @click="startLoginFlow('Google')"
-              class="w-full h-10 flex items-center justify-center gap-2.5 rounded-xl border border-neutral-300 dark:border-[#27272a] bg-white dark:bg-[#18181b] hover:bg-neutral-50 dark:hover:bg-[#202024] text-neutral-700 dark:text-neutral-300 text-xs sm:text-sm font-medium transition cursor-pointer shadow-2xs active:scale-[0.99]"
+              class="w-full h-10 flex items-center justify-center gap-2.5 rounded-xl border border-neutral-300 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface-raised)] hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300 text-xs sm:text-sm font-medium transition cursor-pointer shadow-2xs active:scale-[0.99]"
             >
               <!-- Lingkaran icon persis wireframe -->
-              <div class="w-4.5 h-4.5 rounded-full border border-neutral-200 dark:border-neutral-700 flex items-center justify-center bg-white dark:bg-[#121214] shrink-0">
+              <div class="w-4.5 h-4.5 rounded-full border border-neutral-200 dark:border-neutral-700 flex items-center justify-center bg-white dark:bg-[var(--theme-layer-2)] shrink-0">
                 <svg class="w-3 h-3" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                   <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -447,16 +447,16 @@ const baseLayerStyle = computed(() => {
             v-if="submenuCollapsed && currentMenuItem.submenus && currentMenuItem.submenus.length > 0"
             type="button"
             @click="toggleSubmenu"
-            class="hidden lg:flex absolute left-20 sm:left-22 top-7 -translate-x-1/2 z-30 w-6 h-6 rounded-full items-center justify-center bg-white dark:bg-[#18181b] border border-neutral-300 dark:border-[#27272a] shadow-sm text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[#222226] transition-all hover:scale-110 cursor-pointer"
+            class="hidden lg:flex absolute left-20 sm:left-22 top-7 -translate-x-1/2 z-30 w-6 h-6 rounded-full items-center justify-center bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-300 dark:border-[var(--theme-border)] shadow-sm text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] transition-all hover:scale-110 cursor-pointer"
             title="Buka Submenu"
             aria-label="Buka Submenu"
           >
             <ChevronRight class="w-3.5 h-3.5" />
           </button>
 
-          <!-- Area Content (Main Class Content Area - Pure Neutral Dark: #0c0c0e) -->
+          <!-- Area Content (Main Class Content Area - var(--theme-layer-main); Default dark: #0c0c0e) -->
           <main
-            class="flex-1 min-h-0 flex flex-col p-3.5 sm:p-5 lg:p-6 bg-neutral-50/60 dark:bg-[#0c0c0e] text-neutral-800 dark:text-[#f4f4f5]"
+            class="flex-1 min-h-0 flex flex-col p-3.5 sm:p-5 lg:p-6 bg-neutral-50/60 dark:bg-[var(--theme-layer-main)] text-neutral-800 dark:text-[var(--theme-text-primary)]"
             :class="activeMenuId === 'data' ? 'overflow-hidden' : 'overflow-y-auto'"
           >
             <slot />
@@ -499,7 +499,7 @@ const baseLayerStyle = computed(() => {
     >
       <div
         v-if="mobileDrawerOpen && isAuthenticated"
-        class="lg:hidden fixed inset-y-0 left-0 z-50 flex shadow-2xl h-full rounded-r-[32px] sm:rounded-r-[36px] border-r-2 border-neutral-300 dark:border-[#2e2e34] bg-white dark:bg-[#121214] select-none overflow-hidden max-w-[calc(100vw-24px)]"
+        class="lg:hidden fixed inset-y-0 left-0 z-50 flex shadow-2xl h-full rounded-r-[32px] sm:rounded-r-[36px] border-r-2 border-neutral-300 dark:border-[var(--theme-border-strong)] bg-white dark:bg-[var(--theme-layer-2)] select-none overflow-hidden max-w-[calc(100vw-24px)]"
       >
         <!-- Left Column: Capsule "MENU" Pill (Rounded Top & Bottom persis Wireframe 1) -->
         <PrimarySidebar

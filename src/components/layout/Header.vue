@@ -126,7 +126,7 @@ onUnmounted(() => {
         v-if="isAuthenticated"
         type="button"
         @click="emit('toggle-sidebar')"
-        class="lg:hidden w-8.5 h-8.5 rounded-xl border border-neutral-300 dark:border-[#27272a] bg-white dark:bg-[#18181b] flex items-center justify-center text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#27272a] transition cursor-pointer shadow-2xs active:scale-95 shrink-0"
+        class="lg:hidden w-8.5 h-8.5 rounded-xl border border-neutral-300 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface-raised)] flex items-center justify-center text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] transition cursor-pointer shadow-2xs active:scale-95 shrink-0"
         :class="mobileDrawerOpen ? 'ring-2 ring-[var(--theme-primary)] text-[var(--theme-primary)] border-[var(--theme-primary)]' : ''"
         title="Buka / Tutup Menu Sidebar"
         aria-label="Toggle Sidebar"
@@ -160,13 +160,13 @@ onUnmounted(() => {
       <button
         type="button"
         @click="emit('open-search')"
-        class="w-full h-8 sm:h-8.5 px-3 rounded-xl border border-neutral-300/80 dark:border-[#27272a] bg-white/80 dark:bg-[#18181b]/80 backdrop-blur-xs flex items-center justify-between text-xs text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-600 hover:text-neutral-600 dark:hover:text-neutral-200 transition shadow-2xs cursor-pointer group"
+        class="w-full h-8 sm:h-8.5 px-3 rounded-xl border border-neutral-300/80 dark:border-[var(--theme-border)] bg-white/80 dark:bg-[var(--theme-surface-raised)]/80 backdrop-blur-xs flex items-center justify-between text-xs text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-600 hover:text-neutral-600 dark:hover:text-neutral-200 transition shadow-2xs cursor-pointer group"
       >
         <div class="flex items-center gap-2 truncate">
           <Search class="w-3.5 h-3.5 text-neutral-400 group-hover:text-neutral-700 dark:group-hover:text-neutral-200 transition-colors" />
           <span class="truncate">Cari data, menu, atau aksi...</span>
         </div>
-        <kbd class="px-1.5 py-0.5 rounded text-[10px] font-mono text-neutral-400 bg-neutral-100 dark:bg-[#25252b] border border-neutral-200 dark:border-[#333338] shrink-0">
+        <kbd class="px-1.5 py-0.5 rounded text-[10px] font-mono text-neutral-400 bg-neutral-100 dark:bg-[var(--theme-surface-muted)] border border-neutral-200 dark:border-[var(--theme-border-strong)] shrink-0">
           Ctrl K
         </kbd>
       </button>
@@ -179,7 +179,7 @@ onUnmounted(() => {
         v-if="isAuthenticated"
         type="button"
         @click="emit('open-search')"
-        class="sm:hidden w-8 h-8 rounded-xl border border-neutral-300 dark:border-[#27272a] bg-white dark:bg-[#18181b] flex items-center justify-center text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#27272a] transition cursor-pointer shadow-2xs"
+        class="sm:hidden w-8 h-8 rounded-xl border border-neutral-300 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface-raised)] flex items-center justify-center text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] transition cursor-pointer shadow-2xs"
         title="Buka Command Palette (Cari)"
       >
         <Search class="w-4 h-4" />
@@ -189,7 +189,7 @@ onUnmounted(() => {
       <button
         type="button"
         @click="toggleTheme($event)"
-        class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-neutral-300 dark:border-[#27272a] bg-white dark:bg-[#18181b] flex items-center justify-center text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#27272a] transition cursor-pointer shadow-2xs group"
+        class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-neutral-300 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface-raised)] flex items-center justify-center text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] transition cursor-pointer shadow-2xs group"
         :title="isDark ? 'Beralih ke Mode Terang' : 'Beralih ke Mode Gelap'"
         aria-label="Toggle theme"
       >
@@ -208,7 +208,7 @@ onUnmounted(() => {
         <button
           type="button"
           @click="notificationOpen = !notificationOpen; userMenuOpen = false"
-          class="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-neutral-300 dark:border-[#27272a] bg-white dark:bg-[#18181b] flex items-center justify-center text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#27272a] transition cursor-pointer shadow-2xs"
+          class="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-neutral-300 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface-raised)] flex items-center justify-center text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] transition cursor-pointer shadow-2xs"
           :class="notificationOpen ? 'ring-2 ring-[var(--theme-primary)]' : ''"
           title="Pusat Pemberitahuan"
           aria-label="Notifikasi"
@@ -217,7 +217,7 @@ onUnmounted(() => {
           <!-- Pulsing dot jika ada notifikasi belum dibaca -->
           <span
             v-if="unreadCount() > 0"
-            class="absolute top-1 right-1 w-2 h-2 rounded-full bg-[var(--theme-primary)] ring-2 ring-white dark:ring-[#18181b] animate-pulse"
+            class="absolute top-1 right-1 w-2 h-2 rounded-full bg-[var(--theme-primary)] ring-2 ring-white dark:ring-[var(--theme-border)] animate-pulse"
           />
         </button>
 
@@ -232,10 +232,10 @@ onUnmounted(() => {
         >
           <div
             v-if="notificationOpen"
-            class="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-white dark:bg-[#151518] border border-neutral-200 dark:border-[#2a2a30] shadow-2xl overflow-hidden z-50 flex flex-col max-h-[85vh]"
+            class="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xl overflow-hidden z-50 flex flex-col max-h-[85vh]"
           >
             <!-- Header Notification -->
-            <div class="p-3.5 border-b border-neutral-100 dark:border-[#27272a] flex items-center justify-between">
+            <div class="p-3.5 border-b border-neutral-100 dark:border-[var(--theme-border)] flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <h3 class="text-xs font-bold text-neutral-900 dark:text-white">Pemberitahuan</h3>
                 <span
@@ -256,7 +256,7 @@ onUnmounted(() => {
             </div>
 
             <!-- Category Tabs Pill -->
-            <div class="px-3 pt-2 pb-1.5 flex gap-1 border-b border-neutral-100 dark:border-[#242428] bg-neutral-50/50 dark:bg-[#18181c] text-xs">
+            <div class="px-3 pt-2 pb-1.5 flex gap-1 border-b border-neutral-100 dark:border-[var(--theme-border)] bg-neutral-50/50 dark:bg-[var(--theme-surface-raised)] text-xs">
               <button
                 v-for="t in [
                   { id: 'semua', label: 'Semua' },
@@ -269,7 +269,7 @@ onUnmounted(() => {
                 class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer"
                 :class="
                   notificationTab === t.id
-                    ? 'bg-white dark:bg-[#222228] text-neutral-900 dark:text-white shadow-2xs'
+                    ? 'bg-white dark:bg-[var(--theme-surface-muted)] text-neutral-900 dark:text-white shadow-2xs'
                     : 'text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200'
                 "
               >
@@ -278,12 +278,12 @@ onUnmounted(() => {
             </div>
 
             <!-- Notification Items List -->
-            <div class="overflow-y-auto divide-y divide-neutral-100 dark:divide-[#222228] max-h-72">
+            <div class="overflow-y-auto divide-y divide-neutral-100 dark:divide-[var(--theme-border)] max-h-72">
               <div
                 v-for="notif in filteredNotifications()"
                 :key="notif.id"
-                class="p-3 flex items-start gap-3 hover:bg-neutral-50 dark:hover:bg-[#1a1a20] transition cursor-pointer relative group"
-                :class="notif.unread ? 'bg-neutral-50/30 dark:bg-[#18181c]/40' : ''"
+                class="p-3 flex items-start gap-3 hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-raised)] transition cursor-pointer relative group"
+                :class="notif.unread ? 'bg-neutral-50/30 dark:bg-[var(--theme-surface-raised)]/40' : ''"
               >
                 <!-- Icon Box -->
                 <div
@@ -319,7 +319,7 @@ onUnmounted(() => {
             </div>
 
             <!-- Footer View All -->
-            <div class="p-2 border-t border-neutral-100 dark:border-[#27272a] bg-neutral-50/70 dark:bg-[#131316] text-center">
+            <div class="p-2 border-t border-neutral-100 dark:border-[var(--theme-border)] bg-neutral-50/70 dark:bg-[var(--theme-surface)] text-center">
               <router-link
                 to="/setting/notifikasi"
                 @click="notificationOpen = false"
@@ -337,7 +337,7 @@ onUnmounted(() => {
         <button
           type="button"
           @click="userMenuOpen = !userMenuOpen; notificationOpen = false"
-          class="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-neutral-700 dark:border-neutral-300 bg-white dark:bg-[#18181b] flex items-center justify-center text-neutral-700 dark:text-neutral-200 shadow-2xs hover:scale-105 transition cursor-pointer"
+          class="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-neutral-700 dark:border-neutral-300 bg-white dark:bg-[var(--theme-surface-raised)] flex items-center justify-center text-neutral-700 dark:text-neutral-200 shadow-2xs hover:scale-105 transition cursor-pointer"
           aria-label="Profil Pengguna"
         >
           <User class="w-4 h-4 sm:w-4.5 sm:h-4.5" />
@@ -355,15 +355,15 @@ onUnmounted(() => {
           <div
             v-if="userMenuOpen"
             @click="userMenuOpen = false"
-            class="absolute right-0 mt-2 w-48 rounded-2xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-xl py-2 z-50 text-xs text-neutral-700 dark:text-neutral-300"
+            class="absolute right-0 mt-2 w-48 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-xl py-2 z-50 text-xs text-neutral-700 dark:text-neutral-300"
           >
-            <div class="px-4 py-2 border-b border-neutral-100 dark:border-[#27272a]">
+            <div class="px-4 py-2 border-b border-neutral-100 dark:border-[var(--theme-border)]">
               <p class="font-bold text-neutral-900 dark:text-white">{{ currentUser.name }}</p>
               <p class="text-neutral-400 text-[11px] truncate">{{ currentUser.email }}</p>
             </div>
             <router-link
               to="/setting"
-              class="flex items-center gap-2.5 px-4 py-2 hover:bg-neutral-50 dark:hover:bg-[#1e1e22] transition"
+              class="flex items-center gap-2.5 px-4 py-2 hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-muted)] transition"
             >
               <Sliders class="w-3.5 h-3.5 text-neutral-400" />
               Buka Setting
@@ -383,7 +383,7 @@ onUnmounted(() => {
       <!-- Badge Mode Tamu jika belum login -->
       <div
         v-if="!isAuthenticated"
-        class="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-xl border border-neutral-300 dark:border-[#27272a] bg-white/60 dark:bg-[#18181b]/60 backdrop-blur-xs text-xs font-medium text-neutral-600 dark:text-neutral-400"
+        class="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-xl border border-neutral-300 dark:border-[var(--theme-border)] bg-white/60 dark:bg-[var(--theme-surface-raised)]/60 backdrop-blur-xs text-xs font-medium text-neutral-600 dark:text-neutral-400"
       >
         <div class="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
         <span>Mode Masuk</span>
