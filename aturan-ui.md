@@ -233,8 +233,7 @@ Kode sudah berjalan dan tidak diubah oleh dokumen ini. Tujuannya agar agent tida
 2. **Hex hardcode** untuk permukaan dark sudah diganti token tema di layout, `components/ui/`, dan `views/`. Jangan menulis hex zinc baru (`dark:bg-[#141417]` dan sejenisnya); pakai `dark:bg-[var(--theme-surface)]`. Hex yang sah hanya swatch palet di `SettingView`, warna logo, dan CSS cetak invoice.
 3. **`formatRupiah` sebagian dibagi.** `DataKaryawanView` sudah memakai `src/utils/format.js`. `BaseInvoiceModal` (`formatRp`) dan `BaseInput` (`formatCurrencyString`) sengaja **belum** diganti karena outputnya berbeda (spasi biasa vs NBSP, format angka negatif, desimal; `BaseInput` hanya mengembalikan digit bertitik tanpa `Rp`). Jangan menambah salinan baru. Tanyakan dulu sebelum menyeragamkannya.
 4. **Tema non-default di dark mode sudah memakai token.** Layer: `--theme-bg` (Dasar Pertama) < `--theme-layer-main` (`<main>`) < `--theme-layer-2` (Dasar Kedua) < `--theme-surface` (card) < `--theme-surface-raised` < `--theme-surface-muted` (hover). Nilai dark pink/blue/terracotta di `style.css` adalah turunan yang perlu dinilai visual; ubah di `style.css`, bukan di komponen. Mode terang non-default masih memakai kelas netral Tailwind (belum ditokenkan).
-5. **Dependensi tidak terpakai di `package.json`:** `@lucide/vue` (tidak diimpor di mana pun), serta `autoprefixer` dan `postcss` (Tailwind v4 lewat `@tailwindcss/vite` tidak memerlukannya). Jangan diimpor. Ikon tetap dari `lucide-vue-next`. Penghapusan butuh persetujuan.
-6. **`EssLayout.vue` tidak ada.** Bagian ESS di dokumen lama belum punya implementasi. Jika tugas menyangkut ESS, konfirmasi dulu.
+5. **`EssLayout.vue` tidak ada.** Bagian ESS di dokumen lama belum punya implementasi. Jika tugas menyangkut ESS, konfirmasi dulu.
 
 ---
 
