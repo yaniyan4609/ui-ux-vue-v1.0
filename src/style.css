@@ -214,6 +214,15 @@ html.dark[data-theme-color="terracotta"] {
   display: block;
 }
 
+/* Matikan transisi CSS per elemen selama pergantian tema (class dipasang useTheme.js).
+   Tanpa ini, warna di dalam lingkaran memudar pelan dari warna lama. */
+.theme-switching,
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
+}
+
 /* Outgoing view stays underneath */
 ::view-transition-old(root) {
   z-index: 1 !important;
