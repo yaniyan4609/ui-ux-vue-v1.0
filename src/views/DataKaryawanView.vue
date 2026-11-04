@@ -75,6 +75,23 @@ const itemsPerPage = ref(10)
 const selectedIds = ref([])
 const isBatchDeleteModalOpen = ref(false)
 
+// Dropdown Options: form tambah/edit karyawan (tanpa opsi "Semua")
+const formDivisiOptions = [
+  { value: 'Teknologi & IT', label: 'Teknologi & IT' },
+  { value: 'Desain & Kreatif', label: 'Desain & Kreatif' },
+  { value: 'Keuangan & Pajak', label: 'Keuangan & Pajak' },
+  { value: 'SDM & HR', label: 'SDM & HR' },
+  { value: 'Pemasaran & Bisnis', label: 'Pemasaran & Bisnis' },
+  { value: 'Operasional', label: 'Operasional' },
+]
+
+const formStatusOptions = [
+  { value: 'Tetap', label: 'Tetap' },
+  { value: 'Kontrak', label: 'Kontrak' },
+  { value: 'Probasi', label: 'Probasi' },
+  { value: 'Freelance', label: 'Freelance' },
+]
+
 // Dropdown Options: Divisi (Searchable)
 const divisiOptions = computed(() => {
   const counts = {}
@@ -1104,32 +1121,24 @@ const getRowActionItems = (item) => [
             <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1">
               Divisi / Departemen
             </label>
-            <select
+            <BaseSearchableSelect
               v-model="formData.divisi"
-              class="w-full h-9.5 px-3 py-2 rounded-xl text-xs border border-neutral-300 dark:border-[#27272a] bg-neutral-50 dark:bg-[#18181b] text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 cursor-pointer"
-            >
-              <option value="Teknologi & IT">Teknologi & IT</option>
-              <option value="Desain & Kreatif">Desain & Kreatif</option>
-              <option value="Keuangan & Pajak">Keuangan & Pajak</option>
-              <option value="SDM & HR">SDM & HR</option>
-              <option value="Pemasaran & Bisnis">Pemasaran & Bisnis</option>
-              <option value="Operasional">Operasional</option>
-            </select>
+              :options="formDivisiOptions"
+              size="md"
+            />
           </div>
 
           <div>
             <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1">
               Status Kerja
             </label>
-            <select
+            <BaseSearchableSelect
               v-model="formData.status"
-              class="w-full h-9.5 px-3 py-2 rounded-xl text-xs border border-neutral-300 dark:border-[#27272a] bg-neutral-50 dark:bg-[#18181b] text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 cursor-pointer"
-            >
-              <option value="Tetap">Tetap</option>
-              <option value="Kontrak">Kontrak</option>
-              <option value="Probasi">Probasi</option>
-              <option value="Freelance">Freelance</option>
-            </select>
+              :options="formStatusOptions"
+              :searchable="false"
+              size="md"
+              align="right"
+            />
           </div>
         </div>
 

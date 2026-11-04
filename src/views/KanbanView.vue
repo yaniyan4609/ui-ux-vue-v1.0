@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import BaseButton from '../components/ui/BaseButton.vue'
 import BaseBadge from '../components/ui/BaseBadge.vue'
 import BaseInput from '../components/ui/BaseInput.vue'
+import BaseSearchableSelect from '../components/ui/BaseSearchableSelect.vue'
 import BaseCurrencyInput from '../components/ui/BaseCurrencyInput.vue'
 import BaseModal from '../components/ui/BaseModal.vue'
 import BaseSlideOver from '../components/ui/BaseSlideOver.vue'
@@ -154,6 +155,12 @@ const cards = ref([
 // ========================================================
 const searchQuery = ref('')
 const selectedKategori = ref('all')
+const kategoriFilterOptions = [
+  { value: 'all', label: 'Semua Kategori' },
+  { value: 'Offset', label: 'Offset' },
+  { value: 'Outdoor', label: 'Outdoor' },
+  { value: 'Merchandise', label: 'Merchandise' },
+]
 
 const filteredCards = computed(() => {
   return cards.value.filter((card) => {
@@ -367,15 +374,13 @@ const submitNewOrder = () => {
           />
         </div>
 
-        <select
+        <BaseSearchableSelect
           v-model="selectedKategori"
-          class="text-xs py-1.5 px-3 rounded-xl border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#141417] text-neutral-700 dark:text-neutral-300 font-medium focus:outline-none cursor-pointer"
-        >
-          <option value="all">Semua Kategori</option>
-          <option value="Offset">Offset</option>
-          <option value="Outdoor">Outdoor</option>
-          <option value="Merchandise">Merchandise</option>
-        </select>
+          :options="kategoriFilterOptions"
+          :searchable="false"
+          align="right"
+          width-class="w-44"
+        />
 
         <BaseButton variant="primary" size="sm" @click="isAddModalOpen = true">
           <Plus class="w-3.5 h-3.5" />

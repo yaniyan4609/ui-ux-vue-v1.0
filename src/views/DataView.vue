@@ -232,6 +232,23 @@ const getRowActionItems = (item) => [
 // ========================================================
 const isFormModalOpen = ref(false)
 const isEditMode = ref(false)
+// Dropdown Options: form tambah/edit gunung (tanpa opsi "Semua")
+const formProvinsiOptions = [
+  { value: 'Jawa Timur', label: 'Jawa Timur' },
+  { value: 'Jawa Tengah', label: 'Jawa Tengah' },
+  { value: 'Jawa Barat', label: 'Jawa Barat' },
+  { value: 'Banten', label: 'Banten' },
+  { value: 'DI Yogyakarta', label: 'DI Yogyakarta' },
+]
+
+const formKategoriOptions = [
+  { value: '> 3.000 mdpl', label: '> 3.000 mdpl' },
+  { value: 'Menantang', label: 'Menantang' },
+  { value: 'Sedang', label: 'Sedang' },
+  { value: 'Ramah Pemula', label: 'Ramah Pemula' },
+  { value: 'Wisata Sunrise', label: 'Wisata Sunrise' },
+]
+
 const formData = ref({
   id: null,
   nama: '',
@@ -819,32 +836,25 @@ const handleResetDefault = () => {
             <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1">
               Provinsi
             </label>
-            <select
+            <BaseSearchableSelect
               v-model="formData.provinsi"
-              class="w-full h-9.5 px-3 py-2 rounded-xl text-xs border border-neutral-300 dark:border-[#27272a] bg-neutral-50 dark:bg-[#18181b] text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 cursor-pointer"
-            >
-              <option value="Jawa Timur">Jawa Timur</option>
-              <option value="Jawa Tengah">Jawa Tengah</option>
-              <option value="Jawa Barat">Jawa Barat</option>
-              <option value="Banten">Banten</option>
-              <option value="DI Yogyakarta">DI Yogyakarta</option>
-            </select>
+              :options="formProvinsiOptions"
+              :searchable="false"
+              size="md"
+            />
           </div>
 
           <div>
             <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1">
               Kategori
             </label>
-            <select
+            <BaseSearchableSelect
               v-model="formData.kategori"
-              class="w-full h-9.5 px-3 py-2 rounded-xl text-xs border border-neutral-300 dark:border-[#27272a] bg-neutral-50 dark:bg-[#18181b] text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 cursor-pointer"
-            >
-              <option value="> 3.000 mdpl">&gt; 3.000 mdpl</option>
-              <option value="Menantang">Menantang</option>
-              <option value="Sedang">Sedang</option>
-              <option value="Ramah Pemula">Ramah Pemula</option>
-              <option value="Wisata Sunrise">Wisata Sunrise</option>
-            </select>
+              :options="formKategoriOptions"
+              :searchable="false"
+              size="md"
+              align="right"
+            />
           </div>
         </div>
 
