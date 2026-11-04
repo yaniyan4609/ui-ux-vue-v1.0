@@ -347,10 +347,10 @@ onUnmounted(() => {
         >
           <div
             v-if="modelValue"
-            class="relative w-full max-w-xl rounded-2xl bg-white dark:bg-[#151518] border border-neutral-200 dark:border-[#2a2a30] shadow-2xl overflow-hidden flex flex-col max-h-[75vh]"
+            class="relative w-full max-w-xl rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xl overflow-hidden flex flex-col max-h-[75vh]"
           >
             <!-- Search Bar Input Header -->
-            <div class="flex items-center gap-3 px-4 py-3.5 border-b border-neutral-200/90 dark:border-[#27272a] bg-neutral-50/50 dark:bg-[#18181c]">
+            <div class="flex items-center gap-3 px-4 py-3.5 border-b border-neutral-200/90 dark:border-[var(--theme-border)] bg-neutral-50/50 dark:bg-[var(--theme-surface-raised)]">
               <Search class="w-5 h-5 text-neutral-400 shrink-0" />
               <input
                 ref="inputRef"
@@ -367,13 +367,13 @@ onUnmounted(() => {
               >
                 <X class="w-4 h-4" />
               </button>
-              <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10.5px] font-mono text-neutral-400 bg-neutral-200/60 dark:bg-[#25252b] rounded-md border border-neutral-300 dark:border-[#333338]">
+              <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10.5px] font-mono text-neutral-400 bg-neutral-200/60 dark:bg-[var(--theme-surface-muted)] rounded-md border border-neutral-300 dark:border-[var(--theme-border-strong)]">
                 ESC
               </kbd>
             </div>
 
             <!-- List Results -->
-            <div class="flex-1 overflow-y-auto p-2 divide-y divide-neutral-100 dark:divide-[#202025]">
+            <div class="flex-1 overflow-y-auto p-2 divide-y divide-neutral-100 dark:divide-[var(--theme-border)]">
               <div v-if="flatList.length === 0" class="py-12 text-center text-xs text-neutral-400 space-y-2">
                 <Search class="w-8 h-8 mx-auto opacity-30" />
                 <p>Tidak ada hasil untuk "<strong>{{ searchQuery }}</strong>"</p>
@@ -400,7 +400,7 @@ onUnmounted(() => {
                     :class="[
                       selectedIndex === flatList.indexOf(cmd)
                         ? 'bg-[var(--theme-primary-soft)] text-[var(--theme-primary)] font-semibold'
-                        : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100/70 dark:hover:bg-[#1e1e24]',
+                        : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100/70 dark:hover:bg-[var(--theme-surface-muted)]',
                     ]"
                   >
                     <div class="flex items-center gap-2.5 truncate">
@@ -422,8 +422,8 @@ onUnmounted(() => {
                         class="text-[10px] px-2 py-0.5 rounded-md font-mono"
                         :class="
                           selectedIndex === flatList.indexOf(cmd)
-                            ? 'bg-white/80 dark:bg-[#18181c] text-[var(--theme-primary)] shadow-2xs'
-                            : 'bg-neutral-100 dark:bg-[#222228] text-neutral-500 dark:text-neutral-400'
+                            ? 'bg-white/80 dark:bg-[var(--theme-surface-raised)] text-[var(--theme-primary)] shadow-2xs'
+                            : 'bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-500 dark:text-neutral-400'
                         "
                       >
                         {{ cmd.badge }}
@@ -439,19 +439,19 @@ onUnmounted(() => {
             </div>
 
             <!-- Footer Keyboard Helper Navigation -->
-            <div class="px-4 py-2.5 border-t border-neutral-100 dark:border-[#27272a] bg-neutral-50/70 dark:bg-[#131316] flex items-center justify-between text-[11px] text-neutral-400">
+            <div class="px-4 py-2.5 border-t border-neutral-100 dark:border-[var(--theme-border)] bg-neutral-50/70 dark:bg-[var(--theme-surface)] flex items-center justify-between text-[11px] text-neutral-400">
               <div class="flex items-center gap-3">
                 <span class="flex items-center gap-1">
-                  <kbd class="px-1 py-0.2 bg-white dark:bg-[#202025] rounded border border-neutral-200 dark:border-[#303038] text-[9.5px]">↑</kbd>
-                  <kbd class="px-1 py-0.2 bg-white dark:bg-[#202025] rounded border border-neutral-200 dark:border-[#303038] text-[9.5px]">↓</kbd>
+                  <kbd class="px-1 py-0.2 bg-white dark:bg-[var(--theme-surface-muted)] rounded border border-neutral-200 dark:border-[var(--theme-border-strong)] text-[9.5px]">↑</kbd>
+                  <kbd class="px-1 py-0.2 bg-white dark:bg-[var(--theme-surface-muted)] rounded border border-neutral-200 dark:border-[var(--theme-border-strong)] text-[9.5px]">↓</kbd>
                   navigasi
                 </span>
                 <span class="flex items-center gap-1">
-                  <kbd class="px-1 py-0.2 bg-white dark:bg-[#202025] rounded border border-neutral-200 dark:border-[#303038] text-[9.5px]">↵</kbd>
+                  <kbd class="px-1 py-0.2 bg-white dark:bg-[var(--theme-surface-muted)] rounded border border-neutral-200 dark:border-[var(--theme-border-strong)] text-[9.5px]">↵</kbd>
                   pilih
                 </span>
                 <span class="flex items-center gap-1">
-                  <kbd class="px-1 py-0.2 bg-white dark:bg-[#202025] rounded border border-neutral-200 dark:border-[#303038] text-[9.5px]">esc</kbd>
+                  <kbd class="px-1 py-0.2 bg-white dark:bg-[var(--theme-surface-muted)] rounded border border-neutral-200 dark:border-[var(--theme-border-strong)] text-[9.5px]">esc</kbd>
                   tutup
                 </span>
               </div>

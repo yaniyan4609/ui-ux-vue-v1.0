@@ -115,9 +115,9 @@ onMounted(() => {
         error
           ? 'border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/10'
           : isFocused
-          ? 'border-neutral-400 dark:border-[#3f3f46] ring-2 ring-neutral-300/60 dark:ring-[#2f2f36] bg-white dark:bg-[#1a1a1e]'
-          : 'border-neutral-200 dark:border-[#27272a] hover:border-neutral-300 dark:hover:border-[#383840] bg-white dark:bg-[#18181b]',
-        disabled ? 'opacity-50 cursor-not-allowed bg-neutral-100 dark:bg-[#141417]' : '',
+          ? 'border-neutral-400 dark:border-[var(--theme-border-strong)] ring-2 ring-neutral-300/60 dark:ring-[var(--theme-border-strong)] bg-white dark:bg-[var(--theme-surface-raised)]'
+          : 'border-neutral-200 dark:border-[var(--theme-border)] hover:border-neutral-300 dark:hover:border-[var(--theme-border-strong)] bg-white dark:bg-[var(--theme-surface-raised)]',
+        disabled ? 'opacity-50 cursor-not-allowed bg-neutral-100 dark:bg-[var(--theme-surface)]' : '',
       ]"
     >
       <textarea

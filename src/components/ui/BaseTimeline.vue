@@ -55,9 +55,9 @@ const getVariantClasses = (variant = 'neutral') => {
       }
     default:
       return {
-        dotBg: 'bg-neutral-100 dark:bg-[#202025] text-neutral-600 dark:text-neutral-400 border-neutral-300 dark:border-[#33333a]',
-        badgeBg: 'bg-neutral-100 dark:bg-[#202025] text-neutral-600 dark:text-neutral-400',
-        line: 'border-neutral-200 dark:border-[#27272a]',
+        dotBg: 'bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-600 dark:text-neutral-400 border-neutral-300 dark:border-[var(--theme-border-strong)]',
+        badgeBg: 'bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-600 dark:text-neutral-400',
+        line: 'border-neutral-200 dark:border-[var(--theme-border)]',
       }
   }
 }
@@ -90,7 +90,7 @@ const getDefaultIcon = (variant = 'neutral') => {
       <!-- Connecting Vertical Line (hidden for the last item) -->
       <div
         v-if="idx < items.length - 1"
-        class="absolute left-[15px] top-[26px] bottom-[-16px] w-[2px] bg-neutral-200 dark:bg-[#27272a] group-hover:bg-neutral-300 dark:group-hover:bg-[#33333a] transition-colors"
+        class="absolute left-[15px] top-[26px] bottom-[-16px] w-[2px] bg-neutral-200 dark:bg-[var(--theme-surface-muted)] group-hover:bg-neutral-300 dark:group-hover:bg-[var(--theme-surface-muted)] transition-colors"
       />
 
       <!-- Node Icon Halo -->

@@ -46,7 +46,7 @@ const effectiveIcon = computed(() => props.icon || Search)
       <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-3xl bg-[var(--theme-primary-soft)] opacity-70 flex items-center justify-center shadow-xs" />
 
       <!-- Center Icon Box -->
-      <div class="absolute w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-white dark:bg-[#18181c] border border-neutral-200 dark:border-[#2b2b32] shadow-sm flex items-center justify-center text-[var(--theme-primary)]">
+      <div class="absolute w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-sm flex items-center justify-center text-[var(--theme-primary)]">
         <slot name="icon">
           <component :is="effectiveIcon" class="w-5 h-5 sm:w-6 sm:h-6 stroke-[1.8]" />
         </slot>

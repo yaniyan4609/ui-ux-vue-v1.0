@@ -284,11 +284,11 @@ const getDayClass = (day) => {
 
   // 4. Hari Biasa Bulan Ini (Teks Tegas & Sangat Kontras: Hitam Pekat di Light, Putih Terang di Dark)
   if (day.isCurrentMonth) {
-    return 'text-neutral-900 dark:text-[#f4f4f5] font-semibold hover:bg-neutral-100 dark:hover:bg-[#24242a] rounded-lg'
+    return 'text-neutral-900 dark:text-[var(--theme-text-primary)] font-semibold hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] rounded-lg'
   }
 
   // 5. Tanggal Luar Bulan (Filler Days - Muted Halus)
-  return 'text-neutral-400 dark:text-neutral-600 font-normal hover:bg-neutral-50 dark:hover:bg-[#202025] rounded-lg'
+  return 'text-neutral-400 dark:text-neutral-600 font-normal hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-muted)] rounded-lg'
 }
 
 // Quick Presets
@@ -412,7 +412,7 @@ onUnmounted(() => {
     <!-- Trigger Input Box -->
     <div
       @click="toggleOpen"
-      class="w-full flex items-center justify-between rounded-xl border border-neutral-300 dark:border-[#27272a] bg-white dark:bg-[#141417] text-xs text-neutral-900 dark:text-neutral-100 transition-all duration-150 cursor-pointer shadow-2xs hover:border-neutral-400 dark:hover:border-neutral-600 focus-within:ring-2 focus-within:ring-[var(--theme-primary)]"
+      class="w-full flex items-center justify-between rounded-xl border border-neutral-300 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] text-xs text-neutral-900 dark:text-neutral-100 transition-all duration-150 cursor-pointer shadow-2xs hover:border-neutral-400 dark:hover:border-neutral-600 focus-within:ring-2 focus-within:ring-[var(--theme-primary)]"
       :class="[
         size === 'sm' ? 'h-8.5 px-2.5' : 'h-9.5 px-3',
         isOpen ? 'ring-2 ring-[var(--theme-primary)] border-[var(--theme-primary)]' : '',
@@ -433,7 +433,7 @@ onUnmounted(() => {
           v-if="clearable && displayValue"
           type="button"
           @click.stop="clear"
-          class="p-0.5 rounded-md text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#202025] transition cursor-pointer"
+          class="p-0.5 rounded-md text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] transition cursor-pointer"
           title="Reset Tanggal"
         >
           <X class="w-3.5 h-3.5" />
@@ -452,13 +452,13 @@ onUnmounted(() => {
     >
       <div
         v-if="isOpen"
-        class="absolute top-full mt-1.5 z-50 rounded-2xl bg-white dark:bg-[#18181c] border border-neutral-200 dark:border-[#2b2b32] shadow-2xl p-3 flex flex-col sm:flex-row gap-3 will-change-transform max-w-[calc(100vw-32px)]"
+        class="absolute top-full mt-1.5 z-50 rounded-2xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xl p-3 flex flex-col sm:flex-row gap-3 will-change-transform max-w-[calc(100vw-32px)]"
         :class="alignRight ? 'right-0' : 'left-0'"
       >
         <!-- Quick Presets Sidebar -->
         <div
           v-if="presets"
-          class="sm:w-32 border-b sm:border-b-0 sm:border-r border-neutral-100 dark:border-[#242428] pb-2 sm:pb-0 sm:pr-2.5 flex sm:flex-col gap-1 overflow-x-auto sm:overflow-visible shrink-0 text-xs"
+          class="sm:w-32 border-b sm:border-b-0 sm:border-r border-neutral-100 dark:border-[var(--theme-border)] pb-2 sm:pb-0 sm:pr-2.5 flex sm:flex-col gap-1 overflow-x-auto sm:overflow-visible shrink-0 text-xs"
         >
           <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 px-2 py-0.5 hidden sm:block">
             Preset
@@ -466,28 +466,28 @@ onUnmounted(() => {
           <button
             type="button"
             @click="applyPreset(0)"
-            class="text-left px-2.5 py-1.5 rounded-lg text-neutral-700 dark:text-neutral-200 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[#24242a] transition whitespace-nowrap cursor-pointer text-xs font-medium"
+            class="text-left px-2.5 py-1.5 rounded-lg text-neutral-700 dark:text-neutral-200 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] transition whitespace-nowrap cursor-pointer text-xs font-medium"
           >
             Hari Ini
           </button>
           <button
             type="button"
             @click="applyPreset(7)"
-            class="text-left px-2.5 py-1.5 rounded-lg text-neutral-700 dark:text-neutral-200 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[#24242a] transition whitespace-nowrap cursor-pointer text-xs font-medium"
+            class="text-left px-2.5 py-1.5 rounded-lg text-neutral-700 dark:text-neutral-200 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] transition whitespace-nowrap cursor-pointer text-xs font-medium"
           >
             7 Hari Terakhir
           </button>
           <button
             type="button"
             @click="applyPreset(30)"
-            class="text-left px-2.5 py-1.5 rounded-lg text-neutral-700 dark:text-neutral-200 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[#24242a] transition whitespace-nowrap cursor-pointer text-xs font-medium"
+            class="text-left px-2.5 py-1.5 rounded-lg text-neutral-700 dark:text-neutral-200 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] transition whitespace-nowrap cursor-pointer text-xs font-medium"
           >
             30 Hari Terakhir
           </button>
           <button
             type="button"
             @click="applyPreset('month')"
-            class="text-left px-2.5 py-1.5 rounded-lg text-neutral-700 dark:text-neutral-200 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[#24242a] transition whitespace-nowrap cursor-pointer text-xs font-medium"
+            class="text-left px-2.5 py-1.5 rounded-lg text-neutral-700 dark:text-neutral-200 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] transition whitespace-nowrap cursor-pointer text-xs font-medium"
           >
             Bulan Ini
           </button>
@@ -496,7 +496,7 @@ onUnmounted(() => {
         <!-- Main Calendar Matrix -->
         <div class="w-64 sm:w-68">
           <!-- Calendar Header: Month + Year Navigator -->
-          <div class="flex items-center justify-between pb-2 mb-2 border-b border-neutral-100 dark:border-[#242428]">
+          <div class="flex items-center justify-between pb-2 mb-2 border-b border-neutral-100 dark:border-[var(--theme-border)]">
             <span class="font-bold text-xs sm:text-sm text-neutral-900 dark:text-white">
               {{ monthNames[viewMonth] }} {{ viewYear }}
             </span>
@@ -505,7 +505,7 @@ onUnmounted(() => {
               <button
                 type="button"
                 @click="prevMonth"
-                class="p-1 rounded-lg text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[#24242a] transition cursor-pointer"
+                class="p-1 rounded-lg text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] transition cursor-pointer"
                 title="Bulan Sebelumnya"
               >
                 <ChevronLeft class="w-4 h-4" />
@@ -513,7 +513,7 @@ onUnmounted(() => {
               <button
                 type="button"
                 @click="nextMonth"
-                class="p-1 rounded-lg text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[#24242a] transition cursor-pointer"
+                class="p-1 rounded-lg text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] transition cursor-pointer"
                 title="Bulan Berikutnya"
               >
                 <ChevronRight class="w-4 h-4" />

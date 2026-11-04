@@ -198,10 +198,10 @@ const triggerSelect = () => {
       @click="triggerSelect"
       class="relative w-full rounded-2xl border-2 border-dashed p-6 text-center transition-all duration-150 cursor-pointer flex flex-col items-center justify-center gap-2.5 group"
       :class="[
-        disabled ? 'opacity-50 cursor-not-allowed border-neutral-300 dark:border-[#27272a] bg-neutral-100 dark:bg-[#18181c]' :
+        disabled ? 'opacity-50 cursor-not-allowed border-neutral-300 dark:border-[var(--theme-border)] bg-neutral-100 dark:bg-[var(--theme-surface-raised)]' :
         isDragging
           ? 'border-[var(--theme-primary)] bg-[var(--theme-primary-soft)] scale-[1.01]'
-          : 'border-neutral-300 dark:border-[#2e2e34] bg-neutral-50/50 dark:bg-[#141417]/60 hover:border-neutral-400 dark:hover:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-[#161619]',
+          : 'border-neutral-300 dark:border-[var(--theme-border-strong)] bg-neutral-50/50 dark:bg-[var(--theme-surface)]/60 hover:border-neutral-400 dark:hover:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-raised)]',
       ]"
     >
       <input
@@ -217,7 +217,7 @@ const triggerSelect = () => {
       <!-- Icon Box -->
       <div
         class="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 shadow-2xs"
-        :class="isDragging ? 'bg-white dark:bg-[#1e1e24] text-[var(--theme-primary)]' : 'bg-white dark:bg-[#1a1a1e] border border-neutral-200 dark:border-[#2a2a30] text-neutral-500 dark:text-neutral-400'"
+        :class="isDragging ? 'bg-white dark:bg-[var(--theme-surface-muted)] text-[var(--theme-primary)]' : 'bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] text-neutral-500 dark:text-neutral-400'"
       >
         <UploadCloud class="w-6 h-6 stroke-[1.8]" />
       </div>
@@ -247,14 +247,14 @@ const triggerSelect = () => {
       <div
         v-for="(item, idx) in fileList"
         :key="item.id"
-        class="p-2.5 rounded-xl bg-white dark:bg-[#16161a] border border-neutral-200 dark:border-[#27272a] shadow-2xs flex items-center justify-between gap-3"
+        class="p-2.5 rounded-xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex items-center justify-between gap-3"
       >
         <!-- File Info Left -->
         <div class="flex items-center gap-2.5 min-w-0">
           <!-- Thumbnail Image or File Icon -->
           <div
             v-if="item.preview"
-            class="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-neutral-200 dark:border-[#2a2a30] bg-neutral-100"
+            class="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-neutral-200 dark:border-[var(--theme-border)] bg-neutral-100"
           >
             <img :src="item.preview" :alt="item.name" class="w-full h-full object-cover" />
           </div>

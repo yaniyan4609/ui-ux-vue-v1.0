@@ -217,9 +217,9 @@ const sizeClasses = computed(() => {
         error
           ? 'border-rose-500 dark:border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/10'
           : isFocused
-          ? 'border-[var(--theme-primary)] ring-2 ring-[var(--theme-primary)]/20 bg-white dark:bg-[#1a1a1e]'
-          : 'border-neutral-200 dark:border-[#27272a] hover:border-neutral-300 dark:hover:border-[#383840] bg-white dark:bg-[#18181b]',
-        disabled ? 'opacity-50 cursor-not-allowed bg-neutral-100 dark:bg-[#141417]' : '',
+          ? 'border-[var(--theme-primary)] ring-2 ring-[var(--theme-primary)]/20 bg-white dark:bg-[var(--theme-surface-raised)]'
+          : 'border-neutral-200 dark:border-[var(--theme-border)] hover:border-neutral-300 dark:hover:border-[var(--theme-border-strong)] bg-white dark:bg-[var(--theme-surface-raised)]',
+        disabled ? 'opacity-50 cursor-not-allowed bg-neutral-100 dark:bg-[var(--theme-surface)]' : '',
       ]"
     >
       <!-- Leading Prefix (Badge Rp Otomatis) -->
@@ -227,7 +227,7 @@ const sizeClasses = computed(() => {
         <component :is="leadingIcon" v-if="leadingIcon" class="w-4 h-4 text-neutral-400 mr-1.5" />
         <span
           v-if="prefix"
-          class="text-xs font-bold font-mono px-1.5 py-0.5 rounded-md bg-neutral-100 dark:bg-[#25252b] text-neutral-700 dark:text-neutral-300 border border-neutral-200/80 dark:border-[#303038]"
+          class="text-xs font-bold font-mono px-1.5 py-0.5 rounded-md bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300 border border-neutral-200/80 dark:border-[var(--theme-border-strong)]"
         >
           {{ prefix }}
         </span>
@@ -260,7 +260,7 @@ const sizeClasses = computed(() => {
           v-if="clearable && displayValue && !disabled && !readonly"
           type="button"
           @click="handleClear"
-          class="p-1 rounded-md text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#26262b] transition cursor-pointer"
+          class="p-1 rounded-md text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] transition cursor-pointer"
           title="Bersihkan nominal"
         >
           <X class="w-3.5 h-3.5" />
@@ -269,7 +269,7 @@ const sizeClasses = computed(() => {
         <!-- Suffix Badge (e.g. '/ bln', 'IDR') -->
         <span
           v-if="suffix"
-          class="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-neutral-100 dark:bg-[#27272e] text-neutral-600 dark:text-neutral-400 border border-neutral-200/60 dark:border-[#32323a] select-none font-mono"
+          class="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-600 dark:text-neutral-400 border border-neutral-200/60 dark:border-[var(--theme-border-strong)] select-none font-mono"
         >
           {{ suffix }}
         </span>

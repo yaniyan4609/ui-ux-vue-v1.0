@@ -94,10 +94,10 @@ const handlePrint = () => {
     <!-- Printable Invoice Paper Surface -->
     <div
       id="printable-invoice"
-      class="p-5 sm:p-8 rounded-2xl bg-white dark:bg-[#141417] text-neutral-800 dark:text-neutral-200 border border-neutral-200 dark:border-[#27272a] shadow-xs space-y-6 text-xs sm:text-sm select-none"
+      class="p-5 sm:p-8 rounded-2xl bg-white dark:bg-[var(--theme-surface)] text-neutral-800 dark:text-neutral-200 border border-neutral-200 dark:border-[var(--theme-border)] shadow-xs space-y-6 text-xs sm:text-sm select-none"
     >
       <!-- Invoice Top Bar: Logo & Invoice Metadata -->
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-neutral-200 dark:border-[#27272a]">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-neutral-200 dark:border-[var(--theme-border)]">
         <div>
           <div class="flex items-center gap-2.5">
             <img
@@ -129,7 +129,7 @@ const handlePrint = () => {
       </div>
 
       <!-- Bill To & Payment Method Info -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-200/80 dark:border-[#242428] text-xs">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-200/80 dark:border-[var(--theme-border)] text-xs">
         <div>
           <span class="text-[10px] uppercase font-bold text-neutral-400 block mb-1">Ditagihkan Kepada:</span>
           <div class="font-bold text-sm text-neutral-900 dark:text-white">{{ invoiceData.customer?.nama }}</div>
@@ -137,7 +137,7 @@ const handlePrint = () => {
           <div class="text-neutral-500 text-[11px] mt-0.5">{{ invoiceData.customer?.alamat }}</div>
         </div>
 
-        <div class="sm:border-l sm:border-neutral-200 dark:sm:border-[#242428] sm:pl-4">
+        <div class="sm:border-l sm:border-neutral-200 dark:sm:border-[var(--theme-border)] sm:pl-4">
           <span class="text-[10px] uppercase font-bold text-neutral-400 block mb-1">Status & Pembayaran:</span>
           <div class="flex items-center gap-2">
             <span class="font-bold text-neutral-900 dark:text-white">{{ invoiceData.metodePembayaran }}</span>
@@ -153,9 +153,9 @@ const handlePrint = () => {
       </div>
 
       <!-- Items Table -->
-      <div class="overflow-x-auto rounded-xl border border-neutral-200 dark:border-[#27272a]">
+      <div class="overflow-x-auto rounded-xl border border-neutral-200 dark:border-[var(--theme-border)]">
         <table class="w-full text-left text-xs">
-          <thead class="bg-neutral-100 dark:bg-[#1a1a1e] text-neutral-600 dark:text-neutral-400 font-bold border-b border-neutral-200 dark:border-[#27272a]">
+          <thead class="bg-neutral-100 dark:bg-[var(--theme-surface-raised)] text-neutral-600 dark:text-neutral-400 font-bold border-b border-neutral-200 dark:border-[var(--theme-border)]">
             <tr>
               <th class="py-2.5 px-3 w-10 text-center">No</th>
               <th class="py-2.5 px-3">Deskripsi Layanan / Produk</th>
@@ -164,11 +164,11 @@ const handlePrint = () => {
               <th class="py-2.5 px-3 text-right">Total</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-neutral-100 dark:divide-[#242428]">
+          <tbody class="divide-y divide-neutral-100 dark:divide-[var(--theme-border)]">
             <tr
               v-for="(item, idx) in invoiceData.items"
               :key="idx"
-              class="hover:bg-neutral-50/50 dark:hover:bg-[#18181c]"
+              class="hover:bg-neutral-50/50 dark:hover:bg-[var(--theme-surface-raised)]"
             >
               <td class="py-3 px-3 text-center font-mono text-neutral-400 font-medium">
                 {{ idx + 1 }}
@@ -218,7 +218,7 @@ const handlePrint = () => {
             <span>PPN (11%):</span>
             <span class="font-mono font-medium text-neutral-800 dark:text-neutral-200">{{ formatRp(invoiceData.ppn) }}</span>
           </div>
-          <div class="pt-2 border-t border-neutral-200 dark:border-[#27272a] flex justify-between items-baseline font-bold text-sm sm:text-base text-neutral-900 dark:text-white">
+          <div class="pt-2 border-t border-neutral-200 dark:border-[var(--theme-border)] flex justify-between items-baseline font-bold text-sm sm:text-base text-neutral-900 dark:text-white">
             <span>Total Tagihan:</span>
             <span class="font-mono text-[var(--theme-primary)]">{{ formatRp(invoiceData.totalBayar) }}</span>
           </div>

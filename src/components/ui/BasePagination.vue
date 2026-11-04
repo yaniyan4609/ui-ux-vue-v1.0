@@ -96,12 +96,12 @@ const visiblePages = computed(() => {
       </span>
 
       <!-- Per Page Selector Dropdown -->
-      <div v-if="perPageOptions.length > 0" class="flex items-center gap-1.5 pl-3 border-l border-neutral-200 dark:border-[#27272a]">
+      <div v-if="perPageOptions.length > 0" class="flex items-center gap-1.5 pl-3 border-l border-neutral-200 dark:border-[var(--theme-border)]">
         <span class="hidden sm:inline">Baris:</span>
         <select
           :value="itemsPerPage"
           @change="handlePerPageChange"
-          class="py-0.5 px-2 rounded-lg bg-white dark:bg-[#18181b] border border-neutral-200 dark:border-[#27272a] text-neutral-800 dark:text-neutral-200 text-xs font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-[#333338]"
+          class="py-0.5 px-2 rounded-lg bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] text-neutral-800 dark:text-neutral-200 text-xs font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-[var(--theme-border-strong)]"
         >
           <option
             v-for="opt in perPageOptions"
@@ -122,7 +122,7 @@ const visiblePages = computed(() => {
         type="button"
         @click="setPage(1)"
         :disabled="currentPage === 1"
-        class="hidden sm:flex p-1 rounded-lg border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#18181b] text-neutral-700 dark:text-neutral-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-50 dark:hover:bg-[#202024] cursor-pointer transition shadow-2xs"
+        class="hidden sm:flex p-1 rounded-lg border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface-raised)] text-neutral-700 dark:text-neutral-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-muted)] cursor-pointer transition shadow-2xs"
         title="Halaman Pertama"
       >
         <ChevronsLeft class="w-3.5 h-3.5" />
@@ -133,7 +133,7 @@ const visiblePages = computed(() => {
         type="button"
         @click="setPage(currentPage - 1)"
         :disabled="currentPage === 1"
-        class="p-1 px-1.5 rounded-lg border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#18181b] text-neutral-700 dark:text-neutral-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-50 dark:hover:bg-[#202024] cursor-pointer transition shadow-2xs flex items-center gap-1"
+        class="p-1 px-1.5 rounded-lg border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface-raised)] text-neutral-700 dark:text-neutral-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-muted)] cursor-pointer transition shadow-2xs flex items-center gap-1"
         title="Sebelumnya"
       >
         <ChevronLeft class="w-3.5 h-3.5" />
@@ -157,7 +157,7 @@ const visiblePages = computed(() => {
             :class="[
               currentPage === p
                 ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 font-bold shadow-2xs'
-                : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-[#202024]',
+                : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)]',
             ]"
           >
             {{ p }}
@@ -175,7 +175,7 @@ const visiblePages = computed(() => {
         type="button"
         @click="setPage(currentPage + 1)"
         :disabled="currentPage === totalPages"
-        class="p-1 px-1.5 rounded-lg border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#18181b] text-neutral-700 dark:text-neutral-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-50 dark:hover:bg-[#202024] cursor-pointer transition shadow-2xs flex items-center gap-1"
+        class="p-1 px-1.5 rounded-lg border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface-raised)] text-neutral-700 dark:text-neutral-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-muted)] cursor-pointer transition shadow-2xs flex items-center gap-1"
         title="Selanjutnya"
       >
         <span v-if="compact" class="text-xs">Next</span>
@@ -188,7 +188,7 @@ const visiblePages = computed(() => {
         type="button"
         @click="setPage(totalPages)"
         :disabled="currentPage === totalPages"
-        class="hidden sm:flex p-1 rounded-lg border border-neutral-200 dark:border-[#27272a] bg-white dark:bg-[#18181b] text-neutral-700 dark:text-neutral-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-50 dark:hover:bg-[#202024] cursor-pointer transition shadow-2xs"
+        class="hidden sm:flex p-1 rounded-lg border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface-raised)] text-neutral-700 dark:text-neutral-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-muted)] cursor-pointer transition shadow-2xs"
         title="Halaman Terakhir"
       >
         <ChevronsRight class="w-3.5 h-3.5" />

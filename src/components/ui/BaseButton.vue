@@ -23,10 +23,10 @@ const props = defineProps({
 const variantClasses = computed(() => {
   const map = {
     primary: 'bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] active:bg-[var(--theme-primary-pressed)] text-[var(--theme-primary-text)] shadow-2xs font-semibold',
-    secondary: 'bg-neutral-800 hover:bg-neutral-900 text-white dark:bg-[#27272a] dark:hover:bg-[#333338] dark:text-white shadow-2xs font-semibold',
-    outline: 'border border-neutral-300 dark:border-[#27272a] bg-white hover:bg-neutral-50 text-neutral-800 dark:bg-[#18181b] dark:text-neutral-200 dark:hover:bg-[#222226] shadow-2xs',
+    secondary: 'bg-neutral-800 hover:bg-neutral-900 text-white dark:bg-[var(--theme-surface-muted)] dark:hover:bg-[var(--theme-surface-muted)] dark:text-white shadow-2xs font-semibold',
+    outline: 'border border-neutral-300 dark:border-[var(--theme-border)] bg-white hover:bg-neutral-50 text-neutral-800 dark:bg-[var(--theme-surface-raised)] dark:text-neutral-200 dark:hover:bg-[var(--theme-surface-muted)] shadow-2xs',
     danger: 'bg-rose-600 hover:bg-rose-700 text-white shadow-2xs font-semibold',
-    ghost: 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-[#222226] dark:hover:text-white',
+    ghost: 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-[var(--theme-surface-muted)] dark:hover:text-white',
   }
   return map[props.variant] || map.primary
 })

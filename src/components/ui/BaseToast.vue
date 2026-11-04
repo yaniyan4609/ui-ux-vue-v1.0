@@ -14,7 +14,7 @@ const emit = defineEmits(['close'])
 
 <template>
   <div
-    class="pointer-events-auto relative flex items-center justify-between gap-3 w-full max-w-sm px-4 py-3 sm:px-4.5 sm:py-3.5 rounded-2xl bg-white dark:bg-[#18181b] border border-neutral-200/90 dark:border-[#27272a] shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)] text-neutral-900 dark:text-[#f4f4f5] transition-all select-none"
+    class="pointer-events-auto relative flex items-center justify-between gap-3 w-full max-w-sm px-4 py-3 sm:px-4.5 sm:py-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200/90 dark:border-[var(--theme-border)] shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)] text-neutral-900 dark:text-[var(--theme-text-primary)] transition-all select-none"
     role="status"
     aria-live="polite"
   >
@@ -149,7 +149,7 @@ const emit = defineEmits(['close'])
     <button
       type="button"
       @click="emit('close', toast.id)"
-      class="shrink-0 p-1 -mr-1 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#27272a] transition cursor-pointer"
+      class="shrink-0 p-1 -mr-1 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] transition cursor-pointer"
       aria-label="Tutup"
     >
       <X class="w-3.5 h-3.5" />

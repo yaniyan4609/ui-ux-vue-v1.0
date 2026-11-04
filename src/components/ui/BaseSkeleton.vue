@@ -36,7 +36,7 @@ const variantClasses = computed(() => {
 })
 
 const animClass = computed(() => {
-  return props.shimmer ? 'skeleton-shimmer' : 'bg-neutral-200/80 dark:bg-[#242428] animate-pulse'
+  return props.shimmer ? 'skeleton-shimmer' : 'bg-neutral-200/80 dark:bg-[var(--theme-surface-muted)] animate-pulse'
 })
 
 const customStyle = computed(() => {
@@ -51,7 +51,7 @@ const customStyle = computed(() => {
   <!-- Card Skeleton Container -->
   <div
     v-if="variant === 'card'"
-    class="border border-neutral-200/80 dark:border-[#27272a] bg-white dark:bg-[#141417] shadow-2xs"
+    class="border border-neutral-200/80 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface)] shadow-2xs"
     :class="variantClasses"
     :style="customStyle"
   >

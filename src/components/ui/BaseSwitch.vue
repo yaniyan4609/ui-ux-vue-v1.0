@@ -91,7 +91,7 @@ const thumbTranslate = computed(() => {
         trackSize,
         modelValue
           ? 'bg-[var(--theme-primary)]'
-          : 'bg-neutral-200 dark:bg-[#27272a] hover:bg-neutral-300 dark:hover:bg-[#323238]',
+          : 'bg-neutral-200 dark:bg-[var(--theme-surface-muted)] hover:bg-neutral-300 dark:hover:bg-[var(--theme-surface-muted)]',
         disabled ? 'cursor-not-allowed' : '',
       ]"
     >

@@ -156,18 +156,18 @@ onUnmounted(() => {
         >
           <div
             v-if="modelValue"
-            class="relative w-full max-w-sm rounded-3xl bg-white dark:bg-[#141417] border border-neutral-200 dark:border-[#27272a] shadow-2xl p-6 sm:p-7 flex flex-col items-center text-center overflow-hidden"
+            class="relative w-full max-w-sm rounded-3xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xl p-6 sm:p-7 flex flex-col items-center text-center overflow-hidden"
           >
             <!-- Top Bar: Badge & Close Button (Sesuai gambar referensi) -->
             <div class="w-full flex items-center justify-between mb-3">
-              <span class="text-[11px] font-semibold text-neutral-600 dark:text-neutral-300 bg-neutral-100 dark:bg-[#222226] px-3 py-1 rounded-full border border-neutral-200/80 dark:border-[#333338]">
+              <span class="text-[11px] font-semibold text-neutral-600 dark:text-neutral-300 bg-neutral-100 dark:bg-[var(--theme-surface-muted)] px-3 py-1 rounded-full border border-neutral-200/80 dark:border-[var(--theme-border-strong)]">
                 {{ defaultBadge }}
               </span>
 
               <button
                 type="button"
                 @click="close"
-                class="rounded-full p-1 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 dark:hover:bg-[#222226] dark:hover:text-neutral-200 transition cursor-pointer"
+                class="rounded-full p-1 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] dark:hover:text-neutral-200 transition cursor-pointer"
                 aria-label="Tutup"
               >
                 <X class="w-4 h-4" />
@@ -275,7 +275,7 @@ onUnmounted(() => {
 
             <!-- Title & Description (Sesuai gambar referensi) -->
             <div class="space-y-1.5 my-2">
-              <h3 class="text-base sm:text-lg font-bold text-neutral-900 dark:text-[#f4f4f5] leading-snug">
+              <h3 class="text-base sm:text-lg font-bold text-neutral-900 dark:text-[var(--theme-text-primary)] leading-snug">
                 {{ defaultTitle }}
               </h3>
               <p class="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed px-1">
@@ -288,7 +288,7 @@ onUnmounted(() => {
               <button
                 type="button"
                 @click="handleCancel"
-                class="w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold border border-neutral-200 dark:border-[#27272a] bg-neutral-50 hover:bg-neutral-100 dark:bg-[#1a1a1e] dark:hover:bg-[#24242a] text-neutral-700 dark:text-neutral-200 transition cursor-pointer"
+                class="w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold border border-neutral-200 dark:border-[var(--theme-border)] bg-neutral-50 hover:bg-neutral-100 dark:bg-[var(--theme-surface-raised)] dark:hover:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-200 transition cursor-pointer"
               >
                 {{ cancelText }}
               </button>

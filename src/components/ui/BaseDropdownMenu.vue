@@ -68,8 +68,8 @@ onUnmounted(() => {
       <slot name="trigger" :is-open="isOpen">
         <button
           type="button"
-          class="p-1.5 rounded-lg border border-transparent hover:border-neutral-200 dark:hover:border-[#27272a] text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[#202024] transition cursor-pointer shadow-2xs"
-          :class="[isOpen ? 'bg-neutral-100 dark:bg-[#202024] text-neutral-900 dark:text-white' : '', triggerClass]"
+          class="p-1.5 rounded-lg border border-transparent hover:border-neutral-200 dark:hover:border-[var(--theme-border)] text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] transition cursor-pointer shadow-2xs"
+          :class="[isOpen ? 'bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-900 dark:text-white' : '', triggerClass]"
           title="Menu Aksi"
           aria-haspopup="true"
           :aria-expanded="isOpen"
@@ -90,7 +90,7 @@ onUnmounted(() => {
     >
       <div
         v-if="isOpen"
-        class="absolute top-full mt-1.5 min-w-[160px] z-50 rounded-2xl bg-white/95 dark:bg-[#18181b]/95 backdrop-blur-md border border-neutral-200/90 dark:border-[#2a2a30] shadow-xl p-1 space-y-0.5"
+        class="absolute top-full mt-1.5 min-w-[160px] z-50 rounded-2xl bg-white/95 dark:bg-[var(--theme-surface-raised)]/95 backdrop-blur-md border border-neutral-200/90 dark:border-[var(--theme-border)] shadow-xl p-1 space-y-0.5"
         :class="align === 'right' ? 'right-0' : 'left-0'"
         role="menu"
       >
@@ -99,7 +99,7 @@ onUnmounted(() => {
             <!-- Divider Line -->
             <div
               v-if="item.divider"
-              class="border-b border-neutral-100 dark:border-[#26262b] my-1 -mx-1"
+              class="border-b border-neutral-100 dark:border-[var(--theme-border)] my-1 -mx-1"
             />
 
             <!-- Menu Option Item -->
@@ -114,7 +114,7 @@ onUnmounted(() => {
                   ? 'opacity-40 cursor-not-allowed'
                   : item.danger
                   ? 'text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30'
-                  : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#24242a] hover:text-neutral-900 dark:hover:text-white',
+                  : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] hover:text-neutral-900 dark:hover:text-white',
               ]"
               role="menuitem"
             >

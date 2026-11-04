@@ -146,9 +146,9 @@ const sizeClasses = computed(() => {
         error
           ? 'border-rose-500 dark:border-rose-500 ring-2 ring-rose-500/20 dark:ring-rose-500/20 bg-rose-50/10'
           : isFocused
-          ? 'border-neutral-400 dark:border-[#3f3f46] ring-2 ring-neutral-300/60 dark:ring-[#2f2f36] bg-white dark:bg-[#1a1a1e]'
-          : 'border-neutral-200 dark:border-[#27272a] hover:border-neutral-300 dark:hover:border-[#383840] bg-white dark:bg-[#18181b]',
-        disabled ? 'opacity-50 cursor-not-allowed bg-neutral-100 dark:bg-[#141417]' : '',
+          ? 'border-neutral-400 dark:border-[var(--theme-border-strong)] ring-2 ring-neutral-300/60 dark:ring-[var(--theme-border-strong)] bg-white dark:bg-[var(--theme-surface-raised)]'
+          : 'border-neutral-200 dark:border-[var(--theme-border)] hover:border-neutral-300 dark:hover:border-[var(--theme-border-strong)] bg-white dark:bg-[var(--theme-surface-raised)]',
+        disabled ? 'opacity-50 cursor-not-allowed bg-neutral-100 dark:bg-[var(--theme-surface)]' : '',
       ]"
     >
       <!-- Leading Icon / Prefix -->
@@ -184,7 +184,7 @@ const sizeClasses = computed(() => {
           v-if="clearable && modelValue && !disabled && !readonly"
           type="button"
           @click="handleClear"
-          class="p-1 rounded-md text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#26262b] transition cursor-pointer"
+          class="p-1 rounded-md text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] transition cursor-pointer"
           title="Bersihkan input"
         >
           <X class="w-3.5 h-3.5" />
@@ -195,7 +195,7 @@ const sizeClasses = computed(() => {
           v-if="type === 'password' && !disabled"
           type="button"
           @click="isPasswordVisible = !isPasswordVisible"
-          class="p-1 rounded-md text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#26262b] transition cursor-pointer"
+          class="p-1 rounded-md text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] transition cursor-pointer"
           :title="isPasswordVisible ? 'Sembunyikan password' : 'Lihat password'"
         >
           <EyeOff v-if="isPasswordVisible" class="w-3.5 h-3.5" />
@@ -212,7 +212,7 @@ const sizeClasses = computed(() => {
         <!-- Unit Suffix Badge (e.g. 'mdpl', 'Rp', 'Kg') -->
         <span
           v-if="suffix"
-          class="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-neutral-100 dark:bg-[#27272e] text-neutral-600 dark:text-neutral-400 border border-neutral-200/60 dark:border-[#32323a] select-none"
+          class="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-600 dark:text-neutral-400 border border-neutral-200/60 dark:border-[var(--theme-border-strong)] select-none"
         >
           {{ suffix }}
         </span>

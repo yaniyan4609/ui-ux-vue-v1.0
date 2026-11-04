@@ -31,7 +31,7 @@ const emit = defineEmits(['remove'])
 const variantClasses = computed(() => {
   const map = {
     neutral:
-      'bg-neutral-100 text-neutral-700 dark:bg-[#202024] dark:text-neutral-300 border-neutral-200/80 dark:border-[#2e2e34]',
+      'bg-neutral-100 text-neutral-700 dark:bg-[var(--theme-surface-muted)] dark:text-neutral-300 border-neutral-200/80 dark:border-[var(--theme-border-strong)]',
     success:
       'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200/80 dark:border-emerald-900/40',
     danger:

@@ -243,7 +243,7 @@ const confirmImport = () => {
 
     <div class="space-y-5 text-xs select-none">
       <!-- Step Indicator Bar -->
-      <div class="grid grid-cols-3 gap-2 pb-1 border-b border-neutral-200 dark:border-[#27272a]">
+      <div class="grid grid-cols-3 gap-2 pb-1 border-b border-neutral-200 dark:border-[var(--theme-border)]">
         <div
           class="flex items-center gap-2 py-1 border-b-2 text-[11px] font-semibold transition"
           :class="currentStep === 1 ? 'border-[var(--theme-primary)] text-[var(--theme-primary)]' : 'border-transparent text-neutral-400'"
@@ -278,7 +278,7 @@ const confirmImport = () => {
           @dragleave.prevent="isDragging = false"
           @drop.prevent="onDrop"
           class="border-2 border-dashed rounded-2xl p-8 text-center flex flex-col items-center justify-center gap-3 transition cursor-pointer"
-          :class="isDragging ? 'border-[var(--theme-primary)] bg-[var(--theme-primary-soft)]' : 'border-neutral-300 dark:border-[#2e2e34] bg-neutral-50/50 dark:bg-[#16161a] hover:border-neutral-400 dark:hover:border-neutral-600'"
+          :class="isDragging ? 'border-[var(--theme-primary)] bg-[var(--theme-primary-soft)]' : 'border-neutral-300 dark:border-[var(--theme-border-strong)] bg-neutral-50/50 dark:bg-[var(--theme-surface-raised)] hover:border-neutral-400 dark:hover:border-neutral-600'"
           @click="$refs.fileInput?.click()"
         >
           <input
@@ -321,7 +321,7 @@ const confirmImport = () => {
       <!-- STEP 2: COLUMN MAPPING                                   -->
       <!-- ======================================================== -->
       <div v-else-if="currentStep === 2" class="space-y-4">
-        <div class="p-3 rounded-xl bg-neutral-50 dark:bg-[#18181c] border border-neutral-200 dark:border-[#27272a] flex items-center justify-between">
+        <div class="p-3 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] flex items-center justify-between">
           <div class="flex items-center gap-2 min-w-0">
             <FileSpreadsheet class="w-4 h-4 text-emerald-500 shrink-0" />
             <span class="font-bold text-neutral-900 dark:text-white truncate">{{ selectedFile?.name }}</span>
@@ -339,7 +339,7 @@ const confirmImport = () => {
           <div
             v-for="field in targetFields"
             :key="field.key"
-            class="p-2.5 rounded-xl bg-white dark:bg-[#161619] border border-neutral-200 dark:border-[#27272a] flex items-center justify-between gap-3"
+            class="p-2.5 rounded-xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] flex items-center justify-between gap-3"
           >
             <div class="w-1/2 min-w-0">
               <span class="font-bold text-neutral-900 dark:text-white block truncate">
@@ -352,7 +352,7 @@ const confirmImport = () => {
             <div class="w-1/2">
               <select
                 v-model="columnMapping[field.key]"
-                class="w-full text-xs py-1.5 px-2.5 rounded-lg border border-neutral-300 dark:border-[#2f2f36] bg-neutral-50 dark:bg-[#1c1c20] text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary)]"
+                class="w-full text-xs py-1.5 px-2.5 rounded-lg border border-neutral-300 dark:border-[var(--theme-border-strong)] bg-neutral-50 dark:bg-[var(--theme-surface-muted)] text-neutral-800 dark:text-neutral-200 focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary)]"
               >
                 <option value="">-- Lewati Kolom --</option>
                 <option v-for="header in csvHeaders" :key="header" :value="header">
@@ -389,17 +389,17 @@ const confirmImport = () => {
             Pratinjau 4 Baris Pertama Hasil Pemetaan:
           </span>
 
-          <div class="overflow-x-auto rounded-xl border border-neutral-200 dark:border-[#27272a]">
+          <div class="overflow-x-auto rounded-xl border border-neutral-200 dark:border-[var(--theme-border)]">
             <table class="w-full text-left text-xs">
-              <thead class="bg-neutral-100 dark:bg-[#1a1a1e] font-bold text-neutral-600 dark:text-neutral-400 border-b border-neutral-200 dark:border-[#27272a]">
+              <thead class="bg-neutral-100 dark:bg-[var(--theme-surface-raised)] font-bold text-neutral-600 dark:text-neutral-400 border-b border-neutral-200 dark:border-[var(--theme-border)]">
                 <tr>
                   <th v-for="field in targetFields.filter(f => !!columnMapping[f.key])" :key="field.key" class="py-2 px-3">
                     {{ field.label }}
                   </th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-neutral-100 dark:divide-[#242428]">
-                <tr v-for="(row, rIdx) in previewRows" :key="rIdx" class="hover:bg-neutral-50/50 dark:hover:bg-[#18181c]">
+              <tbody class="divide-y divide-neutral-100 dark:divide-[var(--theme-border)]">
+                <tr v-for="(row, rIdx) in previewRows" :key="rIdx" class="hover:bg-neutral-50/50 dark:hover:bg-[var(--theme-surface-raised)]">
                   <td
                     v-for="field in targetFields.filter(f => !!columnMapping[f.key])"
                     :key="field.key"

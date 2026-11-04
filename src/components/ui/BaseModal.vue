@@ -154,17 +154,17 @@ const sizeClass = computed(() => {
         >
           <div
             v-if="modelValue"
-            class="relative w-full rounded-2xl bg-white shadow-2xl border border-neutral-200 dark:bg-[#141417] dark:border-[#27272a] flex flex-col overflow-hidden max-h-[90vh]"
+            class="relative w-full rounded-2xl bg-white shadow-2xl border border-neutral-200 dark:bg-[var(--theme-surface)] dark:border-[var(--theme-border)] flex flex-col overflow-hidden max-h-[90vh]"
             :class="sizeClass"
           >
             <!-- Header -->
             <div
               v-if="title || $slots.header"
-              class="flex items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-[#27272a]"
+              class="flex items-center justify-between border-b border-neutral-100 px-6 py-4 dark:border-[var(--theme-border)]"
             >
               <slot name="header">
                 <div>
-                  <h3 class="text-base font-semibold text-neutral-900 dark:text-[#f4f4f5] leading-tight">
+                  <h3 class="text-base font-semibold text-neutral-900 dark:text-[var(--theme-text-primary)] leading-tight">
                     {{ title }}
                   </h3>
                   <p v-if="subtitle" class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
@@ -175,7 +175,7 @@ const sizeClass = computed(() => {
               <button
                 type="button"
                 @click="close"
-                class="rounded-xl p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-[#27272a] dark:hover:text-neutral-300 transition cursor-pointer"
+                class="rounded-xl p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-[var(--theme-surface-muted)] dark:hover:text-neutral-300 transition cursor-pointer"
                 aria-label="Tutup modal"
               >
                 <X class="w-5 h-5" />
@@ -190,7 +190,7 @@ const sizeClass = computed(() => {
             <!-- Footer -->
             <div
               v-if="$slots.footer"
-              class="flex items-center justify-end gap-3 border-t border-neutral-100 bg-neutral-50/70 px-6 py-3.5 dark:border-[#27272a] dark:bg-[#101012]"
+              class="flex items-center justify-end gap-3 border-t border-neutral-100 bg-neutral-50/70 px-6 py-3.5 dark:border-[var(--theme-border)] dark:bg-[var(--theme-layer-2)]"
             >
               <slot name="footer" :close="close" />
             </div>

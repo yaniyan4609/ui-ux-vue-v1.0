@@ -170,7 +170,7 @@ onUnmounted(() => {
           <div
             v-if="modelValue"
             ref="sheetRef"
-            class="relative w-full max-w-lg rounded-t-3xl sm:rounded-3xl bg-white dark:bg-[#141417] border-t sm:border border-neutral-200 dark:border-[#27272a] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden z-10 will-change-transform"
+            class="relative w-full max-w-lg rounded-t-3xl sm:rounded-3xl bg-white dark:bg-[var(--theme-surface)] border-t sm:border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden z-10 will-change-transform"
             :style="{
               transform: `translateY(${dragY}px)`,
               transition: isDragging ? 'none' : 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -189,11 +189,11 @@ onUnmounted(() => {
 
             <!-- Header Modal Mobile -->
             <div
-              class="flex items-center justify-between px-6 py-2.5 border-b border-neutral-100 dark:border-[#27272a] touch-none cursor-grab active:cursor-grabbing"
+              class="flex items-center justify-between px-6 py-2.5 border-b border-neutral-100 dark:border-[var(--theme-border)] touch-none cursor-grab active:cursor-grabbing"
               @pointerdown="onPointerDown"
             >
               <div>
-                <h3 class="text-base font-bold text-neutral-900 dark:text-[#f4f4f5]">
+                <h3 class="text-base font-bold text-neutral-900 dark:text-[var(--theme-text-primary)]">
                   {{ title }}
                 </h3>
                 <p v-if="subtitle" class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
@@ -203,7 +203,7 @@ onUnmounted(() => {
               <button
                 type="button"
                 @click="close"
-                class="rounded-full p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-[#27272a] dark:hover:text-neutral-300 transition cursor-pointer"
+                class="rounded-full p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-[var(--theme-surface-muted)] dark:hover:text-neutral-300 transition cursor-pointer"
                 aria-label="Tutup"
               >
                 <X class="w-5 h-5" />
@@ -218,7 +218,7 @@ onUnmounted(() => {
             <!-- Footer Sheet -->
             <div
               v-if="$slots.footer"
-              class="border-t border-neutral-100 bg-neutral-50/90 px-5 sm:px-6 py-3.5 dark:border-[#27272a] dark:bg-[#101012] flex items-center justify-end gap-3 shrink-0"
+              class="border-t border-neutral-100 bg-neutral-50/90 px-5 sm:px-6 py-3.5 dark:border-[var(--theme-border)] dark:bg-[var(--theme-layer-2)] flex items-center justify-end gap-3 shrink-0"
             >
               <slot name="footer" :close="close" />
             </div>

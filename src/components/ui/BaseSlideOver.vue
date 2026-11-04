@@ -116,11 +116,11 @@ const sizeClasses = computed(() => {
         >
           <div
             v-if="modelValue"
-            class="w-screen pointer-events-auto flex flex-col bg-white dark:bg-[#121214] border-l border-neutral-200 dark:border-[#27272a] shadow-2xl select-none"
+            class="w-screen pointer-events-auto flex flex-col bg-white dark:bg-[var(--theme-layer-2)] border-l border-neutral-200 dark:border-[var(--theme-border)] shadow-2xl select-none"
             :class="sizeClasses"
           >
             <!-- Drawer Header (shrink-0) -->
-            <div class="py-4 px-5 sm:px-6 border-b border-neutral-200 dark:border-[#27272a] flex items-center justify-between gap-3 bg-neutral-50/50 dark:bg-[#141417]/80 shrink-0">
+            <div class="py-4 px-5 sm:px-6 border-b border-neutral-200 dark:border-[var(--theme-border)] flex items-center justify-between gap-3 bg-neutral-50/50 dark:bg-[var(--theme-surface)]/80 shrink-0">
               <slot name="header">
                 <div class="min-w-0">
                   <div class="flex items-center gap-2">
@@ -145,7 +145,7 @@ const sizeClasses = computed(() => {
               <button
                 type="button"
                 @click="close"
-                class="p-1.5 rounded-xl text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#202025] transition cursor-pointer shrink-0"
+                class="p-1.5 rounded-xl text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] transition cursor-pointer shrink-0"
                 title="Tutup Panel (Esc)"
               >
                 <X class="w-5 h-5" />
@@ -160,7 +160,7 @@ const sizeClasses = computed(() => {
             <!-- Drawer Footer (Optional, shrink-0) -->
             <div
               v-if="$slots.footer"
-              class="py-3 px-5 sm:px-6 border-t border-neutral-200 dark:border-[#27272a] bg-neutral-50/70 dark:bg-[#141417] flex items-center justify-end gap-2.5 shrink-0"
+              class="py-3 px-5 sm:px-6 border-t border-neutral-200 dark:border-[var(--theme-border)] bg-neutral-50/70 dark:bg-[var(--theme-surface)] flex items-center justify-end gap-2.5 shrink-0"
             >
               <slot name="footer" :close="close" />
             </div>

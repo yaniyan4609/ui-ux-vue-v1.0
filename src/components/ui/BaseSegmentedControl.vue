@@ -135,13 +135,13 @@ const itemSizeClasses = computed(() => {
 <template>
   <div
     ref="containerRef"
-    class="relative inline-flex items-center bg-neutral-100 dark:bg-[#18181b] border border-neutral-200/80 dark:border-[#27272a] shadow-2xs select-none"
+    class="relative inline-flex items-center bg-neutral-100 dark:bg-[var(--theme-surface-raised)] border border-neutral-200/80 dark:border-[var(--theme-border)] shadow-2xs select-none"
     :class="[sizeClasses, fullWidth ? 'w-full' : '']"
     role="tablist"
   >
     <!-- Fluid Gliding Pill Indicator -->
     <div
-      class="absolute left-0 top-0 rounded-lg bg-white dark:bg-[#27272c] border border-neutral-300/80 dark:border-[#383842] shadow-sm pointer-events-none"
+      class="absolute left-0 top-0 rounded-lg bg-white dark:bg-[var(--theme-surface-muted)] border border-neutral-300/80 dark:border-[var(--theme-border-strong)] shadow-sm pointer-events-none"
       :class="isReady ? 'transition-all duration-200 cubic-bezier(0.16, 1, 0.3, 1)' : ''"
       :style="indicatorStyle"
     />
@@ -168,7 +168,7 @@ const itemSizeClasses = computed(() => {
       <span class="truncate">{{ opt.label }}</span>
       <span
         v-if="opt.badge !== null"
-        class="text-[9.5px] px-1.5 py-0.2 rounded-full font-mono bg-neutral-200/80 dark:bg-[#202025] text-neutral-600 dark:text-neutral-300 ml-1"
+        class="text-[9.5px] px-1.5 py-0.2 rounded-full font-mono bg-neutral-200/80 dark:bg-[var(--theme-surface-muted)] text-neutral-600 dark:text-neutral-300 ml-1"
       >
         {{ opt.badge }}
       </span>

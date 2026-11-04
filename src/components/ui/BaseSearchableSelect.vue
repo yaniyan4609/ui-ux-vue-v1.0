@@ -235,8 +235,8 @@ const sizeClasses = computed(() => {
       :class="[
         sizeClasses,
         isOpen
-          ? 'bg-neutral-50/90 dark:bg-[#1a1a1e] border-neutral-300 dark:border-[#383840] ring-2 ring-neutral-300/60 dark:ring-[#2f2f36]'
-          : 'bg-white hover:bg-neutral-50/70 dark:bg-[#18181b] dark:hover:bg-[#1e1e22] border-neutral-200 dark:border-[#27272a] hover:border-neutral-300 dark:hover:border-[#34343a]',
+          ? 'bg-neutral-50/90 dark:bg-[var(--theme-surface-raised)] border-neutral-300 dark:border-[var(--theme-border-strong)] ring-2 ring-neutral-300/60 dark:ring-[var(--theme-border-strong)]'
+          : 'bg-white hover:bg-neutral-50/70 dark:bg-[var(--theme-surface-raised)] dark:hover:bg-[var(--theme-surface-muted)] border-neutral-200 dark:border-[var(--theme-border)] hover:border-neutral-300 dark:hover:border-[var(--theme-border-strong)]',
       ]"
       :title="selectedOption ? selectedOption.label : placeholder"
       aria-haspopup="listbox"
@@ -275,7 +275,7 @@ const sizeClasses = computed(() => {
         <!-- Optional Badge on Selected -->
         <span
           v-if="selectedOption?.badge !== null && selectedOption?.badge !== undefined"
-          class="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-neutral-100 dark:bg-[#27272d] text-neutral-600 dark:text-neutral-400 shrink-0 ml-auto mr-1 hidden sm:inline-block border border-neutral-200/60 dark:border-[#32323a]"
+          class="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-600 dark:text-neutral-400 shrink-0 ml-auto mr-1 hidden sm:inline-block border border-neutral-200/60 dark:border-[var(--theme-border-strong)]"
         >
           {{ selectedOption.badge }}
         </span>
@@ -288,7 +288,7 @@ const sizeClasses = computed(() => {
           v-if="clearable && selectedOption && selectedOption.value !== clearValue"
           type="button"
           @click="handleClear"
-          class="p-0.5 rounded-md text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-200/60 dark:hover:bg-[#28282e] transition cursor-pointer"
+          class="p-0.5 rounded-md text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-200/60 dark:hover:bg-[var(--theme-surface-muted)] transition cursor-pointer"
           title="Hapus pilihan"
         >
           <X class="w-3 h-3" />
@@ -313,7 +313,7 @@ const sizeClasses = computed(() => {
     >
       <div
         v-if="isOpen"
-        class="absolute top-full mt-1.5 w-full min-w-[230px] max-w-[340px] z-50 rounded-2xl bg-white/95 dark:bg-[#18181b]/95 backdrop-blur-md border border-neutral-200/90 dark:border-[#2a2a30] shadow-xl p-1.5 space-y-1.5"
+        class="absolute top-full mt-1.5 w-full min-w-[230px] max-w-[340px] z-50 rounded-2xl bg-white/95 dark:bg-[var(--theme-surface-raised)]/95 backdrop-blur-md border border-neutral-200/90 dark:border-[var(--theme-border)] shadow-xl p-1.5 space-y-1.5"
         :class="align === 'right' ? 'right-0' : 'left-0'"
         role="listbox"
       >
@@ -325,7 +325,7 @@ const sizeClasses = computed(() => {
             v-model="searchQuery"
             type="text"
             :placeholder="searchPlaceholder"
-            class="w-full pl-8 pr-7 py-1.5 rounded-xl text-xs bg-neutral-50 dark:bg-[#121214] border border-neutral-200/80 dark:border-[#26262a] text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-[#333338] transition"
+            class="w-full pl-8 pr-7 py-1.5 rounded-xl text-xs bg-neutral-50 dark:bg-[var(--theme-layer-2)] border border-neutral-200/80 dark:border-[var(--theme-border)] text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-[var(--theme-border-strong)] transition"
           />
           <button
             v-if="searchQuery"
@@ -354,10 +354,10 @@ const sizeClasses = computed(() => {
                 ? 'opacity-40 cursor-not-allowed'
                 : 'cursor-pointer',
               selectedOption?.value === opt.value
-                ? 'bg-neutral-100 dark:bg-[#25252a] font-semibold text-neutral-900 dark:text-white'
+                ? 'bg-neutral-100 dark:bg-[var(--theme-surface-muted)] font-semibold text-neutral-900 dark:text-white'
                 : highlightedIndex === idx
-                ? 'bg-neutral-50 dark:bg-[#202024] text-neutral-900 dark:text-white'
-                : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[#202024] hover:text-neutral-900 dark:hover:text-white',
+                ? 'bg-neutral-50 dark:bg-[var(--theme-surface-muted)] text-neutral-900 dark:text-white'
+                : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-muted)] hover:text-neutral-900 dark:hover:text-white',
             ]"
             role="option"
             :aria-selected="selectedOption?.value === opt.value"
@@ -376,7 +376,7 @@ const sizeClasses = computed(() => {
             <div class="flex items-center gap-1.5 shrink-0 ml-2">
               <span
                 v-if="opt.badge !== null"
-                class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-neutral-100 dark:bg-[#26262c] text-neutral-500 dark:text-neutral-400 border border-neutral-200/60 dark:border-[#32323a]"
+                class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-500 dark:text-neutral-400 border border-neutral-200/60 dark:border-[var(--theme-border-strong)]"
               >
                 {{ opt.badge }}
               </span>
