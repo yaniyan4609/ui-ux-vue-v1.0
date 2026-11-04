@@ -48,7 +48,7 @@ Untuk tugas UI apa pun, urutannya:
 - Halaman data/tabel (rute dengan `meta: { fixedHeight: true }`, mis. Contoh Data 1 dan 2) memakai container wajib: `h-full flex flex-col min-h-0 overflow-hidden gap-2.5 w-full max-w-7xl mx-auto select-none relative`. Halaman lain (Dashboard, Kanban, Setting) mengikuti view contohnya, lihat `aturan-ui.md` bagian 3.
 - Warna aksen lewat `var(--theme-primary)` dan variabel tema lain (`src/style.css`). Dark mode tema Default memakai zinc netral (tanpa semburat biru). Uji hasil di 4 tema.
 - Teks antarmuka berbahasa Indonesia. Nominal di form pakai `BaseCurrencyInput`. Notifikasi lewat `useToast()`, konfirmasi lewat `ConfirmationModal`.
-- Beberapa view lama melanggar aturan (mis. `<select>` mentah, hex hardcode). Jangan ditiru. Daftarnya ada di `aturan-ui.md` bagian 8.
+- Jangan memakai `<select>` mentah atau hex zinc permukaan (`dark:bg-[#141417]` dan sejenisnya): pakai `BaseSearchableSelect` dan token tema (`var(--theme-surface)`, `var(--theme-border)`, dan lainnya). Kelemahan lain yang diketahui ada di `aturan-ui.md` bagian 8.
 - Data contoh di dokumen (nama, angka, warna) hanya ilustrasi. Jangan di-hardcode ke aplikasi.
 
 ## Jika komponen atau pola yang dibutuhkan tidak ada

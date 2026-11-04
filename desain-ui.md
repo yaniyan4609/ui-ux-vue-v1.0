@@ -211,6 +211,8 @@ const provinsiOptions = [
 </template>
 ```
 
+> **Pemakaian di form (modal):** bungkus dengan `<label>` sendiri, pakai `size="md"` agar tinggi sejajar `BaseInput`, `:searchable="false"` untuk daftar pendek (<= 6 opsi), dan `align="right"` untuk kolom paling kanan. Jika ada opsi "Semua ...", pertahankan sebagai opsi (mis. `{ value: 'all', label: 'Semua Kategori' }`), bukan `clearable`.
+
 > **Props:** `options` (primitif atau `{ value, label, badge? }`), `placeholder`, `searchPlaceholder`, `searchable` (default `true`), `clearable`, `clearValue`, `disabled`, `size` (`sm` default, `md`, `lg`), `align` (`left` default, `right`), `leadingIcon`, `emptyText`, `widthClass` (default `w-full`). Emit: `update:modelValue`, `change`, `clear`. Filter di ujung kanan toolbar wajib `align="right"`.
 
 ---
