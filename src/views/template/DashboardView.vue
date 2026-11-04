@@ -1,16 +1,16 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import BaseButton from '../components/ui/BaseButton.vue'
-import BaseBadge from '../components/ui/BaseBadge.vue'
-import BaseModal from '../components/ui/BaseModal.vue'
-import BaseSkeleton from '../components/ui/BaseSkeleton.vue'
-import BaseCountUp from '../components/ui/BaseCountUp.vue'
-import BaseDatePicker from '../components/ui/BaseDatePicker.vue'
-import BaseSlideOver from '../components/ui/BaseSlideOver.vue'
-import BaseInvoiceModal from '../components/ui/BaseInvoiceModal.vue'
-import BaseTimeline from '../components/ui/BaseTimeline.vue'
-import { useToast } from '../composables/useToast'
+import BaseButton from '../../components/ui/BaseButton.vue'
+import BaseBadge from '../../components/ui/BaseBadge.vue'
+import BaseModal from '../../components/ui/BaseModal.vue'
+import BaseSkeleton from '../../components/ui/BaseSkeleton.vue'
+import BaseCountUp from '../../components/ui/BaseCountUp.vue'
+import BaseDatePicker from '../../components/ui/BaseDatePicker.vue'
+import BaseSlideOver from '../../components/ui/BaseSlideOver.vue'
+import BaseInvoiceModal from '../../components/ui/BaseInvoiceModal.vue'
+import BaseTimeline from '../../components/ui/BaseTimeline.vue'
+import { useToast } from '../../composables/useToast'
 import {
   kpiSummary,
   trenDataPresets,
@@ -22,7 +22,7 @@ import {
   logistikDanKaryawan,
   aktivitasOperasional,
   orderTerbaruList,
-} from '../data/dashboardData'
+} from '../../data/dashboardData'
 import {
   ShoppingBag,
   Wallet,

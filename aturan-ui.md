@@ -62,10 +62,10 @@ AppLayout memiliki dua perilaku untuk area konten (`<main>`):
 
 | Kebutuhan | Pola | View contoh (salin dari sini) |
 |---|---|---|
-| Daftar data (CRUD, filter, paginasi, pilih banyak) | **Data View** dengan formula container (bagian 4) | `src/views/DataKaryawanView.vue`, `src/views/DataView.vue` |
-| Dashboard / KPI / grafik SVG | Halaman mengalir: `space-y-4 sm:space-y-5 w-full max-w-7xl mx-auto select-none pb-8` | `src/views/DashboardView.vue` |
-| Papan Kanban | Drag & drop HTML5 native | `src/views/KanbanView.vue` |
-| Pengaturan | Halaman mengalir: `space-y-6 w-full max-w-4xl mx-auto` | `src/views/SettingView.vue` |
+| Daftar data (CRUD, filter, paginasi, pilih banyak) | **Data View** dengan formula container (bagian 4) | `src/views/template/DataKaryawanView.vue`, `src/views/template/DataView.vue` |
+| Dashboard / KPI / grafik SVG | Halaman mengalir: `space-y-4 sm:space-y-5 w-full max-w-7xl mx-auto select-none pb-8` | `src/views/template/DashboardView.vue` |
+| Papan Kanban | Drag & drop HTML5 native | `src/views/template/KanbanView.vue` |
+| Pengaturan | Halaman mengalir: `space-y-6 w-full max-w-4xl mx-auto` | `src/views/template/SettingView.vue` |
 | Form tambah/ubah | `BaseModal` berisi komponen input Base | `DataKaryawanView.vue` (modal tambah/edit) |
 | Detail data tanpa meninggalkan halaman | `BaseSlideOver` | `DataKaryawanView.vue`, `KanbanView.vue` |
 | Konfirmasi hapus / simpan | `ConfirmationModal` | semua view data |

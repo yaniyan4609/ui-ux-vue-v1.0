@@ -24,7 +24,7 @@ npm run build    # build production (WAJIB lolos, exit code 0)
 - `components/ui/`: komponen Base (sumber kebenaran desain). Baca `defineProps` sebelum memakai komponen.
 - `components/layout/`: `AppLayout`, `Header`, `PrimarySidebar`, `SubmenuSidebar`.
 - `composables/`: `useAuth`, `useBackground`, `useIsMobile`, `useTheme`, `useThemeColor`, `useToast`. Pakai yang ada.
-- `views/`: `DashboardView`, `DataKaryawanView`, `DataView`, `KanbanView`, `SettingView`. Contoh hidup: halaman data/tabel salin dari `DataKaryawanView`/`DataView`; dashboard dari `DashboardView`.
+- `views/template/`: `DashboardView`, `DataKaryawanView`, `DataView`, `KanbanView`, `SettingView`. Contoh hidup: halaman data/tabel salin dari `DataKaryawanView`/`DataView`; dashboard dari `DashboardView`.
 - Halaman baru wajib didaftarkan di `router/index.js` **dan** `data/menuData.js`.
 - `data/`, `router/`, `style.css`.
 

@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import DashboardView from '../views/DashboardView.vue'
-import KanbanView from '../views/KanbanView.vue'
-import DataView from '../views/DataView.vue'
-import DataKaryawanView from '../views/DataKaryawanView.vue'
-import SettingView from '../views/SettingView.vue'
+import DashboardView from '../views/template/DashboardView.vue'
+import KanbanView from '../views/template/KanbanView.vue'
+import DataView from '../views/template/DataView.vue'
+import DataKaryawanView from '../views/template/DataKaryawanView.vue'
+import SettingView from '../views/template/SettingView.vue'
 
 // meta.fixedHeight: halaman data/tabel mengunci tinggi sendiri (AppLayout memakai overflow-hidden)
 const routes = [

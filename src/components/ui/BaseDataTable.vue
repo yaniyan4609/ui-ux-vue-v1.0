@@ -498,3 +498,4 @@ const alignClass = (align) => {
     </div>
   </Transition>
 </template>
+

@@ -1,16 +1,16 @@
 <script setup>
 import { ref, computed } from 'vue'
-import BaseButton from '../components/ui/BaseButton.vue'
-import BaseBadge from '../components/ui/BaseBadge.vue'
-import BaseInput from '../components/ui/BaseInput.vue'
-import BaseSearchableSelect from '../components/ui/BaseSearchableSelect.vue'
-import BaseCurrencyInput from '../components/ui/BaseCurrencyInput.vue'
-import BaseModal from '../components/ui/BaseModal.vue'
-import BaseSlideOver from '../components/ui/BaseSlideOver.vue'
-import BaseInvoiceModal from '../components/ui/BaseInvoiceModal.vue'
-import BaseTimeline from '../components/ui/BaseTimeline.vue'
-import BaseEmptyState from '../components/ui/BaseEmptyState.vue'
-import { useToast } from '../composables/useToast'
+import BaseButton from '../../components/ui/BaseButton.vue'
+import BaseBadge from '../../components/ui/BaseBadge.vue'
+import BaseInput from '../../components/ui/BaseInput.vue'
+import BaseSearchableSelect from '../../components/ui/BaseSearchableSelect.vue'
+import BaseCurrencyInput from '../../components/ui/BaseCurrencyInput.vue'
+import BaseModal from '../../components/ui/BaseModal.vue'
+import BaseSlideOver from '../../components/ui/BaseSlideOver.vue'
+import BaseInvoiceModal from '../../components/ui/BaseInvoiceModal.vue'
+import BaseTimeline from '../../components/ui/BaseTimeline.vue'
+import BaseEmptyState from '../../components/ui/BaseEmptyState.vue'
+import { useToast } from '../../composables/useToast'
 import {
   KanbanSquare,
   Plus,

@@ -472,7 +472,7 @@ Penyaji status ketika hasil pencarian atau tabel bernilai 0:
 ---
 
 ### 4.14 Multi-Select Checkbox, Floating Batch Bar & Ekspor CSV
-Fitur produktivitas tabel data skala enterprise di [`DataKaryawanView.vue`](./src/views/DataKaryawanView.vue):
+Fitur produktivitas tabel data skala enterprise di [`DataKaryawanView.vue`](./src/views/template/DataKaryawanView.vue):
 - **Pilih Semua (Select All)**: Mengontrol semua baris dalam halaman aktif atau seluruh dataset.
 - **Floating Batch Action Bar**: Bilah aksi mengambang di bagian bawah layar saat $\ge 1$ baris terpilih, dengan tombol *Ekspor CSV Terpilih* dan *Hapus Terpilih*.
 - **Ekspor CSV Sesuai Standar RFC 4180**:
@@ -808,7 +808,7 @@ const itemsPerPage = ref(10)
 
 ## 5. Standar Desain Dashboard & Visualisasi SVG (Zero Library)
 
-Dashboard operasional di [`DashboardView.vue`](./src/views/DashboardView.vue) dibangun menggunakan pure SVG interaktif berkinerja tinggi tanpa library chart eksternal:
+Dashboard operasional di [`DashboardView.vue`](./src/views/template/DashboardView.vue) dibangun menggunakan pure SVG interaktif berkinerja tinggi tanpa library chart eksternal:
 
 ### 1. Kurva Bezier Bergelombang (*Undulating Wave Motion*)
 - Titik koordinat SVG dihitung dinamis dengan osilasi harmonis:
@@ -923,12 +923,12 @@ Setiap halaman di folder `src/views/` mengikuti pola tata letak berjenjang yang 
 
 | Halaman | Rute | File View | Fitur Utama |
 |---|---|---|---|
-| **Dashboard ERP & Payroll** | `/` | [`DashboardView.vue`](./src/views/DashboardView.vue) | 6 KPI stat cards, SVG real-time wave chart beriak, horizontal bar alokasi budget divisi, donut chart distribusi status pegawai, audit log realtime, simulasi skeleton loading. |
+| **Dashboard ERP & Payroll** | `/` | [`DashboardView.vue`](./src/views/template/DashboardView.vue) | 6 KPI stat cards, SVG real-time wave chart beriak, horizontal bar alokasi budget divisi, donut chart distribusi status pegawai, audit log realtime, simulasi skeleton loading. |
 | **Login In-Place (Morphing Card)** | Terintegrasi di `/` (Single Screen) | [`AppLayout.vue`](./src/components/layout/AppLayout.vue) | Autentikasi in-place tanpa navigasi/pindah halaman (*Zero Route Split*). Menampilkan kartu login terpusat (Frame 1), beralih ke lingkaran LOADING & timeline progress horizontal pada tombol "Masuk" (Frame 2-4: 0% &rarr; 100%), lalu kartu morphing melebar menjadi card besar dashboard. |
-| **Data Karyawan & Payroll** | `/template/data-2` | [`DataKaryawanView.vue`](./src/views/DataKaryawanView.vue) | Tabel CRUD enterprise, multi-select checkbox, floating bulk action bar, wizard impor CSV, modal form tambah/edit adaptif, slide-over detail karyawan, modal konfirmasi hapus massal. |
-| **Data Gunung Jawa** | `/template/data-1` | [`DataView.vue`](./src/views/DataView.vue) | Tabel master data 159 gunung di Jawa, filter provinsi & status aktif, pencarian instan, sorting multi-kolom, modal tambah/edit dan pratinjau detail. |
-| **Papan Alur Kanban** | `/template/kanban` | [`KanbanView.vue`](./src/views/KanbanView.vue) | Pipeline alur kerja 4 kolom, drag & drop HTML5 native antar status, badge prioritas, akumulasi nilai rupiah per kolom, laci slide-over detail order, pratinjau invoice cetak. |
-| **Pusat Pengaturan** | `/template/umum` (+ `/template/dasar-pertama`, `/modal`, `/notifikasi`, `/keamanan`) | [`SettingView.vue`](./src/views/SettingView.vue) | Kustomisasi Dasar Pertama (pola latar, palet warna), konfigurasi Dasar Kedua (gaya sudut & margin card), preferensi akun & keamanan, serta pengaturan notifikasi sistem. |
+| **Data Karyawan & Payroll** | `/template/data-2` | [`DataKaryawanView.vue`](./src/views/template/DataKaryawanView.vue) | Tabel CRUD enterprise, multi-select checkbox, floating bulk action bar, wizard impor CSV, modal form tambah/edit adaptif, slide-over detail karyawan, modal konfirmasi hapus massal. |
+| **Data Gunung Jawa** | `/template/data-1` | [`DataView.vue`](./src/views/template/DataView.vue) | Tabel master data 159 gunung di Jawa, filter provinsi & status aktif, pencarian instan, sorting multi-kolom, modal tambah/edit dan pratinjau detail. |
+| **Papan Alur Kanban** | `/template/kanban` | [`KanbanView.vue`](./src/views/template/KanbanView.vue) | Pipeline alur kerja 4 kolom, drag & drop HTML5 native antar status, badge prioritas, akumulasi nilai rupiah per kolom, laci slide-over detail order, pratinjau invoice cetak. |
+| **Pusat Pengaturan** | `/template/umum` (+ `/template/dasar-pertama`, `/modal`, `/notifikasi`, `/keamanan`) | [`SettingView.vue`](./src/views/template/SettingView.vue) | Kustomisasi Dasar Pertama (pola latar, palet warna), konfigurasi Dasar Kedua (gaya sudut & margin card), preferensi akun & keamanan, serta pengaturan notifikasi sistem. |
 
 ---
 
