@@ -1,4 +1,4 @@
-import { Home, LayoutTemplate, Sliders, Palette, Shield, Bell, Layers, Mountain, Users, KanbanSquare } from 'lucide-vue-next'
+import { Home, LayoutTemplate, Sliders, Palette, Shield, Bell, Layers, Mountain, Users, KanbanSquare, Component } from 'lucide-vue-next'
 
 export const menuItems = [
   {
@@ -14,6 +14,7 @@ export const menuItems = [
     icon: LayoutTemplate,
     route: '/template',
     submenus: [
+      { id: 'komponen', label: 'Komponen', icon: Component, route: '/template/komponen' },
       { id: 'kanban', label: 'Contoh Kanban', icon: KanbanSquare, route: '/template/kanban' },
       { id: 'data-1', label: 'Contoh Data 1', icon: Mountain, route: '/template/data-1' },
       { id: 'data-2', label: 'Contoh Data 2', icon: Users, route: '/template/data-2' },

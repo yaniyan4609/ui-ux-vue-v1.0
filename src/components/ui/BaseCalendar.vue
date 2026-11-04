@@ -307,3 +307,4 @@ const eventVariantClasses = (variant = 'primary') => {
     </div>
   </div>
 </template>
+

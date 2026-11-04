@@ -4,6 +4,7 @@ import KanbanView from '../views/template/KanbanView.vue'
 import DataView from '../views/template/DataView.vue'
 import DataKaryawanView from '../views/template/DataKaryawanView.vue'
 import SettingView from '../views/template/SettingView.vue'
+import KomponenView from '../views/template/KomponenView.vue'
 
 // meta.fixedHeight: halaman data/tabel mengunci tinggi sendiri (AppLayout memakai overflow-hidden)
 const routes = [
@@ -16,7 +17,13 @@ const routes = [
   // ===== Menu Template =====
   {
     path: '/template',
-    redirect: '/template/kanban',
+    redirect: '/template/komponen',
+  },
+  {
+    path: '/template/komponen',
+    name: 'TemplateKomponen',
+    component: KomponenView,
+    meta: { fixedHeight: true },
   },
   {
     path: '/template/kanban',

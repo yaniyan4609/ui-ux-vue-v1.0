@@ -63,6 +63,7 @@ AppLayout memiliki dua perilaku untuk area konten (`<main>`):
 | Kebutuhan | Pola | View contoh (salin dari sini) |
 |---|---|---|
 | Daftar data (CRUD, filter, paginasi, pilih banyak) | **Data View** dengan formula container (bagian 4) | `src/views/template/DataKaryawanView.vue`, `src/views/template/DataView.vue` |
+| Katalog komponen / playground master-detail | **Master-Detail View** (`meta.fixedHeight`): dua kolom scroll mandiri | `src/views/template/KomponenView.vue` |
 | Dashboard / KPI / grafik SVG | Halaman mengalir: `space-y-4 sm:space-y-5 w-full max-w-7xl mx-auto select-none pb-8` | `src/views/template/DashboardView.vue` |
 | Papan Kanban | Drag & drop HTML5 native | `src/views/template/KanbanView.vue` |
 | Pengaturan | Halaman mengalir: `space-y-6 w-full max-w-4xl mx-auto` | `src/views/template/SettingView.vue` |

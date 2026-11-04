@@ -410,3 +410,4 @@ const resetCenter = () => {
     </div>
   </div>
 </template>
+
