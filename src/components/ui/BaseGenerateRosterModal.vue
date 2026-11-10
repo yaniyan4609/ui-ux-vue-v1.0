@@ -498,16 +498,63 @@ const newPatternForm = ref({
   }),
 })
 
-// Popover shift warna-warni di dalam submodal buat pola
-const activePatternPopover = ref(null) // { mode: 'weekly' | 'monthly', index: number }
+// Popover shift warna-warni di dalam submodal buat pola (Searchable)
+const activePatternPopover = ref(null) // { mode: 'weekly' | 'monthly', index: number, title: string, currentCode: string, top: number, left: number }
+const patternShiftSearchQuery = ref('')
+const patternShiftSearchInputRef = ref(null)
 
-const togglePatternShiftPopover = (mode, index) => {
+const togglePatternShiftPopover = (mode, index, event) => {
   if (activePatternPopover.value?.mode === mode && activePatternPopover.value?.index === index) {
     activePatternPopover.value = null
-  } else {
-    activePatternPopover.value = { mode, index }
+    return
   }
+
+  const rect = event.currentTarget.getBoundingClientRect()
+  const currentCode = mode === 'weekly'
+    ? newPatternForm.value.weeklyDays[index]
+    : newPatternForm.value.monthlyDays[index]
+
+  const title = mode === 'weekly'
+    ? `${dayNamesIndo[index]} (Hari ${index + 1})`
+    : `Tanggal ${index + 1}`
+
+  const popoverHeight = 280
+  const spaceBelow = window.innerHeight - rect.bottom
+  const openUpwards = spaceBelow < popoverHeight && rect.top > popoverHeight
+
+  const top = openUpwards
+    ? Math.max(10, rect.top - popoverHeight - 6)
+    : Math.min(window.innerHeight - popoverHeight - 10, rect.bottom + 6)
+
+  let left = rect.left + rect.width / 2 - 128 // center a 256px popover
+  if (left < 10) left = 10
+  if (left + 266 > window.innerWidth) left = window.innerWidth - 266
+
+  patternShiftSearchQuery.value = ''
+  activePatternPopover.value = {
+    mode,
+    index,
+    title,
+    currentCode,
+    top,
+    left,
+  }
+
+  nextTick(() => {
+    patternShiftSearchInputRef.value?.focus()
+  })
 }
+
+const filteredPatternShiftTypes = computed(() => {
+  if (!patternShiftSearchQuery.value.trim()) return props.shiftTypes
+  const q = patternShiftSearchQuery.value.toLowerCase().trim()
+  return props.shiftTypes.filter(
+    (s) =>
+      s.code.toLowerCase().includes(q) ||
+      s.name.toLowerCase().includes(q) ||
+      (s.time && s.time.toLowerCase().includes(q))
+  )
+})
 
 const selectPatternShift = (code) => {
   if (!activePatternPopover.value) return
@@ -1183,31 +1230,13 @@ watch(
               <!-- Tombol Shift Warna-Warni -->
               <button
                 type="button"
-                @click.stop="togglePatternShiftPopover('weekly', dIdx)"
-                class="w-full py-1.5 px-1.5 rounded-xl text-xs font-bold border transition flex items-center justify-between gap-1 cursor-pointer"
+                @click.stop="togglePatternShiftPopover('weekly', dIdx, $event)"
+                class="w-full py-1.5 px-1.5 rounded-xl text-xs font-bold border transition flex items-center justify-between gap-1 cursor-pointer hover:ring-2 hover:ring-[var(--theme-primary)]/50"
                 :class="getShiftBadgeClasses(newPatternForm.weeklyDays[dIdx])"
               >
                 <span class="truncate">{{ getShiftMeta(newPatternForm.weeklyDays[dIdx]).name }}</span>
                 <ChevronDown class="w-3 h-3 opacity-60 shrink-0" />
               </button>
-
-              <!-- Popover Pilihan Shift -->
-              <div
-                v-if="activePatternPopover && activePatternPopover.mode === 'weekly' && activePatternPopover.index === dIdx"
-                class="absolute z-50 top-full mt-1 left-0 right-0 p-1.5 rounded-xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-xl text-left space-y-1"
-                @click.stop
-              >
-                <button
-                  v-for="st in shiftTypes"
-                  :key="st.code"
-                  type="button"
-                  @click="selectPatternShift(st.code)"
-                  class="w-full px-2 py-1 rounded-lg text-xs font-bold flex items-center justify-between transition cursor-pointer"
-                  :class="getShiftBadgeClasses(st.code)"
-                >
-                  <span>{{ st.name }}</span>
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -1300,31 +1329,13 @@ watch(
                       <!-- Tombol Shift Warna-Warni di Kalender Bulanan -->
                       <button
                         type="button"
-                        @click.stop="togglePatternShiftPopover('monthly', cell.index)"
-                        class="w-full py-1.5 px-1.5 rounded-xl text-xs font-bold border transition flex items-center justify-between gap-1 cursor-pointer"
+                        @click.stop="togglePatternShiftPopover('monthly', cell.index, $event)"
+                        class="w-full py-1.5 px-1.5 rounded-xl text-xs font-bold border transition flex items-center justify-between gap-1 cursor-pointer hover:ring-2 hover:ring-[var(--theme-primary)]/50"
                         :class="getShiftBadgeClasses(newPatternForm.monthlyDays[cell.index])"
                       >
                         <span class="truncate">{{ getShiftMeta(newPatternForm.monthlyDays[cell.index]).name }}</span>
                         <ChevronDown class="w-3 h-3 opacity-60 shrink-0" />
                       </button>
-
-                      <!-- Popover Shift Warna-Warni -->
-                      <div
-                        v-if="activePatternPopover && activePatternPopover.mode === 'monthly' && activePatternPopover.index === cell.index"
-                        class="absolute z-50 top-full mt-1 left-0 right-0 p-1.5 rounded-xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-xl text-left space-y-1"
-                        @click.stop
-                      >
-                        <button
-                          v-for="st in shiftTypes"
-                          :key="st.code"
-                          type="button"
-                          @click="selectPatternShift(st.code)"
-                          class="w-full px-2 py-1 rounded-lg text-xs font-bold flex items-center justify-between transition cursor-pointer"
-                          :class="getShiftBadgeClasses(st.code)"
-                        >
-                          <span>{{ st.name }}</span>
-                        </button>
-                      </div>
                     </template>
                   </td>
                 </tr>
@@ -1353,4 +1364,84 @@ watch(
       </BaseButton>
     </template>
   </BaseModal>
+
+  <!-- FLOATING SEARCHABLE SHIFT POPOVER UNTUK SUB-MODAL BUAT POLA -->
+  <Teleport to="body">
+    <div
+      v-if="activePatternPopover"
+      class="fixed inset-0 z-[120]"
+      @click="activePatternPopover = null"
+    >
+      <div
+        class="fixed z-[121] w-64 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xl p-2.5 text-xs animate-in fade-in zoom-in-95 duration-100"
+        :style="{ top: `${activePatternPopover.top}px`, left: `${activePatternPopover.left}px` }"
+        @click.stop
+      >
+        <!-- Header Popover -->
+        <div class="flex items-center justify-between pb-1.5 mb-2 border-b border-neutral-100 dark:border-[var(--theme-border)]">
+          <div class="truncate">
+            <span class="font-bold text-neutral-900 dark:text-white block text-xs">Pilih Shift</span>
+            <span class="text-[10px] text-neutral-400 block truncate">{{ activePatternPopover.title }}</span>
+          </div>
+          <button
+            type="button"
+            @click="activePatternPopover = null"
+            class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-0.5 rounded cursor-pointer"
+          >
+            <X class="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <!-- Search Input (Searchable) -->
+        <div class="relative mb-2">
+          <Search class="w-3.5 h-3.5 text-neutral-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <input
+            ref="patternShiftSearchInputRef"
+            v-model="patternShiftSearchQuery"
+            type="text"
+            placeholder="Cari shift..."
+            class="w-full pl-8 pr-6 py-1.5 rounded-lg text-xs bg-neutral-50 dark:bg-[var(--theme-surface-muted)] border border-neutral-200 dark:border-[var(--theme-border)] text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary)]"
+          />
+          <button
+            v-if="patternShiftSearchQuery"
+            type="button"
+            @click="patternShiftSearchQuery = ''"
+            class="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer"
+          >
+            <X class="w-3 h-3" />
+          </button>
+        </div>
+
+        <!-- Shift Options List -->
+        <div class="space-y-1 max-h-52 overflow-y-auto pr-0.5 custom-scroll">
+          <button
+            v-for="st in filteredPatternShiftTypes"
+            :key="st.code"
+            type="button"
+            @click="selectPatternShift(st.code)"
+            class="w-full px-2 py-1.5 rounded-lg text-left text-xs transition flex items-center justify-between gap-1.5 hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] cursor-pointer"
+            :class="activePatternPopover.currentCode === st.code ? 'bg-neutral-100 dark:bg-[var(--theme-surface-muted)] font-bold' : ''"
+          >
+            <div class="flex items-center gap-2 min-w-0">
+              <span
+                class="w-5 h-5 rounded-md flex items-center justify-center font-mono text-[10px] font-bold shrink-0 border"
+                :class="getShiftBadgeClasses(st.code)"
+              >
+                {{ st.code }}
+              </span>
+              <div class="min-w-0">
+                <span class="block leading-tight text-xs font-semibold truncate">{{ st.name }}</span>
+                <span class="block text-[9.5px] text-neutral-400 font-mono">{{ st.time }}</span>
+              </div>
+            </div>
+            <Check v-if="activePatternPopover.currentCode === st.code" class="w-3.5 h-3.5 text-[var(--theme-primary)] shrink-0" />
+          </button>
+
+          <div v-if="filteredPatternShiftTypes.length === 0" class="py-3 text-center text-neutral-400 text-[11px]">
+            Shift tidak ditemukan
+          </div>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>

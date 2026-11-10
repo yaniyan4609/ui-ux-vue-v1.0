@@ -140,8 +140,9 @@ const filteredShiftTypes = computed(() => {
 
 // Listener global untuk Escape & klik luar popover
 const handleGlobalKeydown = (e) => {
-  if (e.key === 'Escape' && activeCellEditor.value) {
-    activeCellEditor.value = null
+  if (e.key === 'Escape') {
+    if (activeCellEditor.value) activeCellEditor.value = null
+    if (modalShiftPopover.value) modalShiftPopover.value = null
   }
 }
 
@@ -270,70 +271,14 @@ const storageOptions = computed(() => {
 // 4. TABLE COLUMNS: PROPORSIONAL DAN COMPACT TANPA SCROLL
 // ========================================================
 const tableColumns = [
-  {
-    key: 'nama',
-    label: 'NAMA POLA',
-    sortable: true,
-    width: 'w-48 sm:w-56',
-    headerClass: '!px-2.5',
-    cellClass: 'whitespace-nowrap !px-2.5 max-w-[210px]',
-  },
-  {
-    key: 'senin',
-    label: 'Senin',
-    align: 'center',
-    width: 'w-[84px]',
-    headerClass: '!px-1 text-center',
-    cellClass: 'whitespace-nowrap !px-1 text-center',
-  },
-  {
-    key: 'selasa',
-    label: 'Selasa',
-    align: 'center',
-    width: 'w-[84px]',
-    headerClass: '!px-1 text-center',
-    cellClass: 'whitespace-nowrap !px-1 text-center',
-  },
-  {
-    key: 'rabu',
-    label: 'Rabu',
-    align: 'center',
-    width: 'w-[84px]',
-    headerClass: '!px-1 text-center',
-    cellClass: 'whitespace-nowrap !px-1 text-center',
-  },
-  {
-    key: 'kamis',
-    label: 'Kamis',
-    align: 'center',
-    width: 'w-[84px]',
-    headerClass: '!px-1 text-center',
-    cellClass: 'whitespace-nowrap !px-1 text-center',
-  },
-  {
-    key: 'jumat',
-    label: 'Jumat',
-    align: 'center',
-    width: 'w-[84px]',
-    headerClass: '!px-1 text-center',
-    cellClass: 'whitespace-nowrap !px-1 text-center',
-  },
-  {
-    key: 'sabtu',
-    label: 'Sabtu',
-    align: 'center',
-    width: 'w-[84px]',
-    headerClass: '!px-1 text-center',
-    cellClass: 'whitespace-nowrap !px-1 text-center',
-  },
-  {
-    key: 'minggu',
-    label: 'Minggu',
-    align: 'center',
-    width: 'w-[84px]',
-    headerClass: '!px-1 text-center',
-    cellClass: 'whitespace-nowrap !px-1 text-center',
-  },
+  { key: 'nama', label: 'NAMA POLA', sortable: true, cellClass: 'whitespace-nowrap w-52 max-w-[210px]' },
+  { key: 'senin', label: 'Senin', align: 'center', cellClass: 'whitespace-nowrap p-1 w-[92px]' },
+  { key: 'selasa', label: 'Selasa', align: 'center', cellClass: 'whitespace-nowrap p-1 w-[92px]' },
+  { key: 'rabu', label: 'Rabu', align: 'center', cellClass: 'whitespace-nowrap p-1 w-[92px]' },
+  { key: 'kamis', label: 'Kamis', align: 'center', cellClass: 'whitespace-nowrap p-1 w-[92px]' },
+  { key: 'jumat', label: 'Jumat', align: 'center', cellClass: 'whitespace-nowrap p-1 w-[92px]' },
+  { key: 'sabtu', label: 'Sabtu', align: 'center', cellClass: 'whitespace-nowrap p-1 w-[92px]' },
+  { key: 'minggu', label: 'Minggu', align: 'center', cellClass: 'whitespace-nowrap p-1 w-[92px]' },
 ]
 
 // ========================================================
@@ -481,9 +426,60 @@ const formName = ref('')
 const formDivisi = ref('Teknologi & IT')
 const formDesc = ref('')
 const formSaveToDb = ref(true)
-const formActiveDayDropdown = ref(null)
 const formPattern = ref(['P', 'P', 'P', 'P', 'P', 'OFF', 'OFF'])
 const formErrors = ref({})
+
+// Searchable Shift Popover di dalam Modal Form Tambah/Ubah
+const modalShiftPopover = ref(null) // { dayIndex, dayName, currentCode, top, left }
+const modalShiftSearchQuery = ref('')
+const modalShiftSearchInputRef = ref(null)
+
+const openModalShiftSelector = (dayIndex, dayName, event) => {
+  const rect = event.currentTarget.getBoundingClientRect()
+  const currentCode = formPattern.value[dayIndex] || 'OFF'
+
+  const popoverHeight = 280
+  const spaceBelow = window.innerHeight - rect.bottom
+  const openUpwards = spaceBelow < popoverHeight && rect.top > popoverHeight
+
+  const top = openUpwards
+    ? Math.max(10, rect.top - popoverHeight - 6)
+    : Math.min(window.innerHeight - popoverHeight - 10, rect.bottom + 6)
+
+  let left = rect.left + rect.width / 2 - 128 // center a 256px popover
+  if (left < 10) left = 10
+  if (left + 266 > window.innerWidth) left = window.innerWidth - 266
+
+  modalShiftSearchQuery.value = ''
+  modalShiftPopover.value = {
+    dayIndex,
+    dayName,
+    currentCode,
+    top,
+    left,
+  }
+
+  nextTick(() => {
+    modalShiftSearchInputRef.value?.focus()
+  })
+}
+
+const selectModalShift = (code) => {
+  if (!modalShiftPopover.value) return
+  formPattern.value[modalShiftPopover.value.dayIndex] = code
+  modalShiftPopover.value = null
+}
+
+const filteredModalShifts = computed(() => {
+  if (!modalShiftSearchQuery.value.trim()) return shiftTypes
+  const q = modalShiftSearchQuery.value.toLowerCase().trim()
+  return shiftTypes.filter(
+    (s) =>
+      s.code.toLowerCase().includes(q) ||
+      s.name.toLowerCase().includes(q) ||
+      (s.time && s.time.toLowerCase().includes(q))
+  )
+})
 
 const divisiFormOptions = [
   { value: 'Teknologi & IT', label: 'Teknologi & IT' },
@@ -537,11 +533,6 @@ const applyQuickPreset = (preset) => {
     formPattern.value = ['P', 'P', 'P', 'P', 'P', 'P', 'P']
     toast.info('Seluruh hari diatur ke Shift Pagi.')
   }
-}
-
-const handleSetDayShift = (dayIdx, code) => {
-  formPattern.value[dayIdx] = code
-  formActiveDayDropdown.value = null
 }
 
 const validateForm = () => {
@@ -843,7 +834,6 @@ const exportSelected = () => {
           v-model="selectedDivisi"
           :options="divisiOptions"
           placeholder="Semua Target Divisi"
-          align="right"
           clearable
         />
       </div>
@@ -1330,6 +1320,86 @@ const exportSelected = () => {
       </div>
     </Teleport>
 
+    <!-- FLOATING SEARCHABLE SHIFT POPOVER DI DALAM MODAL FORM (UKURAN LEPAS & SEARCHABLE) -->
+    <Teleport to="body">
+      <div
+        v-if="modalShiftPopover"
+        class="fixed inset-0 z-[120]"
+        @click="modalShiftPopover = null"
+      >
+        <div
+          class="fixed z-[121] w-64 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xl p-2.5 text-xs animate-in fade-in zoom-in-95 duration-100"
+          :style="{ top: `${modalShiftPopover.top}px`, left: `${modalShiftPopover.left}px` }"
+          @click.stop
+        >
+          <!-- Header Popover -->
+          <div class="flex items-center justify-between pb-1.5 mb-2 border-b border-neutral-100 dark:border-[var(--theme-border)]">
+            <div class="truncate">
+              <span class="font-bold text-neutral-900 dark:text-white block text-xs">Pilih Shift</span>
+              <span class="text-[10px] text-neutral-400 block truncate">{{ modalShiftPopover.dayName }} (Hari {{ modalShiftPopover.dayIndex + 1 }})</span>
+            </div>
+            <button
+              type="button"
+              @click="modalShiftPopover = null"
+              class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-0.5 rounded cursor-pointer"
+            >
+              <X class="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <!-- Search Input (Searchable) -->
+          <div class="relative mb-2">
+            <Search class="w-3.5 h-3.5 text-neutral-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              ref="modalShiftSearchInputRef"
+              v-model="modalShiftSearchQuery"
+              type="text"
+              placeholder="Cari shift..."
+              class="w-full pl-8 pr-6 py-1.5 rounded-lg text-xs bg-neutral-50 dark:bg-[var(--theme-surface-muted)] border border-neutral-200 dark:border-[var(--theme-border)] text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary)]"
+            />
+            <button
+              v-if="modalShiftSearchQuery"
+              type="button"
+              @click="modalShiftSearchQuery = ''"
+              class="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer"
+            >
+              <X class="w-3 h-3" />
+            </button>
+          </div>
+
+          <!-- Shift Options List -->
+          <div class="space-y-1 max-h-52 overflow-y-auto pr-0.5 custom-scroll">
+            <button
+              v-for="s in filteredModalShifts"
+              :key="s.code"
+              type="button"
+              @click="selectModalShift(s.code)"
+              class="w-full px-2 py-1.5 rounded-lg text-left text-xs transition flex items-center justify-between gap-1.5 hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] cursor-pointer"
+              :class="modalShiftPopover.currentCode === s.code ? 'bg-neutral-100 dark:bg-[var(--theme-surface-muted)] font-bold' : ''"
+            >
+              <div class="flex items-center gap-2 min-w-0">
+                <span
+                  class="w-5 h-5 rounded-md flex items-center justify-center font-mono text-[10px] font-bold shrink-0"
+                  :class="getShiftPillClasses(s.code)"
+                >
+                  {{ s.code }}
+                </span>
+                <div class="min-w-0">
+                  <span class="block leading-tight text-xs font-semibold truncate">{{ s.name }}</span>
+                  <span class="block text-[9.5px] text-neutral-400 font-mono">{{ s.time }}</span>
+                </div>
+              </div>
+              <Check v-if="modalShiftPopover.currentCode === s.code" class="w-3.5 h-3.5 text-[var(--theme-primary)] shrink-0" />
+            </button>
+
+            <div v-if="filteredModalShifts.length === 0" class="py-3 text-center text-neutral-400 text-[11px]">
+              Shift tidak ditemukan
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
     <!-- 5. MODAL FORM: TAMBAH / UBAH POLA ROSTER (UKURAN BALANCED PROPORSI) -->
     <BaseModal
       v-model="isFormModalOpen"
@@ -1430,45 +1500,23 @@ const exportSelected = () => {
               </span>
               <span class="text-[9px] text-neutral-400 mt-0.5">Hari {{ d.index + 1 }}</span>
 
-              <!-- Shift Selector Pill -->
+              <!-- Shift Selector Pill (Membuka Searchable Popover) -->
               <div class="mt-2 w-full">
                 <button
                   type="button"
-                  @click="formActiveDayDropdown = formActiveDayDropdown === d.index ? null : d.index"
-                  class="w-full py-1 px-1 rounded-lg border text-xs font-bold transition-all flex items-center justify-between cursor-pointer"
-                  :class="[
-                    formPattern[d.index] === 'P' ? 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/40' :
-                    formPattern[d.index] === 'S' ? 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900/40' :
-                    formPattern[d.index] === 'M' ? 'bg-purple-50 text-purple-800 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400 dark:border-purple-900/40' :
-                    'bg-neutral-50 text-neutral-700 border-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700'
-                  ]"
+                  @click="openModalShiftSelector(d.index, d.label, $event)"
+                  class="w-full py-1.5 px-1.5 rounded-lg border text-xs font-bold transition-all flex items-center justify-between gap-1 cursor-pointer hover:ring-2 hover:ring-[var(--theme-primary)]/50 hover:border-[var(--theme-primary)] shadow-2xs"
+                  :class="getShiftPillClasses(formPattern[d.index])"
+                  :title="`Klik untuk memilih shift ${d.label}`"
                 >
-                  <span class="truncate">{{ getShiftMeta(formPattern[d.index]).name }}</span>
-                  <ChevronDown class="w-3 h-3 shrink-0 ml-0.5 text-neutral-400" />
+                  <div class="flex items-center gap-1 min-w-0">
+                    <span class="w-4 h-4 rounded flex items-center justify-center text-[9px] font-mono font-bold shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
+                      {{ formPattern[d.index] || 'OFF' }}
+                    </span>
+                    <span class="text-[10px] font-semibold truncate">{{ getShiftShortName(formPattern[d.index]) }}</span>
+                  </div>
+                  <ChevronDown class="w-2.5 h-2.5 shrink-0 opacity-60" />
                 </button>
-
-                <!-- Popover Pilihan Shift -->
-                <div
-                  v-if="formActiveDayDropdown === d.index"
-                  class="absolute top-full left-0 right-0 mt-1 z-30 bg-white dark:bg-[var(--theme-surface)] rounded-lg shadow-lg border border-neutral-200 dark:border-[var(--theme-border)] p-1 text-left space-y-0.5"
-                >
-                  <button
-                    v-for="s in shiftTypes"
-                    :key="s.code"
-                    type="button"
-                    @click="handleSetDayShift(d.index, s.code)"
-                    class="w-full text-left px-2 py-1 rounded text-[11px] flex items-center justify-between hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-hover)] cursor-pointer"
-                    :class="{ 'font-bold bg-neutral-50 dark:bg-neutral-800': formPattern[d.index] === s.code }"
-                  >
-                    <div class="flex items-center gap-1.5 truncate">
-                      <BaseBadge :variant="s.badgeVariant" size="sm" class="px-1 py-0 text-[9px] font-mono">
-                        {{ s.code }}
-                      </BaseBadge>
-                      <span class="truncate">{{ s.name }}</span>
-                    </div>
-                    <Check v-if="formPattern[d.index] === s.code" class="w-3 h-3 text-[var(--theme-primary)] shrink-0" />
-                  </button>
-                </div>
               </div>
             </div>
           </div>
