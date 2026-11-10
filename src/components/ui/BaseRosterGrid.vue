@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import BaseAvatar from './BaseAvatar.vue'
 import BaseBadge from './BaseBadge.vue'
 import {
@@ -12,6 +12,8 @@ import {
   CheckCircle2,
   AlertCircle,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   X,
   Search,
   Sparkles,
@@ -50,6 +52,14 @@ const props = defineProps({
     type: Object,
     default: () => ({ P: 2, S: 2, M: 1 }),
   },
+  canPrevWeek: {
+    type: Boolean,
+    default: true,
+  },
+  canNextWeek: {
+    type: Boolean,
+    default: true,
+  },
 })
 
 const emit = defineEmits([
@@ -57,6 +67,8 @@ const emit = defineEmits([
   'cell-click',
   'row-click',
   'column-shift-change',
+  'prev-week',
+  'next-week',
 ])
 
 // ========================================================
@@ -119,6 +131,12 @@ onMounted(() => {
   }
   document.addEventListener('click', handleDocumentClick)
   document.addEventListener('keydown', handleDocumentKeydown)
+
+  if (props.mode === 'monthly') {
+    setTimeout(() => {
+      scrollToToday(false)
+    }, 120)
+  }
 })
 
 onUnmounted(() => {
@@ -374,6 +392,67 @@ const dailyCoverageSummary = computed(() => {
 
   return summary
 })
+
+// ========================================================
+// 5. AUTO-SCROLL KE HARI INI DI TENGAH TABEL (MODE BULANAN)
+// ========================================================
+const scrollToToday = (smooth = true) => {
+  nextTick(() => {
+    requestAnimationFrame(() => {
+      if (!scrollContainerRef.value) return
+      const container = scrollContainerRef.value
+      const todayTh = container.querySelector('th[data-today="true"]')
+      if (!todayTh) return
+
+      const stickyTh = container.querySelector('th.sticky')
+      const stickyWidth = stickyTh ? stickyTh.offsetWidth : 240
+
+      const availableWidth = container.clientWidth - stickyWidth
+      const thLeft = todayTh.offsetLeft
+      const thWidth = todayTh.offsetWidth
+
+      // Hitung posisi scrollLeft agar kolom Hari Ini berada tepat di tengah area terlihat
+      const targetScrollLeft = thLeft - stickyWidth - (availableWidth / 2) + (thWidth / 2)
+
+      container.scrollTo({
+        left: Math.max(0, targetScrollLeft),
+        behavior: smooth ? 'smooth' : 'auto',
+      })
+    })
+  })
+}
+
+// Watch pergantian mode: jika masuk bulanan, otomatis scroll ke hari ini di tengah tabel
+watch(
+  () => props.mode,
+  (newMode) => {
+    if (newMode === 'monthly') {
+      setTimeout(() => {
+        scrollToToday(true)
+      }, 50)
+    } else {
+      nextTick(() => {
+        scrollContainerRef.value?.scrollTo({ left: 0, behavior: 'smooth' })
+      })
+    }
+  }
+)
+
+// Watch days jika ada pembaruan hari pada mode bulanan
+watch(
+  () => props.days,
+  () => {
+    if (props.mode === 'monthly') {
+      setTimeout(() => {
+        scrollToToday(true)
+      }, 50)
+    }
+  }
+)
+
+defineExpose({
+  scrollToToday,
+})
 </script>
 
 <template>
@@ -389,7 +468,8 @@ const dailyCoverageSummary = computed(() => {
         <!-- ======================================================== -->
         <thead
           ref="theadRef"
-          class="sticky top-0 z-20 bg-neutral-50/95 dark:bg-[var(--theme-surface-raised)]/95 backdrop-blur-xs border-b border-neutral-200 dark:border-[var(--theme-border)] text-neutral-600 dark:text-neutral-300 font-semibold shadow-2xs cursor-ew-resize"
+          class="sticky top-0 bg-neutral-50/95 dark:bg-[var(--theme-surface-raised)]/95 backdrop-blur-xs border-b border-neutral-200 dark:border-[var(--theme-border)] text-neutral-600 dark:text-neutral-300 font-semibold shadow-2xs cursor-ew-resize group/thead"
+          :class="activeColumnHeader ? 'z-50' : 'z-20'"
           title="Scroll mouse saat kursor di header untuk menggeser ke samping"
         >
           <tr>
@@ -403,8 +483,9 @@ const dailyCoverageSummary = computed(() => {
 
             <!-- Day Columns (Semua Mode Memiliki Lebar yang Nyaman untuk Format Badge [Icon | Nama Shift]) -->
             <th
-              v-for="day in days"
+              v-for="(day, index) in days"
               :key="day.date"
+              :data-today="day.isToday ? 'true' : undefined"
               class="py-2 px-2 text-center border-r border-neutral-200/60 dark:border-[var(--theme-border)] last:border-r-0 relative group/th min-w-[125px] w-[130px]"
               :class="[
                 (activeColumnHeader && activeColumnHeader.date === day.date) ? 'z-40' : '',
@@ -412,6 +493,37 @@ const dailyCoverageSummary = computed(() => {
                 day.isWeekend && !day.isToday ? 'bg-neutral-100/50 dark:bg-neutral-900/20 text-neutral-400' : ''
               ]"
             >
+              <!-- Navigasi Minggu Sebelumnya (<) di tepi kiri kolom hari (hanya tampil saat kursor di thead pada mode mingguan) -->
+              <button
+                v-if="mode === 'weekly' && index === 0"
+                type="button"
+                @click.stop="emit('prev-week')"
+                class="absolute -left-3.5 top-1/2 -translate-y-1/2 z-40 w-7 h-7 rounded-full bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-300 dark:border-[var(--theme-border)] shadow-md flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-muted)] transition-all opacity-0 group-hover/thead:opacity-100"
+                :class="[
+                  activeColumnHeader ? 'pointer-events-none !opacity-0' : '',
+                  canPrevWeek ? 'hover:scale-110 active:scale-95 cursor-pointer' : 'opacity-40 cursor-not-allowed'
+                ]"
+                :disabled="!canPrevWeek"
+                title="Minggu Sebelumnya"
+              >
+                <ChevronLeft class="w-3.5 h-3.5" />
+              </button>
+
+              <!-- Navigasi Minggu Berikutnya (>) di tepi kanan kolom hari (hanya tampil saat kursor di thead pada mode mingguan) -->
+              <button
+                v-if="mode === 'weekly' && index === days.length - 1"
+                type="button"
+                @click.stop="emit('next-week')"
+                class="absolute -right-3.5 top-1/2 -translate-y-1/2 z-40 w-7 h-7 rounded-full bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-300 dark:border-[var(--theme-border)] shadow-md flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-muted)] transition-all opacity-0 group-hover/thead:opacity-100"
+                :class="[
+                  activeColumnHeader ? 'pointer-events-none !opacity-0' : '',
+                  canNextWeek ? 'hover:scale-110 active:scale-95 cursor-pointer' : 'opacity-40 cursor-not-allowed'
+                ]"
+                :disabled="!canNextWeek"
+                title="Minggu Berikutnya"
+              >
+                <ChevronRight class="w-3.5 h-3.5" />
+              </button>
               <div class="flex flex-col items-center justify-center gap-0.5">
                 <!-- Day Name & Today Indicator -->
                 <div class="flex items-center gap-1">

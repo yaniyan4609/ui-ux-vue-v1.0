@@ -55,10 +55,42 @@ const toast = useToast()
 // 1. DATA MASTER & MODE TAMPILAN (MINGGUAN VS 1 BULAN)
 // ========================================================
 const viewMode = ref('weekly') // 'weekly' | 'monthly'
-const weekDays = ref([...defaultWeekDays])
 const monthDays = ref([...fullMonthDays])
 const employees = ref([...rosterEmployees])
 const swapRequests = ref([...shiftSwapRequests])
+
+// State navigasi minggu aktif (default index 9 = 10 Nov 2026 / Hari Ini)
+const currentWeekStartIndex = ref(9)
+
+const weekDays = computed(() => {
+  const start = Math.max(0, Math.min(fullMonthDays.length - 7, currentWeekStartIndex.value))
+  return fullMonthDays.slice(start, start + 7)
+})
+
+const canPrevWeek = computed(() => currentWeekStartIndex.value > 0)
+const canNextWeek = computed(() => currentWeekStartIndex.value + 7 < fullMonthDays.length)
+
+const handlePrevWeek = () => {
+  if (canPrevWeek.value) {
+    currentWeekStartIndex.value = Math.max(0, currentWeekStartIndex.value - 7)
+    const firstDay = weekDays.value[0]?.dateLabel
+    const lastDay = weekDays.value[weekDays.value.length - 1]?.dateLabel
+    toast.info(`Menampilkan jadwal mingguan: ${firstDay} – ${lastDay}`, 'Minggu Diperbarui')
+  } else {
+    toast.info('Sudah berada di awal bulan (minggu pertama).', 'Batas Periode')
+  }
+}
+
+const handleNextWeek = () => {
+  if (canNextWeek.value) {
+    currentWeekStartIndex.value = Math.min(fullMonthDays.length - 7, currentWeekStartIndex.value + 7)
+    const firstDay = weekDays.value[0]?.dateLabel
+    const lastDay = weekDays.value[weekDays.value.length - 1]?.dateLabel
+    toast.info(`Menampilkan jadwal mingguan: ${firstDay} – ${lastDay}`, 'Minggu Diperbarui')
+  } else {
+    toast.info('Sudah berada di akhir bulan (minggu terakhir).', 'Batas Periode')
+  }
+}
 
 // Hari aktif berdasarkan mode (7 Hari vs 30 Hari)
 const activeDays = computed(() => {
@@ -709,9 +741,13 @@ const employeeScheduleDetails = computed(() => {
         :shift-types="shiftTypes"
         :mode="viewMode"
         :min-coverage="{ P: 2, S: 2, M: 1 }"
+        :can-prev-week="canPrevWeek"
+        :can-next-week="canNextWeek"
         @cell-change="handleShiftChange"
         @column-shift-change="handleBulkColumnShift"
         @row-click="openEmployeeScheduleDetail"
+        @prev-week="handlePrevWeek"
+        @next-week="handleNextWeek"
       />
     </div>
 
