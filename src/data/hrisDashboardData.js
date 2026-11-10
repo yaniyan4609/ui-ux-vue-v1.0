@@ -220,3 +220,62 @@ export const hrisUpcomingHolidays = [
   { date: '29 Jan 2027', name: 'Tahun Baru Imlek 2578', daysLeft: '80 hari lagi' },
 ]
 
+
+
+// Preset Tren Presensi & Lembur (Untuk Diagram Ombak SVG Interaktif)
+export const hrisAttendanceTrendPresets = {
+  '7hari': {
+    labels: ['04 Nov', '05 Nov', '06 Nov', '07 Nov', '08 Nov', '09 Nov', '10 Nov'],
+    presencePct: [93.8, 94.5, 92.6, 95.2, 94.1, 91.5, 94.6],
+    presenceCount: [1204, 1213, 1189, 1222, 1208, 1175, 1215],
+    overtimeHours: [42, 58, 65, 38, 52, 28, 48],
+    lateCount: [18, 14, 25, 12, 16, 20, 15],
+    minPct: 88,
+    maxPct: 100,
+    maxOvertime: 80,
+  },
+  '14hari': {
+    labels: [
+      '28 Okt', '29 Okt', '30 Okt', '31 Okt', '01 Nov', '02 Nov', '03 Nov',
+      '04 Nov', '05 Nov', '06 Nov', '07 Nov', '08 Nov', '09 Nov', '10 Nov'
+    ],
+    presencePct: [92.4, 93.1, 94.0, 93.5, 90.8, 91.2, 93.0, 93.8, 94.5, 92.6, 95.2, 94.1, 91.5, 94.6],
+    presenceCount: [1186, 1195, 1207, 1200, 1166, 1171, 1194, 1204, 1213, 1189, 1222, 1208, 1175, 1215],
+    overtimeHours: [35, 48, 55, 62, 22, 20, 36, 42, 58, 65, 38, 52, 28, 48],
+    lateCount: [22, 18, 15, 19, 28, 24, 16, 18, 14, 25, 12, 16, 20, 15],
+    minPct: 88,
+    maxPct: 100,
+    maxOvertime: 80,
+  },
+  '30hari': {
+    labels: [
+      '12 Okt', '14 Okt', '16 Okt', '18 Okt', '20 Okt', '22 Okt', '24 Okt', '26 Okt',
+      '28 Okt', '30 Okt', '01 Nov', '03 Nov', '05 Nov', '07 Nov', '09 Nov', '10 Nov'
+    ],
+    presencePct: [91.5, 92.8, 93.4, 94.2, 92.0, 93.7, 94.8, 93.2, 92.4, 94.0, 90.8, 93.0, 94.5, 95.2, 91.5, 94.6],
+    presenceCount: [1175, 1192, 1199, 1209, 1181, 1203, 1217, 1197, 1186, 1207, 1166, 1194, 1213, 1222, 1175, 1215],
+    overtimeHours: [40, 52, 45, 60, 34, 48, 56, 44, 35, 55, 22, 36, 58, 38, 28, 48],
+    lateCount: [25, 20, 16, 14, 22, 15, 12, 18, 22, 15, 28, 16, 14, 12, 20, 15],
+    minPct: 88,
+    maxPct: 100,
+    maxOvertime: 80,
+  },
+}
+
+// Distribusi Status Kehadiran Hari Ini (Untuk Diagram Donat Interaktif)
+export const hrisDisciplineDistribution = [
+  { id: 'ontime', name: 'Tepat Waktu', count: 1140, pct: 88.8, color: '#10b981', desc: 'Presensi sebelum toleransi jam masuk' },
+  { id: 'late', name: 'Terlambat', count: 75, pct: 5.8, color: '#f59e0b', desc: 'Presensi lewat 1-30 menit dari jadwal' },
+  { id: 'leave', name: 'Cuti Tahunan', count: 28, pct: 2.2, color: '#3b82f6', desc: 'Permohonan cuti disetujui HRD' },
+  { id: 'sick', name: 'Izin Sakit (SKD)', count: 18, pct: 1.4, color: '#8b5cf6', desc: 'Dilengkapi surat keterangan dokter' },
+  { id: 'absent', name: 'Tanpa Keterangan', count: 23, pct: 1.8, color: '#f43f5e', desc: 'Tidak hadir & belum lapor atasan' },
+]
+
+// Komparasi Jam Lembur per Departemen (Untuk Diagram Batang Vertikal)
+export const hrisOvertimeByDept = [
+  { dept: 'Operasional & Gudang', code: 'OPS', hours: 284, maxQuota: 350, cost: 'Rp 42.600.000', color: '#10b981' },
+  { dept: 'Engineering & Tech', code: 'ENG', hours: 142, maxQuota: 200, cost: 'Rp 28.400.000', color: '#3b82f6' },
+  { dept: 'Sales & Marketing', code: 'SLS', hours: 96, maxQuota: 150, cost: 'Rp 19.200.000', color: '#f59e0b' },
+  { dept: 'Layanan Pelanggan', code: 'CS', hours: 78, maxQuota: 120, cost: 'Rp 14.040.000', color: '#06b6d4' },
+  { dept: 'Finance & HRIS', code: 'FIN', hours: 54, maxQuota: 100, cost: 'Rp 10.800.000', color: '#8b5cf6' },
+]
