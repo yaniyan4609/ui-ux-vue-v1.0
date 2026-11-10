@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
 import BaseAvatar from './BaseAvatar.vue'
 import BaseBadge from './BaseBadge.vue'
 import {
@@ -15,7 +15,6 @@ import {
   X,
   Search,
   Sparkles,
-  ArrowDownCircle,
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -61,7 +60,36 @@ const emit = defineEmits([
 ])
 
 // ========================================================
-// 1. STATE POPOVER CELL INDIVIDU (SEARCHABLE DROPDOWN)
+// 1. REF CONTAINER & THEAD SCROLL INTERACTION
+// Wheel di thead -> scroll horizontal
+// Wheel di tbody -> scroll vertical
+// ========================================================
+const scrollContainerRef = ref(null)
+const theadRef = ref(null)
+
+const onTheadWheel = (e) => {
+  if (!scrollContainerRef.value) return
+  if (Math.abs(e.deltaY) > 0) {
+    e.preventDefault()
+    // Scroll horizontal secara mulus
+    scrollContainerRef.value.scrollLeft += e.deltaY * 1.2
+  }
+}
+
+onMounted(() => {
+  if (theadRef.value) {
+    theadRef.value.addEventListener('wheel', onTheadWheel, { passive: false })
+  }
+})
+
+onUnmounted(() => {
+  if (theadRef.value) {
+    theadRef.value.removeEventListener('wheel', onTheadWheel)
+  }
+})
+
+// ========================================================
+// 2. STATE POPOVER CELL INDIVIDU (SEARCHABLE DROPDOWN)
 // ========================================================
 const activeCell = ref(null) // { rowId, rowName, date, dayLabel, currentCode }
 const cellSearchQuery = ref('')
@@ -116,7 +144,7 @@ const filteredCellShiftTypes = computed(() => {
 })
 
 // ========================================================
-// 2. STATE POPOVER THEAD COLUMN (SEARCHABLE DROPDOWN MASSAL)
+// 3. STATE POPOVER THEAD COLUMN (SEARCHABLE DROPDOWN MASSAL)
 // ========================================================
 const activeColumnHeader = ref(null) // { date, dayName, dateLabel }
 const columnSearchQuery = ref('')
@@ -165,7 +193,7 @@ const filteredColumnShiftTypes = computed(() => {
 })
 
 // ========================================================
-// 3. UTILITY & BADGE STYLING
+// 4. UTILITY & BADGE STYLING
 // ========================================================
 const getShiftMeta = (code) => {
   const found = props.shiftTypes.find((s) => s.code === code)
@@ -241,29 +269,33 @@ const dailyCoverageSummary = computed(() => {
   <div class="h-full flex flex-col min-h-0 bg-white dark:bg-[var(--theme-surface)] rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs overflow-hidden select-none relative">
     
     <!-- Table Matrix Scrollable Container -->
-    <div class="flex-1 min-h-0 overflow-auto relative">
-      <table class="w-full border-collapse text-left text-xs" :class="mode === 'monthly' ? 'min-w-[1300px]' : 'min-w-[860px]'">
+    <div ref="scrollContainerRef" class="flex-1 min-h-0 overflow-auto relative scroll-smooth">
+      <table class="w-full border-collapse text-left text-xs min-w-max">
         
         <!-- ======================================================== -->
         <!-- 1. TABLE HEADER: PEGAWAI & HARI-HARI KERJA               -->
+        <!-- Saat cursor di thead, scroll mouse menggeser ke samping  -->
         <!-- ======================================================== -->
-        <thead class="sticky top-0 z-20 bg-neutral-50/95 dark:bg-[var(--theme-surface-raised)]/95 backdrop-blur-xs border-b border-neutral-200 dark:border-[var(--theme-border)] text-neutral-600 dark:text-neutral-300 font-semibold shadow-2xs">
+        <thead
+          ref="theadRef"
+          class="sticky top-0 z-20 bg-neutral-50/95 dark:bg-[var(--theme-surface-raised)]/95 backdrop-blur-xs border-b border-neutral-200 dark:border-[var(--theme-border)] text-neutral-600 dark:text-neutral-300 font-semibold shadow-2xs cursor-ew-resize"
+          title="Scroll mouse saat kursor di header untuk menggeser ke samping"
+        >
           <tr>
             <!-- Left Sticky Header: Karyawan -->
-            <th class="sticky left-0 z-30 bg-neutral-50 dark:bg-[var(--theme-surface-raised)] py-2.5 px-3.5 w-64 border-r border-neutral-200/80 dark:border-[var(--theme-border)] shadow-[1px_0_0_0_rgba(0,0,0,0.05)]">
+            <th class="sticky left-0 z-30 bg-neutral-50 dark:bg-[var(--theme-surface-raised)] py-2.5 px-3.5 w-64 min-w-[240px] border-r border-neutral-200/80 dark:border-[var(--theme-border)] shadow-[1px_0_0_0_rgba(0,0,0,0.05)] cursor-default">
               <div class="flex items-center justify-between">
                 <span class="uppercase text-[10px] tracking-wider font-bold text-neutral-500">Pegawai ({{ rows.length }})</span>
                 <span class="text-[10px] text-neutral-400 font-mono">Total Jam</span>
               </div>
             </th>
 
-            <!-- Day Columns (Weekly or Monthly Mode) -->
+            <!-- Day Columns (Semua Mode Memiliki Lebar yang Nyaman untuk Format Badge [Icon | Nama Shift]) -->
             <th
               v-for="day in days"
               :key="day.date"
-              class="py-2 px-1 text-center border-r border-neutral-200/60 dark:border-[var(--theme-border)] last:border-r-0 relative group/th"
+              class="py-2 px-2 text-center border-r border-neutral-200/60 dark:border-[var(--theme-border)] last:border-r-0 relative group/th min-w-[125px] w-[130px]"
               :class="[
-                mode === 'monthly' ? 'w-11 min-w-[42px] max-w-[48px]' : 'min-w-[95px]',
                 day.isToday ? 'bg-[var(--theme-primary-soft)] text-[var(--theme-primary)]' : '',
                 day.isWeekend && !day.isToday ? 'bg-neutral-100/50 dark:bg-neutral-900/20 text-neutral-400' : ''
               ]"
@@ -271,11 +303,11 @@ const dailyCoverageSummary = computed(() => {
               <div class="flex flex-col items-center justify-center gap-0.5">
                 <!-- Day Name & Today Indicator -->
                 <div class="flex items-center gap-1">
-                  <span class="font-bold leading-tight" :class="mode === 'monthly' ? 'text-[11px]' : 'text-xs'">
-                    {{ mode === 'monthly' ? day.shortDay : day.dayName }}
+                  <span class="font-bold leading-tight text-xs">
+                    {{ day.dayName }}
                   </span>
                   <span
-                    v-if="day.isToday && mode !== 'monthly'"
+                    v-if="day.isToday"
                     class="px-1.5 py-0.2 rounded-full text-[9px] font-extrabold uppercase bg-[var(--theme-primary)] text-[var(--theme-primary-text)] tracking-wider"
                   >
                     Hari Ini
@@ -285,13 +317,10 @@ const dailyCoverageSummary = computed(() => {
                 <!-- Date Label & Trigger Dropdown Massal Kolom -->
                 <div class="flex items-center justify-center gap-1">
                   <span
-                    class="font-mono"
-                    :class="[
-                      mode === 'monthly' ? 'text-[10.5px] font-bold' : 'text-[11px] opacity-80',
-                      day.isToday && mode === 'monthly' ? 'text-[var(--theme-primary)] font-extrabold' : ''
-                    ]"
+                    class="font-mono text-[11px]"
+                    :class="day.isToday ? 'text-[var(--theme-primary)] font-extrabold' : 'opacity-80'"
                   >
-                    {{ mode === 'monthly' ? day.dayNumber : day.dateLabel }}
+                    {{ day.dateLabel }}
                   </span>
 
                   <!-- Tombol Trigger Dropdown Searchable di thead -->
@@ -312,7 +341,7 @@ const dailyCoverageSummary = computed(() => {
               <!-- ============================================== -->
               <div
                 v-if="activeColumnHeader && activeColumnHeader.date === day.date"
-                class="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 z-40 w-52 p-2.5 rounded-2xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-xl animate-in fade-in zoom-in-95 duration-150 text-left font-normal"
+                class="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 z-40 w-52 p-2.5 rounded-2xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-xl animate-in fade-in zoom-in-95 duration-150 text-left font-normal cursor-default"
               >
                 <!-- Header Popover Kolom -->
                 <div class="flex items-center justify-between pb-1.5 mb-2 border-b border-neutral-100 dark:border-[var(--theme-border)]">
@@ -392,6 +421,7 @@ const dailyCoverageSummary = computed(() => {
 
         <!-- ======================================================== -->
         <!-- 2. TABLE BODY: EMPLOYEE ROWS & SCHEDULE CELLS            -->
+        <!-- Format Selalu Menggunakan Badge: [Icon/Kode | Nama Shift]-->
         <!-- ======================================================== -->
         <tbody class="divide-y divide-neutral-100 dark:divide-[var(--theme-border)]">
           <tr
@@ -430,50 +460,39 @@ const dailyCoverageSummary = computed(() => {
               </div>
             </td>
 
-            <!-- Interactive Shift Cells per Day -->
+            <!-- Interactive Shift Cells: Selalu Format [Kode/Icon | Nama Shift] Sesuai Permintaan -->
             <td
               v-for="day in days"
               :key="day.date"
-              class="text-center border-r border-neutral-100 dark:border-[var(--theme-border)] last:border-r-0 relative"
+              class="p-1.5 text-center border-r border-neutral-100 dark:border-[var(--theme-border)] last:border-r-0 relative min-w-[125px]"
               :class="[
-                mode === 'monthly' ? 'p-1' : 'p-1.5',
                 day.isToday ? 'bg-[var(--theme-primary-soft)]/20' : '',
                 day.isWeekend && !day.isToday ? 'bg-neutral-50/30 dark:bg-neutral-900/10' : ''
               ]"
             >
-              <!-- Cell Shift Button -->
+              <!-- Cell Shift Button: Tampilan Pill Bulat Sesuai Screenshot Pengguna -->
               <button
                 type="button"
                 @click="openShiftSelector(row, day)"
-                class="rounded-xl border transition-all flex items-center justify-center shadow-2xs group/cell cursor-pointer"
-                :class="[
-                  mode === 'monthly'
-                    ? 'w-full h-8 text-[11px] font-mono font-extrabold'
-                    : 'w-full py-1.5 px-2 text-xs font-semibold justify-between gap-1',
-                  getShiftBadgeClasses(row.schedules?.[day.date])
-                ]"
+                class="w-full py-1.5 px-2 rounded-xl text-xs font-semibold border transition-all flex items-center justify-between gap-1.5 shadow-2xs group/cell cursor-pointer whitespace-nowrap"
+                :class="getShiftBadgeClasses(row.schedules?.[day.date])"
                 :title="`${row.name} - ${day.dayName}: ${getShiftMeta(row.schedules?.[day.date]).name} (${getShiftMeta(row.schedules?.[day.date]).time})`"
               >
-                <!-- Mode Bulanan: Badge Kode Saja (P, S, M, OFF, C) -->
-                <template v-if="mode === 'monthly'">
-                  <span>{{ row.schedules?.[day.date] || 'OFF' }}</span>
-                </template>
+                <!-- Badge Kiri: Kotak Kode Shift (P, S, M, OFF, C) -->
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <span class="w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
+                    {{ row.schedules?.[day.date] || 'OFF' }}
+                  </span>
+                  <!-- Label Kanan: Nama Shift Lengkap (Shift Malam, Shift Pagi, dll) -->
+                  <span class="text-[11px] font-semibold truncate">
+                    {{ getShiftMeta(row.schedules?.[day.date]).name }}
+                  </span>
+                </div>
 
-                <!-- Mode Mingguan: Kode + Nama Shift Lengkap -->
-                <template v-else>
-                  <div class="flex items-center gap-1.5 min-w-0">
-                    <span class="w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black font-mono shrink-0 bg-white/60 dark:bg-black/30">
-                      {{ row.schedules?.[day.date] || 'OFF' }}
-                    </span>
-                    <span class="text-[11px] font-medium truncate hidden sm:inline">
-                      {{ getShiftMeta(row.schedules?.[day.date]).name }}
-                    </span>
-                  </div>
-                  <ChevronDown
-                    v-if="editable"
-                    class="w-3 h-3 opacity-0 group-hover/cell:opacity-80 transition shrink-0"
-                  />
-                </template>
+                <ChevronDown
+                  v-if="editable"
+                  class="w-3 h-3 opacity-0 group-hover/cell:opacity-80 transition shrink-0 ml-0.5"
+                />
               </button>
 
               <!-- ============================================== -->
@@ -481,7 +500,7 @@ const dailyCoverageSummary = computed(() => {
               <!-- ============================================== -->
               <div
                 v-if="activeCell && activeCell.rowId === row.id && activeCell.date === day.date"
-                class="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 z-40 w-52 p-2.5 rounded-2xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-xl animate-in fade-in zoom-in-95 duration-150 text-left font-normal"
+                class="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 z-40 w-52 p-2.5 rounded-2xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-xl animate-in fade-in zoom-in-95 duration-150 text-left font-normal cursor-default"
               >
                 <!-- Popover Header -->
                 <div class="flex items-center justify-between pb-1.5 mb-2 border-b border-neutral-100 dark:border-[var(--theme-border)]">
@@ -576,18 +595,10 @@ const dailyCoverageSummary = computed(() => {
             <td
               v-for="day in days"
               :key="day.date"
-              class="p-1.5 text-center border-r border-neutral-200/60 dark:border-[var(--theme-border)] last:border-r-0"
+              class="p-1.5 text-center border-r border-neutral-200/60 dark:border-[var(--theme-border)] last:border-r-0 min-w-[125px]"
               :class="day.isToday ? 'bg-[var(--theme-primary-soft)]/30' : ''"
             >
-              <!-- Mode Bulanan: Tampilan ringkas -->
-              <div v-if="mode === 'monthly'" class="space-y-0.5 text-[9.5px] font-mono leading-tight">
-                <div class="text-emerald-700 dark:text-emerald-300 font-bold" title="Pagi">P:{{ dailyCoverageSummary[day.date]?.P || 0 }}</div>
-                <div class="text-amber-700 dark:text-amber-300 font-bold" title="Siang">S:{{ dailyCoverageSummary[day.date]?.S || 0 }}</div>
-                <div class="text-purple-700 dark:text-purple-300 font-bold" title="Malam">M:{{ dailyCoverageSummary[day.date]?.M || 0 }}</div>
-              </div>
-
-              <!-- Mode Mingguan: Tampilan lengkap dengan status -->
-              <div v-else class="space-y-1">
+              <div class="space-y-1">
                 <div class="flex items-center justify-center gap-1 text-[10px] font-mono">
                   <span class="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold" title="Shift Pagi">
                     P: {{ dailyCoverageSummary[day.date]?.P || 0 }}

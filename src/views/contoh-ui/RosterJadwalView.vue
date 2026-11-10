@@ -65,13 +65,15 @@ const activeDays = computed(() => {
 })
 
 // ========================================================
-// 2. FILTER DENGAN BASETREE: WILAYAH/KANTOR & ORGANISASI
+// 2. FILTER DENGAN BASETREE MULTI-SELECT:
+//    - WILAYAH & KANTOR (MULTIPLE)
+//    - ORGANISASI: DIVISI -> DEPT -> JABATAN (MULTIPLE)
 // ========================================================
 const searchQuery = ref('')
-const selectedLocationNode = ref('') // ID dari tree Wilayah & Kantor
-const selectedOrgNode = ref('') // ID dari tree Organisasi (Divisi -> Dept -> Jabatan)
+const selectedLocationNodes = ref([]) // Array ID terpilih (multi-select)
+const selectedOrgNodes = ref([]) // Array ID terpilih (multi-select)
 
-// Filtered Employees
+// Filtered Employees Berbasis Multi-Tree
 const filteredEmployees = computed(() => {
   return employees.value.filter((emp) => {
     // 1. Pencarian Kata Kunci
@@ -82,44 +84,38 @@ const filteredEmployees = computed(() => {
       emp.nip.toLowerCase().includes(q) ||
       emp.role.toLowerCase().includes(q)
 
-    // 2. Filter Wilayah & Kantor (Hierarki BaseTree)
+    // 2. Filter Wilayah & Kantor (Multi-Select)
     let matchLocation = true
-    if (selectedLocationNode.value) {
-      const loc = selectedLocationNode.value
-      if (loc === 'wilayah-dki') {
-        matchLocation = emp.wilayah === 'Wilayah DKI Jakarta & Banten'
-      } else if (loc === 'wilayah-jabar') {
-        matchLocation = emp.wilayah === 'Wilayah Jawa Barat'
-      } else if (loc === 'wilayah-jatim') {
-        matchLocation = emp.wilayah === 'Wilayah Jawa Timur'
-      } else {
-        // Cocokkan persis nama kantor cabang
-        matchLocation = emp.cabang === loc
-      }
+    if (selectedLocationNodes.value && selectedLocationNodes.value.length > 0) {
+      matchLocation = selectedLocationNodes.value.some((nodeId) => {
+        if (nodeId === 'wilayah-dki') return emp.wilayah === 'Wilayah DKI Jakarta & Banten'
+        if (nodeId === 'wilayah-jabar') return emp.wilayah === 'Wilayah Jawa Barat'
+        if (nodeId === 'wilayah-jatim') return emp.wilayah === 'Wilayah Jawa Timur'
+        return emp.cabang === nodeId
+      })
     }
 
-    // 3. Filter Organisasi (Hierarki BaseTree: Divisi -> Dept -> Jabatan)
+    // 3. Filter Organisasi (Divisi -> Dept -> Jabatan Multi-Select)
     let matchOrg = true
-    if (selectedOrgNode.value) {
-      const org = selectedOrgNode.value
-      if (['Teknologi & IT', 'Keamanan & Fasilitas', 'Layanan & CS', 'Operasional Gudang', 'Medis & Kesehatan'].includes(org)) {
-        // Cocokkan Divisi
-        matchOrg = emp.divisi === org
-      } else if (org.startsWith('dept-')) {
-        // Cocokkan Departemen
-        const deptMap = {
-          'dept-it-ops': 'Software & Cloud 24/7',
-          'dept-sec-guard': 'Pengamanan Fisik (Satpam)',
-          'dept-sec-facility': 'Mekanikal, Elektrikal & Gedung',
-          'dept-cs-care': 'Customer Contact Center',
-          'dept-gudang-log': 'Logistik & Distribusi',
-          'dept-medis-k3': 'Layanan Kesehatan & K3',
-        }
-        matchOrg = emp.departemen === deptMap[org]
-      } else {
-        // Cocokkan Jabatan / Posisi
-        matchOrg = emp.role === org
+    if (selectedOrgNodes.value && selectedOrgNodes.value.length > 0) {
+      const deptMap = {
+        'dept-it-ops': 'Software & Cloud 24/7',
+        'dept-sec-guard': 'Pengamanan Fisik (Satpam)',
+        'dept-sec-facility': 'Mekanikal, Elektrikal & Gedung',
+        'dept-cs-care': 'Customer Contact Center',
+        'dept-gudang-log': 'Logistik & Distribusi',
+        'dept-medis-k3': 'Layanan Kesehatan & K3',
       }
+
+      matchOrg = selectedOrgNodes.value.some((nodeId) => {
+        // Cek Divisi
+        if (emp.divisi === nodeId) return true
+        // Cek Departemen
+        if (deptMap[nodeId] && emp.departemen === deptMap[nodeId]) return true
+        // Cek Jabatan / Role
+        if (emp.role === nodeId) return true
+        return false
+      })
     }
 
     return matchSearch && matchLocation && matchOrg
@@ -146,10 +142,8 @@ const pendingSwapCount = computed(() => {
 })
 
 // ========================================================
-// 3. HANDLER PERGANTIAN SHIFT (CELL & BULK COLUMN THEAD)
+// 3. HANDLER PERGANTIAN SHIFT (CELL & BULK THEAD)
 // ========================================================
-
-// 1. Ubah shift per sel individu
 const handleShiftChange = ({ rowId, date, newShiftCode }) => {
   const emp = employees.value.find((e) => e.id === rowId)
   if (emp && emp.schedules) {
@@ -163,7 +157,7 @@ const handleShiftChange = ({ rowId, date, newShiftCode }) => {
   }
 }
 
-// 2. Ubah shift massal kolom via thead table (Point 2 user request)
+// Bulk shift change column from thead
 const handleBulkColumnShift = ({ date, dayLabel, shiftCode }) => {
   const meta = shiftTypes.find((s) => s.code === shiftCode)
   let count = 0
@@ -184,12 +178,12 @@ const handleBulkColumnShift = ({ date, dayLabel, shiftCode }) => {
 // Reset Filter
 const handleResetFilter = () => {
   searchQuery.value = ''
-  selectedLocationNode.value = ''
-  selectedOrgNode.value = ''
+  selectedLocationNodes.value = []
+  selectedOrgNodes.value = []
   toast.info('Filter pencarian roster telah direset ke seluruh data.', 'Filter Direset')
 }
 
-// Salin Jadwal ke Minggu / Bulan Depan
+// Salin Jadwal ke Periode Depan
 const handleCopySchedule = () => {
   const targetPeriod = viewMode.value === 'monthly' ? 'Bulan Desember 2026' : 'Minggu Depan (17 – 23 Nov 2026)'
   toast.success(
@@ -449,7 +443,8 @@ const employeeScheduleDetails = computed(() => {
     </div>
 
     <!-- ======================================================== -->
-    <!-- 2. FILTER BAR: SEARCH + BASETREE SELECT WILAYAH & ORGANISASI -->
+    <!-- 2. FILTER BAR: SEARCH + MULTI-TREE SELECT                -->
+    <!-- (WILAYAH & KANTOR MULTI + ORGANISASI MULTI)              -->
     <!-- ======================================================== -->
     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
       <!-- Search Input -->
@@ -471,24 +466,26 @@ const employeeScheduleDetails = computed(() => {
         </button>
       </div>
 
-      <!-- Filter 1: Wilayah & Kantor Menggunakan BaseTreeSelect -->
-      <div class="w-full sm:w-60 shrink-0">
+      <!-- Filter 1: Wilayah & Kantor Menggunakan BaseTreeSelect Multi -->
+      <div class="w-full sm:w-64 shrink-0">
         <BaseTreeSelect
-          v-model="selectedLocationNode"
+          v-model="selectedLocationNodes"
           :nodes="locationTreeNodes"
-          placeholder="Filter Wilayah & Kantor..."
+          :multiple="true"
+          placeholder="Pilih Wilayah & Kantor..."
           size="sm"
           clearable
           searchable
         />
       </div>
 
-      <!-- Filter 2: Organisasi (Divisi -> Dept -> Jabatan) Menggunakan BaseTreeSelect -->
-      <div class="w-full sm:w-64 shrink-0">
+      <!-- Filter 2: Organisasi (Divisi -> Dept -> Jabatan) BaseTreeSelect Multi -->
+      <div class="w-full sm:w-72 shrink-0">
         <BaseTreeSelect
-          v-model="selectedOrgNode"
+          v-model="selectedOrgNodes"
           :nodes="organizationTreeNodes"
-          placeholder="Filter Divisi, Dept & Jabatan..."
+          :multiple="true"
+          placeholder="Pilih Divisi, Dept & Jabatan..."
           size="sm"
           clearable
           searchable
@@ -497,7 +494,7 @@ const employeeScheduleDetails = computed(() => {
 
       <!-- Reset Filter Button -->
       <button
-        v-if="searchQuery || selectedLocationNode || selectedOrgNode"
+        v-if="searchQuery || (selectedLocationNodes && selectedLocationNodes.length > 0) || (selectedOrgNodes && selectedOrgNodes.length > 0)"
         type="button"
         @click="handleResetFilter"
         class="p-2 rounded-xl text-neutral-500 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] transition cursor-pointer shrink-0"
@@ -508,26 +505,80 @@ const employeeScheduleDetails = computed(() => {
     </div>
 
     <!-- ======================================================== -->
-    <!-- 3. STRIP SWITCHER MODE (MINGGUAN/BULANAN) & LEGENDA      -->
+    <!-- 3. STRIP LEGENDA (KIRI) & SWITCHER MINGGUAN/BULANAN (KANAN) -->
+    <!-- Tombol Mingguan / 1 Bulan Berada di Sebelah Kanan        -->
     <!-- ======================================================== -->
-    <div class="flex flex-wrap items-center justify-between gap-2 p-2 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs shrink-0 text-xs">
+    <div class="flex flex-wrap items-center justify-between gap-2.5 p-2 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs shrink-0 text-xs">
       
-      <!-- Mode View Switcher (Mingguan vs 1 Bulan) & Legenda -->
-      <div class="flex flex-wrap items-center gap-2">
-        <!-- Toggle Button: Mingguan vs 1 Bulan -->
-        <div class="flex items-center p-0.5 rounded-xl bg-neutral-100 dark:bg-[var(--theme-surface-muted)] border border-neutral-200/80 dark:border-[var(--theme-border)]">
+      <!-- SISI KIRI: Legenda Shift Berwarna -->
+      <div class="flex flex-wrap items-center gap-1.5">
+        <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider mr-1">Shift:</span>
+        
+        <!-- Pagi -->
+        <div class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/40 text-emerald-800 dark:text-emerald-300 font-medium text-[11px]">
+          <Sun class="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+          <span>Pagi (07:00)</span>
+        </div>
+
+        <!-- Siang -->
+        <div class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/40 text-amber-800 dark:text-amber-300 font-medium text-[11px]">
+          <Sunset class="w-3 h-3 text-amber-600 dark:text-amber-400" />
+          <span>Siang (15:00)</span>
+        </div>
+
+        <!-- Malam -->
+        <div class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200/80 dark:border-purple-800/40 text-purple-800 dark:text-purple-300 font-medium text-[11px]">
+          <Moon class="w-3 h-3 text-purple-600 dark:text-purple-400" />
+          <span>Malam (23:00)</span>
+        </div>
+
+        <!-- Libur -->
+        <div class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-neutral-100 dark:bg-[var(--theme-surface-muted)] border border-neutral-200 dark:border-[var(--theme-border)] text-neutral-600 dark:text-neutral-400 font-medium text-[11px]">
+          <Coffee class="w-3 h-3 text-neutral-400" />
+          <span>Libur (OFF)</span>
+        </div>
+
+        <!-- Cuti -->
+        <div class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/40 text-blue-800 dark:text-blue-300 font-medium text-[11px]">
+          <Plane class="w-3 h-3 text-blue-500" />
+          <span>Cuti (C)</span>
+        </div>
+      </div>
+
+      <!-- SISI KANAN: Quick Stats & Tombol Switcher Mode (Mingguan / Bulanan) -->
+      <div class="flex items-center gap-3 shrink-0">
+        <!-- Quick Stats -->
+        <div class="hidden xl:flex items-center gap-2.5 text-neutral-500 text-xs">
+          <div class="flex items-center gap-1 font-medium">
+            <Users class="w-3.5 h-3.5 text-neutral-400" />
+            <span class="text-neutral-900 dark:text-white font-bold">{{ totalPegawai }}</span> Pegawai
+          </div>
+          <span>&bull;</span>
+          <div class="flex items-center gap-1 font-medium">
+            <Clock class="w-3.5 h-3.5 text-neutral-400" />
+            <span class="text-neutral-900 dark:text-white font-bold font-mono">{{ totalScheduledHours }} Jam</span>
+          </div>
+          <span>&bull;</span>
+          <div class="flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400">
+            <CheckCircle2 class="w-3.5 h-3.5" />
+            <span>Coverage 100%</span>
+          </div>
+        </div>
+
+        <!-- Tombol Switcher Mode Mingguan / Bulanan di Sebelah Kanan -->
+        <div class="flex items-center p-0.5 rounded-xl bg-neutral-100 dark:bg-[var(--theme-surface-muted)] border border-neutral-200/80 dark:border-[var(--theme-border)] shrink-0">
           <button
             type="button"
             @click="viewMode = 'weekly'"
             class="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition cursor-pointer"
             :class="[
               viewMode === 'weekly'
-                ? 'bg-white dark:bg-[var(--theme-surface-raised)] text-neutral-900 dark:text-white shadow-xs'
+                ? 'bg-white dark:bg-[var(--theme-surface-raised)] text-neutral-900 dark:text-white shadow-xs font-bold'
                 : 'text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200'
             ]"
           >
             <Calendar class="w-3.5 h-3.5" />
-            <span>Mingguan (7 Hari)</span>
+            <span>Mingguan</span>
           </button>
 
           <button
@@ -536,66 +587,13 @@ const employeeScheduleDetails = computed(() => {
             class="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition cursor-pointer"
             :class="[
               viewMode === 'monthly'
-                ? 'bg-white dark:bg-[var(--theme-surface-raised)] text-neutral-900 dark:text-white shadow-xs'
+                ? 'bg-white dark:bg-[var(--theme-surface-raised)] text-neutral-900 dark:text-white shadow-xs font-bold'
                 : 'text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200'
             ]"
           >
             <CalendarDays class="w-3.5 h-3.5" />
-            <span>1 Bulan (30 Hari)</span>
+            <span>1 Bulan Penuh</span>
           </button>
-        </div>
-
-        <div class="h-4 w-px bg-neutral-200 dark:bg-[var(--theme-border)] hidden sm:block" />
-
-        <!-- Legenda Shift -->
-        <div class="flex flex-wrap items-center gap-1.5">
-          <!-- Pagi -->
-          <div class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/40 text-emerald-800 dark:text-emerald-300 font-medium text-[11px]">
-            <Sun class="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-            <span>Pagi (07:00)</span>
-          </div>
-
-          <!-- Siang -->
-          <div class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/40 text-amber-800 dark:text-amber-300 font-medium text-[11px]">
-            <Sunset class="w-3 h-3 text-amber-600 dark:text-amber-400" />
-            <span>Siang (15:00)</span>
-          </div>
-
-          <!-- Malam -->
-          <div class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200/80 dark:border-purple-800/40 text-purple-800 dark:text-purple-300 font-medium text-[11px]">
-            <Moon class="w-3 h-3 text-purple-600 dark:text-purple-400" />
-            <span>Malam (23:00)</span>
-          </div>
-
-          <!-- Libur -->
-          <div class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-neutral-100 dark:bg-[var(--theme-surface-muted)] border border-neutral-200 dark:border-[var(--theme-border)] text-neutral-600 dark:text-neutral-400 font-medium text-[11px]">
-            <Coffee class="w-3 h-3 text-neutral-400" />
-            <span>Libur (OFF)</span>
-          </div>
-
-          <!-- Cuti -->
-          <div class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/40 text-blue-800 dark:text-blue-300 font-medium text-[11px]">
-            <Plane class="w-3 h-3 text-blue-500" />
-            <span>Cuti (C)</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Stats Kanan -->
-      <div class="flex items-center gap-3 shrink-0 text-neutral-500">
-        <div class="flex items-center gap-1.5 font-medium">
-          <Users class="w-3.5 h-3.5 text-neutral-400" />
-          <span class="text-neutral-900 dark:text-white font-bold">{{ totalPegawai }}</span> Pegawai
-        </div>
-        <span>&bull;</span>
-        <div class="flex items-center gap-1.5 font-medium">
-          <Clock class="w-3.5 h-3.5 text-neutral-400" />
-          <span class="text-neutral-900 dark:text-white font-bold font-mono">{{ totalScheduledHours }} Jam</span>
-        </div>
-        <span>&bull;</span>
-        <div class="flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400">
-          <CheckCircle2 class="w-3.5 h-3.5" />
-          <span>Coverage 100%</span>
         </div>
       </div>
 
@@ -603,7 +601,9 @@ const employeeScheduleDetails = computed(() => {
 
     <!-- ======================================================== -->
     <!-- 4. BASE ROSTER GRID COMPONENT (FLEX-1 MIN-H-0)           -->
-    <!-- Mendukung Searchable Dropdown Cell + Dropdown Kolom Thead-->
+    <!-- - Format Sel: Selalu [Icon/Kode | Nama Shift]            -->
+    <!-- - Thead Hover: Scroll Wheel geser ke samping             -->
+    <!-- - Dropdown Searchable di Sel & Kolom Thead               -->
     <!-- ======================================================== -->
     <div class="flex-1 min-h-0 overflow-hidden">
       <BaseRosterGrid
@@ -628,7 +628,6 @@ const employeeScheduleDetails = computed(() => {
       size="lg"
     >
       <div class="space-y-4 py-1 text-xs">
-        <!-- Tab Selector: Daftar Pengajuan vs Buat Baru -->
         <div class="flex items-center gap-2 border-b border-neutral-200 dark:border-[var(--theme-border)] pb-2">
           <button
             type="button"
@@ -878,7 +877,7 @@ const employeeScheduleDetails = computed(() => {
         <div class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs space-y-2">
           <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-500 flex items-center gap-1.5 mb-2">
             <Calendar class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-            <span>Jadwal Shift ({{ viewMode === 'monthly' ? 'Bulan November' : '10 – 16 Nov' }})</span>
+            <span>Jadwal Shift ({{ viewMode === 'monthly' ? 'Bulan November Penuh' : '10 – 16 Nov' }})</span>
           </h4>
 
           <div class="divide-y divide-neutral-100 dark:divide-[var(--theme-border)] max-h-80 overflow-y-auto pr-1">
