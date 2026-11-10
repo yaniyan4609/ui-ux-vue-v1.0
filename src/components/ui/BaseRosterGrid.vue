@@ -17,6 +17,7 @@ import {
   X,
   Search,
   Sparkles,
+  Check,
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -275,11 +276,6 @@ const activeColumnHeader = ref(null) // { date, dayName, dateLabel, placement }
 const columnSearchQuery = ref('')
 const columnSearchInputRef = ref(null)
 
-// Tanggal kolom yang sedang aktif memiliki action (dropdown thead atau cell terbuka)
-const activeActionDate = computed(() => {
-  return activeColumnHeader.value?.date || activeCell.value?.date || null
-})
-
 const toggleColumnShiftSelector = (day, event) => {
   if (!props.editable) return
 
@@ -341,7 +337,23 @@ const getShiftMeta = (code) => {
   }
 }
 
-const getShiftBadgeClasses = (code) => {
+const getShiftBadgeClasses = (code, isActive = false) => {
+  if (isActive) {
+    switch (code) {
+      case 'P':
+        return 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-900 dark:text-emerald-100 border-emerald-400 dark:border-emerald-500 ring-2 ring-emerald-500 font-bold shadow-sm'
+      case 'S':
+        return 'bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-100 border-amber-400 dark:border-amber-500 ring-2 ring-amber-500 font-bold shadow-sm'
+      case 'M':
+        return 'bg-purple-100 dark:bg-purple-950/80 text-purple-900 dark:text-purple-100 border-purple-400 dark:border-purple-500 ring-2 ring-purple-500 font-bold shadow-sm'
+      case 'C':
+        return 'bg-blue-100 dark:bg-blue-950/80 text-blue-900 dark:text-blue-100 border-blue-400 dark:border-blue-500 ring-2 ring-blue-500 font-bold shadow-sm'
+      case 'OFF':
+      default:
+        return 'bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border-neutral-400 dark:border-neutral-500 ring-2 ring-neutral-500 font-bold shadow-sm'
+    }
+  }
+
   switch (code) {
     case 'P':
       return 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/40 hover:bg-emerald-100 dark:hover:bg-emerald-950/60'
@@ -355,6 +367,26 @@ const getShiftBadgeClasses = (code) => {
     default:
       return 'bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-500 dark:text-neutral-400 border-neutral-200/60 dark:border-[var(--theme-border)] hover:bg-neutral-200/60 dark:hover:bg-[var(--theme-surface-raised)]'
   }
+}
+
+// Styling item di dalam popover shift saat terpilih (warna menebal sesuai identitas shift, tidak menjadi biru)
+const getShiftPopoverItemClasses = (code, isSelected = false) => {
+  if (isSelected) {
+    switch (code) {
+      case 'P':
+        return 'bg-emerald-100/90 dark:bg-emerald-950/70 text-emerald-900 dark:text-emerald-100 font-bold ring-1.5 ring-emerald-500/80 shadow-xs'
+      case 'S':
+        return 'bg-amber-100/90 dark:bg-amber-950/70 text-amber-900 dark:text-amber-100 font-bold ring-1.5 ring-amber-500/80 shadow-xs'
+      case 'M':
+        return 'bg-purple-100/90 dark:bg-purple-950/70 text-purple-900 dark:text-purple-100 font-bold ring-1.5 ring-purple-500/80 shadow-xs'
+      case 'C':
+        return 'bg-blue-100/90 dark:bg-blue-950/70 text-blue-900 dark:text-blue-100 font-bold ring-1.5 ring-blue-500/80 shadow-xs'
+      case 'OFF':
+      default:
+        return 'bg-neutral-200/90 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 font-bold ring-1.5 ring-neutral-400/80 shadow-xs'
+    }
+  }
+  return 'hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] text-neutral-800 dark:text-neutral-200'
 }
 
 // Menghitung total jam kerja per pegawai
@@ -493,9 +525,8 @@ defineExpose({
               :data-today="day.isToday ? 'true' : undefined"
               class="py-2 px-2 text-center border-r border-neutral-200/60 dark:border-[var(--theme-border)] last:border-r-0 relative group/th min-w-[125px] w-[130px] transition-colors duration-150"
               :class="[
-                (activeColumnHeader && activeColumnHeader.date === day.date) ? 'z-40' : '',
-                activeActionDate === day.date
-                  ? 'bg-[var(--theme-primary-soft)] text-[var(--theme-primary)] ring-inset ring-2 ring-[var(--theme-primary)]/40 font-bold'
+                (activeColumnHeader && activeColumnHeader.date === day.date)
+                  ? 'z-40 bg-[var(--theme-primary-soft)] text-[var(--theme-primary)] ring-inset ring-2 ring-[var(--theme-primary)]/40 font-bold'
                   : day.isToday
                   ? 'bg-[var(--theme-primary-soft)] text-[var(--theme-primary)]'
                   : day.isWeekend && !day.isToday
@@ -709,7 +740,7 @@ defineExpose({
               class="p-1.5 text-center border-r border-neutral-100 dark:border-[var(--theme-border)] last:border-r-0 relative min-w-[125px] transition-colors duration-150"
               :class="[
                 (activeCell && activeCell.rowId === row.id && activeCell.date === day.date) ? 'z-40' : '',
-                activeActionDate === day.date
+                (activeColumnHeader && activeColumnHeader.date === day.date)
                   ? 'bg-[var(--theme-primary-soft)]/25 dark:bg-[var(--theme-primary-soft)]/15'
                   : day.isToday
                   ? 'bg-[var(--theme-primary-soft)]/20'
@@ -723,7 +754,7 @@ defineExpose({
                 type="button"
                 @click.stop="openShiftSelector(row, day, $event)"
                 class="roster-trigger-btn w-full py-1.5 px-2 rounded-xl text-xs font-semibold border transition-all flex items-center justify-between gap-1.5 shadow-2xs group/cell cursor-pointer whitespace-nowrap"
-                :class="getShiftBadgeClasses(row.schedules?.[day.date])"
+                :class="getShiftBadgeClasses(row.schedules?.[day.date], Boolean(activeCell && activeCell.rowId === row.id && activeCell.date === day.date))"
                 :title="`${row.name} - ${day.dayName}: ${getShiftMeta(row.schedules?.[day.date]).name} (${getShiftMeta(row.schedules?.[day.date]).time})`"
               >
                 <!-- Badge Kiri: Kotak Kode Shift (P, S, M, OFF, C) -->
@@ -802,11 +833,7 @@ defineExpose({
                     type="button"
                     @click.stop="selectShift(st.code)"
                     class="w-full px-2 py-1.5 rounded-xl text-left text-xs transition flex items-center justify-between gap-1.5 cursor-pointer"
-                    :class="[
-                      activeCell.currentCode === st.code
-                        ? 'bg-[var(--theme-primary-soft)] text-[var(--theme-primary)] font-bold'
-                        : 'hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] text-neutral-800 dark:text-neutral-200'
-                    ]"
+                    :class="getShiftPopoverItemClasses(st.code, activeCell.currentCode === st.code)"
                   >
                     <div class="flex items-center gap-2 min-w-0">
                       <span
@@ -817,9 +844,13 @@ defineExpose({
                       </span>
                       <div class="min-w-0">
                         <span class="block leading-tight text-xs font-semibold">{{ st.name }}</span>
-                        <span class="block text-[9.5px] text-neutral-400 font-mono">{{ st.time }}</span>
+                        <span class="block text-[9.5px] opacity-75 font-mono">{{ st.time }}</span>
                       </div>
                     </div>
+                    <Check
+                      v-if="activeCell.currentCode === st.code"
+                      class="w-3.5 h-3.5 shrink-0 ml-auto"
+                    />
                   </button>
 
                   <div v-if="filteredCellShiftTypes.length === 0" class="py-3 text-center text-neutral-400 text-[11px]">
@@ -850,7 +881,7 @@ defineExpose({
               :key="day.date"
               class="p-1.5 text-center border-r border-neutral-200/60 dark:border-[var(--theme-border)] last:border-r-0 min-w-[125px] transition-colors duration-150"
               :class="[
-                activeActionDate === day.date
+                (activeColumnHeader && activeColumnHeader.date === day.date)
                   ? 'bg-[var(--theme-primary-soft)]/35 dark:bg-[var(--theme-primary-soft)]/20'
                   : day.isToday
                   ? 'bg-[var(--theme-primary-soft)]/30'
