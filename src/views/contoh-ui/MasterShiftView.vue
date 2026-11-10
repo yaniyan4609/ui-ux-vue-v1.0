@@ -9,7 +9,9 @@ import BaseTimePicker from '../../components/ui/BaseTimePicker.vue'
 import BaseBadge from '../../components/ui/BaseBadge.vue'
 import BaseSwitch from '../../components/ui/BaseSwitch.vue'
 import BaseDataTable from '../../components/ui/BaseDataTable.vue'
-import BaseStatCard from '../../components/ui/BaseStatCard.vue'
+import BaseDropdownMenu from '../../components/ui/BaseDropdownMenu.vue'
+import BaseCheckbox from '../../components/ui/BaseCheckbox.vue'
+import BaseCsvImporter from '../../components/ui/BaseCsvImporter.vue'
 import { useToast } from '../../composables/useToast'
 import { shiftTypes as initialShiftTypes } from '../../data/hrisRosterData'
 import {
@@ -20,16 +22,17 @@ import {
   Search,
   RotateCcw,
   Download,
+  Upload,
   CheckCircle2,
   Hourglass,
   Users,
-  Sun,
-  Sunset,
-  Moon,
-  Building2,
-  Sparkles,
   Coffee,
   Check,
+  X,
+  Eye,
+  Copy,
+  Sparkles,
+  Layers,
 } from 'lucide-vue-next'
 
 const toast = useToast()
@@ -37,92 +40,197 @@ const toast = useToast()
 // ========================================================
 // 1. DATA STATE & CRUD
 // ========================================================
-const shifts = ref(JSON.parse(JSON.stringify(initialShiftTypes)))
+const initialShifts = initialShiftTypes
+const listShifts = ref(JSON.parse(JSON.stringify(initialShiftTypes)))
 
-// Search & Filter State
+// ========================================================
+// 2. SEARCH, FILTER & SORTING
+// ========================================================
 const searchQuery = ref('')
+const selectedKategori = ref('all')
 const selectedStatus = ref('all')
-const selectedVariant = ref('all')
 
-const statusOptions = [
-  { value: 'all', label: 'Semua Status' },
-  { value: 'active', label: 'Status Aktif' },
-  { value: 'inactive', label: 'Status Nonaktif' },
-]
+const sortKey = ref('hours')
+const sortOrder = ref('desc')
 
-const variantOptions = [
-  { value: 'all', label: 'Semua Warna Badge' },
-  { value: 'success', label: 'Hijau (Emerald)' },
-  { value: 'warning', label: 'Kuning (Amber)' },
-  { value: 'purple', label: 'Ungu (Purple)' },
-  { value: 'info', label: 'Biru (Sky)' },
-  { value: 'neutral', label: 'Netral (Zinc/Gray)' },
-  { value: 'danger', label: 'Merah (Rose)' },
-]
+const currentPage = ref(1)
+const itemsPerPage = ref(10)
 
-// Available Badge Variants for Color Picker in Form
-const availableVariants = [
-  { value: 'success', label: 'Hijau Emerald', colorClass: 'bg-emerald-500' },
-  { value: 'warning', label: 'Kuning Amber', colorClass: 'bg-amber-500' },
-  { value: 'purple', label: 'Ungu Purple', colorClass: 'bg-purple-500' },
-  { value: 'info', label: 'Biru Sky', colorClass: 'bg-sky-500' },
-  { value: 'neutral', label: 'Abu Netral', colorClass: 'bg-neutral-500' },
-  { value: 'danger', label: 'Merah Rose', colorClass: 'bg-rose-500' },
+// Multi-select & Batch Actions State
+const selectedIds = ref([])
+const isBatchDeleteModalOpen = ref(false)
+
+// Dropdown Options: Kategori Shift (Searchable with Badge Counts)
+const kategoriOptions = computed(() => {
+  const counts = {}
+  listShifts.value.forEach((s) => {
+    const kat = s.kategori || 'Lainnya'
+    counts[kat] = (counts[kat] || 0) + 1
+  })
+
+  return [
+    { value: 'all', label: 'Semua Kategori', badge: listShifts.value.length },
+    { value: 'Rotasi 24 Jam', label: 'Rotasi 24 Jam', badge: counts['Rotasi 24 Jam'] || 0 },
+    { value: 'Kantor Reguler', label: 'Kantor Reguler', badge: counts['Kantor Reguler'] || 0 },
+    { value: 'Fleksibel & Remote', label: 'Fleksibel & Remote', badge: counts['Fleksibel & Remote'] || 0 },
+    { value: 'Libur & Bebas Tugas', label: 'Libur & Bebas Tugas', badge: counts['Libur & Bebas Tugas'] || 0 },
+    { value: 'Cuti & Perizinan', label: 'Cuti & Perizinan', badge: counts['Cuti & Perizinan'] || 0 },
+  ]
+})
+
+// Dropdown Options: Status Kerja
+const statusOptions = computed(() => {
+  const activeCount = listShifts.value.filter((s) => s.isActive).length
+  const inactiveCount = listShifts.value.length - activeCount
+
+  return [
+    { value: 'all', label: 'Semua Status', badge: listShifts.value.length },
+    { value: 'active', label: 'Shift Aktif', badge: activeCount },
+    { value: 'inactive', label: 'Shift Nonaktif', badge: inactiveCount },
+  ]
+})
+
+// Table Columns (Persis Pola Data Karyawan)
+const tableColumns = [
+  { key: 'nama', label: 'SHIFT', sortable: true, cellClass: 'whitespace-nowrap' },
+  { key: 'kategori', label: 'JABATAN & KATEGORI', sortable: true, cellClass: 'whitespace-nowrap' },
+  { key: 'jam', label: 'JAM OPERASIONAL', sortable: true, cellClass: 'whitespace-nowrap' },
+  { key: 'status', label: 'STATUS', sortable: true, cellClass: 'whitespace-nowrap' },
+  { key: 'toleransi', label: 'DISPENSASI', sortable: false, cellClass: 'whitespace-nowrap text-neutral-600 dark:text-neutral-400' },
+  { key: 'pegawai', label: 'PEGAWAI', sortable: false, align: 'center', cellClass: 'whitespace-nowrap' },
 ]
 
 // ========================================================
-// 2. COMPUTED METRICS & FILTERED DATA
+// 3. COMPUTED METRICS & FILTERED / PAGINATED DATA
 // ========================================================
-const totalShifts = computed(() => shifts.value.length)
-const activeShifts = computed(() => shifts.value.filter((s) => s.isActive).length)
+const activeShifts = computed(() => listShifts.value.filter((s) => s.isActive).length)
 const totalAssignedEmployees = computed(() =>
-  shifts.value.reduce((acc, curr) => acc + (curr.employeeCount || 0), 0)
+  listShifts.value.reduce((acc, curr) => acc + (curr.employeeCount || 0), 0)
 )
 const averageWorkHours = computed(() => {
-  const activeWorking = shifts.value.filter((s) => s.isActive && s.hours > 0)
+  const activeWorking = listShifts.value.filter((s) => s.isActive && s.hours > 0)
   if (!activeWorking.length) return 0
   const sum = activeWorking.reduce((acc, curr) => acc + (curr.hours || 0), 0)
   return (sum / activeWorking.length).toFixed(1)
 })
 
-const filteredShifts = computed(() => {
-  return shifts.value.filter((item) => {
-    // Search query
-    if (searchQuery.value.trim()) {
-      const q = searchQuery.value.toLowerCase().trim()
-      const matchCode = item.code?.toLowerCase().includes(q)
-      const matchName = item.name?.toLowerCase().includes(q)
-      const matchDesc = item.desc?.toLowerCase().includes(q)
-      if (!matchCode && !matchName && !matchDesc) return false
+// Filtered & Sorted List
+const processedList = computed(() => {
+  let list = [...listShifts.value]
+
+  // Filter Kategori
+  if (selectedKategori.value && selectedKategori.value !== 'all') {
+    list = list.filter((s) => s.kategori === selectedKategori.value)
+  }
+
+  // Filter Status
+  if (selectedStatus.value === 'active') {
+    list = list.filter((s) => s.isActive)
+  } else if (selectedStatus.value === 'inactive') {
+    list = list.filter((s) => !s.isActive)
+  }
+
+  // Search
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.toLowerCase().trim()
+    list = list.filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.code.toLowerCase().includes(q) ||
+        (s.desc && s.desc.toLowerCase().includes(q)) ||
+        (s.time && s.time.toLowerCase().includes(q)) ||
+        (s.kategori && s.kategori.toLowerCase().includes(q))
+    )
+  }
+
+  // Sorting
+  list.sort((a, b) => {
+    let aVal = a[sortKey.value]
+    let bVal = b[sortKey.value]
+
+    if (sortKey.value === 'nama') {
+      aVal = a.name
+      bVal = b.name
+    } else if (sortKey.value === 'jam') {
+      aVal = a.hours
+      bVal = b.hours
+    } else if (sortKey.value === 'status') {
+      aVal = a.isActive ? 1 : 0
+      bVal = b.isActive ? 1 : 0
     }
 
-    // Status filter
-    if (selectedStatus.value === 'active' && !item.isActive) return false
-    if (selectedStatus.value === 'inactive' && item.isActive) return false
-
-    // Variant filter
-    if (selectedVariant.value !== 'all' && item.badgeVariant !== selectedVariant.value) return false
-
-    return true
+    if (typeof aVal === 'string') {
+      const cmp = aVal.localeCompare(bVal)
+      return sortOrder.value === 'asc' ? cmp : -cmp
+    }
+    if (typeof aVal === 'number') {
+      return sortOrder.value === 'asc' ? aVal - bVal : bVal - aVal
+    }
+    return 0
   })
+
+  return list
 })
 
-// ========================================================
-// 3. TABLE COLUMNS CONFIGURATION
-// ========================================================
-const tableColumns = [
-  { key: 'code', label: 'Kode', width: '100px', align: 'center', sortable: true },
-  { key: 'name', label: 'Nama Shift & Deskripsi', sortable: true },
-  { key: 'time', label: 'Jam Kerja Operasional', width: '220px', sortable: true },
-  { key: 'breakTime', label: 'Istirahat & Toleransi', width: '200px' },
-  { key: 'employeeCount', label: 'Pegawai', width: '130px', align: 'center', sortable: true },
-  { key: 'isActive', label: 'Status Aktif', width: '130px', align: 'center' },
-  { key: 'actions', label: 'Aksi', width: '110px', align: 'center' },
-]
+const paginatedList = computed(() => {
+  if (itemsPerPage.value === 'all') return processedList.value
+  const start = (currentPage.value - 1) * Number(itemsPerPage.value)
+  return processedList.value.slice(start, start + Number(itemsPerPage.value))
+})
+
+// Multi-select Logic
+const isAllSelected = computed(() => {
+  if (paginatedList.value.length === 0) return false
+  return paginatedList.value.every((s) => selectedIds.value.includes(s.id))
+})
+
+const toggleSelectAll = () => {
+  if (isAllSelected.value) {
+    const pageIds = paginatedList.value.map((s) => s.id)
+    selectedIds.value = selectedIds.value.filter((id) => !pageIds.includes(id))
+  } else {
+    const pageIds = paginatedList.value.map((s) => s.id)
+    const set = new Set([...selectedIds.value, ...pageIds])
+    selectedIds.value = Array.from(set)
+  }
+}
+
+const toggleSelect = (id) => {
+  const index = selectedIds.value.indexOf(id)
+  if (index === -1) {
+    selectedIds.value.push(id)
+  } else {
+    selectedIds.value.splice(index, 1)
+  }
+}
 
 // ========================================================
-// 4. TOGGLE STATUS AKTIF DIRECTLY FROM TABLE
+// 4. ACTION ITEMS UNTUK ROW DROPDOWN
 // ========================================================
+const getRowActionItems = (shift) => [
+  {
+    label: shift.isActive ? 'Nonaktifkan Shift' : 'Aktifkan Shift',
+    icon: shift.isActive ? RotateCcw : CheckCircle2,
+    action: () => handleToggleActive(shift),
+  },
+  {
+    label: 'Duplikasi Shift',
+    icon: Copy,
+    action: () => handleDuplicateShift(shift),
+  },
+  {
+    label: 'Ubah Data Shift',
+    icon: Pencil,
+    action: () => openEditModal(shift),
+  },
+  {
+    label: 'Hapus dari Sistem',
+    icon: Trash2,
+    danger: true,
+    action: () => openDeleteConfirm(shift),
+  },
+]
+
 const handleToggleActive = (shift) => {
   shift.isActive = !shift.isActive
   if (shift.isActive) {
@@ -132,16 +240,69 @@ const handleToggleActive = (shift) => {
   }
 }
 
+const handleDuplicateShift = (shift) => {
+  const newShift = {
+    ...JSON.parse(JSON.stringify(shift)),
+    id: Date.now(),
+    code: `${shift.code}2`.slice(0, 5),
+    name: `${shift.name} (Salinan)`,
+    employeeCount: 0,
+  }
+  listShifts.value.unshift(newShift)
+  toast.success(`Shift "${newShift.name}" berhasil diduplikasi.`, 'Duplikasi Berhasil')
+}
+
+// Batch Actions
+const handleBatchDeleteConfirm = () => {
+  const count = selectedIds.value.length
+  listShifts.value = listShifts.value.filter((s) => !selectedIds.value.includes(s.id))
+  selectedIds.value = []
+  isBatchDeleteModalOpen.value = false
+  toast.error(`${count} master shift terpilih telah dihapus dari sistem.`, 'Hapus Massal')
+}
+
+const handleBatchSetActive = (isActive) => {
+  const count = selectedIds.value.length
+  listShifts.value.forEach((s) => {
+    if (selectedIds.value.includes(s.id)) {
+      s.isActive = isActive
+    }
+  })
+  selectedIds.value = []
+  toast.success(
+    `${count} shift terpilih berhasil di-${isActive ? 'aktifkan' : 'nonaktifkan'}.`,
+    'Perubahan Massal'
+  )
+}
+
 // ========================================================
-// 5. MODAL TAMBAH & EDIT SHIFT
+// 5. MODAL FORM: TAMBAH & EDIT SHIFT
 // ========================================================
 const isFormModalOpen = ref(false)
 const isEditMode = ref(false)
+
+const formKategoriOptions = [
+  { value: 'Rotasi 24 Jam', label: 'Rotasi 24 Jam' },
+  { value: 'Kantor Reguler', label: 'Kantor Reguler' },
+  { value: 'Fleksibel & Remote', label: 'Fleksibel & Remote' },
+  { value: 'Libur & Bebas Tugas', label: 'Libur & Bebas Tugas' },
+  { value: 'Cuti & Perizinan', label: 'Cuti & Perizinan' },
+]
+
+const availableVariants = [
+  { value: 'success', label: 'Hijau Emerald', colorClass: 'bg-emerald-500' },
+  { value: 'warning', label: 'Kuning Amber', colorClass: 'bg-amber-500' },
+  { value: 'purple', label: 'Ungu Purple', colorClass: 'bg-purple-500' },
+  { value: 'info', label: 'Biru Sky', colorClass: 'bg-sky-500' },
+  { value: 'neutral', label: 'Abu Netral', colorClass: 'bg-neutral-500' },
+  { value: 'danger', label: 'Merah Rose', colorClass: 'bg-rose-500' },
+]
 
 const formInitialState = {
   id: null,
   code: '',
   name: '',
+  kategori: 'Rotasi 24 Jam',
   startTime: '08:00',
   endTime: '17:00',
   hours: 8,
@@ -164,15 +325,6 @@ const openAddModal = () => {
     id: Date.now(),
     code: '',
     name: '',
-    startTime: '08:00',
-    endTime: '17:00',
-    hours: 8,
-    breakTime: 60,
-    lateTolerance: 15,
-    badgeVariant: 'success',
-    isActive: true,
-    employeeCount: 0,
-    desc: '',
   }
   isFormModalOpen.value = true
 }
@@ -188,13 +340,12 @@ const openEditModal = (shift) => {
   isFormModalOpen.value = true
 }
 
-// Hitung durasi jam kerja otomatis saat startTime atau endTime berubah
 const calculateHours = (start, end) => {
-  if (!start || !end || start === '00:00' && end === '00:00') return 0
+  if (!start || !end || (start === '00:00' && end === '00:00')) return 0
   const [sH, sM] = start.split(':').map(Number)
   const [eH, eM] = end.split(':').map(Number)
-  let diffMin = (eH * 60 + eM) - (sH * 60 + sM)
-  if (diffMin <= 0) diffMin += 24 * 60 // Melintasi tengah malam (mis. 23:00 - 07:00)
+  let diffMin = eH * 60 + eM - (sH * 60 + sM)
+  if (diffMin <= 0) diffMin += 24 * 60
   return Math.round((diffMin / 60) * 10) / 10
 }
 
@@ -235,21 +386,20 @@ const handleSaveShift = () => {
   }
 
   if (isEditMode.value) {
-    const idx = shifts.value.findIndex((s) => s.id === payload.id || s.code === payload.code)
+    const idx = listShifts.value.findIndex((s) => s.id === payload.id)
     if (idx !== -1) {
-      shifts.value[idx] = payload
+      listShifts.value[idx] = payload
     }
     toast.success(`Konfigurasi shift "${payload.name}" berhasil diperbarui!`, 'Shift Diperbarui')
   } else {
-    // Cek duplikasi kode
-    const exists = shifts.value.some((s) => s.code === payload.code)
+    const exists = listShifts.value.some((s) => s.code === payload.code)
     if (exists) {
-      formErrors.value.code = `Kode shift "${payload.code}" sudah digunakan. Gunakan kode unik lain.`
+      formErrors.value.code = `Kode shift "${payload.code}" sudah ada. Gunakan kode lain.`
       toast.error(`Kode shift ${payload.code} sudah ada.`, 'Kode Duplikat')
       return
     }
-    shifts.value.unshift(payload)
-    toast.success(`Shift "${payload.name}" (${payload.code}) berhasil ditambahkan ke sistem!`, 'Shift Ditambahkan')
+    listShifts.value.unshift(payload)
+    toast.success(`Shift "${payload.name}" (${payload.code}) berhasil ditambahkan!`, 'Shift Ditambahkan')
   }
 
   isFormModalOpen.value = false
@@ -269,41 +419,96 @@ const openDeleteConfirm = (shift) => {
 const handleDeleteConfirm = () => {
   if (!itemToDelete.value) return
   const deleted = itemToDelete.value
-  shifts.value = shifts.value.filter((s) => s.id !== deleted.id && s.code !== deleted.code)
+  listShifts.value = listShifts.value.filter((s) => s.id !== deleted.id)
   isDeleteModalOpen.value = false
   itemToDelete.value = null
   toast.error(`Shift "${deleted.name}" (${deleted.code}) telah dihapus dari sistem.`, 'Shift Dihapus')
 }
 
-// ========================================================
-// 7. RESET & EKSPOR CSV
-// ========================================================
+// Reset Default
 const handleResetDefault = () => {
-  shifts.value = JSON.parse(JSON.stringify(initialShiftTypes))
+  listShifts.value = JSON.parse(JSON.stringify(initialShifts))
   searchQuery.value = ''
+  selectedKategori.value = 'all'
   selectedStatus.value = 'all'
-  selectedVariant.value = 'all'
-  toast.info('Seluruh master shift telah dikembalikan ke pengaturan bawaan sistem.')
+  selectedIds.value = []
+  sortKey.value = 'hours'
+  sortOrder.value = 'desc'
+  toast.info('Data shift telah dikembalikan ke pengaturan awal.')
 }
 
-const exportToCSV = () => {
-  const items = filteredShifts.value
-  if (!items.length) {
+// ========================================================
+// 7. CSV IMPORTER & EXPORTER
+// ========================================================
+const isCsvImporterOpen = ref(false)
+const targetFieldsForImport = [
+  { key: 'code', label: 'Kode Shift (P/S/M)', required: true },
+  { key: 'name', label: 'Nama Shift', required: true },
+  { key: 'kategori', label: 'Kategori Shift', required: false },
+  { key: 'startTime', label: 'Jam Mulai (HH:mm)', required: false },
+  { key: 'endTime', label: 'Jam Selesai (HH:mm)', required: false },
+  { key: 'breakTime', label: 'Istirahat (Menit)', required: false },
+]
+
+const handleCsvImported = (importedRows) => {
+  if (!importedRows || importedRows.length === 0) return
+
+  let count = 0
+  importedRows.forEach((row, idx) => {
+    if (!row.name || !row.code) return
+    listShifts.value.unshift({
+      id: Date.now() + idx,
+      code: row.code.toUpperCase().trim(),
+      name: row.name,
+      kategori: row.kategori || 'Rotasi 24 Jam',
+      startTime: row.startTime || '08:00',
+      endTime: row.endTime || '17:00',
+      time: `${row.startTime || '08:00'} - ${row.endTime || '17:00'}`,
+      hours: calculateHours(row.startTime || '08:00', row.endTime || '17:00'),
+      breakTime: Number(row.breakTime) || 60,
+      lateTolerance: 15,
+      color: 'emerald',
+      badgeVariant: 'success',
+      isActive: true,
+      employeeCount: 0,
+      desc: 'Diimpor dari berkas CSV',
+    })
+    count++
+  })
+
+  toast.success(`Berhasil mengimpor ${count} shift baru dari CSV!`, 'Impor Berhasil')
+}
+
+const exportToCSV = (itemsToExport = null, filename = null) => {
+  const items = itemsToExport || processedList.value
+  if (items.length === 0) {
     toast.warning('Tidak ada data shift untuk diekspor.')
     return
   }
 
-  const headers = ['Kode Shift', 'Nama Shift', 'Jam Operasional', 'Durasi (Jam)', 'Istirahat (Mnt)', 'Toleransi Terlambat (Mnt)', 'Pegawai Terdaftar', 'Status Aktif', 'Deskripsi']
+  const exportFilename = filename || `data-master-shift-${new Date().toISOString().slice(0, 10)}.csv`
+  const headers = [
+    'Kode Shift',
+    'Nama Shift',
+    'Kategori',
+    'Jam Operasional',
+    'Durasi (Jam)',
+    'Istirahat (Mnt)',
+    'Toleransi (Mnt)',
+    'Pegawai Terkait',
+    'Status Aktif',
+  ]
+
   const rows = items.map((s) => [
     `"${s.code}"`,
     `"${s.name}"`,
+    `"${s.kategori || ''}"`,
     `"${s.time}"`,
     s.hours,
     s.breakTime || 0,
     s.lateTolerance || 0,
     s.employeeCount || 0,
     s.isActive ? 'Aktif' : 'Nonaktif',
-    `"${(s.desc || '').replace(/"/g, '""')}"`,
   ])
 
   const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n')
@@ -311,37 +516,42 @@ const exportToCSV = () => {
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.setAttribute('href', url)
-  link.setAttribute('download', `master_shift_digaji_${new Date().toISOString().slice(0, 10)}.csv`)
+  link.setAttribute('download', exportFilename)
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
   URL.revokeObjectURL(url)
 
-  toast.success(`Berhasil mengunduh ${items.length} master shift ke format CSV!`, 'Ekspor CSV')
+  toast.success(`Berhasil mengunduh ${items.length} master shift ke file CSV!`, 'Ekspor CSV')
+}
+
+const exportSelected = () => {
+  const items = listShifts.value.filter((s) => selectedIds.value.includes(s.id))
+  exportToCSV(items, `data-shift-terpilih-${items.length}.csv`)
 }
 </script>
 
 <template>
-  <!-- Main View Container: Sesuai Aturan Data View -->
+  <!-- Main View Container: Sesuai Struktur Wajib Data View -->
   <div class="h-full flex flex-col min-h-0 overflow-hidden gap-2.5 w-full max-w-7xl mx-auto select-none relative">
     
-    <!-- 1. HEADER HALAMAN MASTER SHIFT -->
+    <!-- 1. Top Compact Header: Title & Action Buttons (Persis Layout Gambar Contoh) -->
     <div class="flex items-center justify-between gap-3 pb-2 border-b border-neutral-200 dark:border-[var(--theme-border)] shrink-0">
       <div class="flex items-center gap-2.5 min-w-0">
         <div class="w-8 h-8 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 flex items-center justify-center shrink-0 shadow-2xs">
-          <Clock class="w-4 h-4 text-emerald-400 dark:text-emerald-600" />
+          <Clock class="w-4 h-4" />
         </div>
         <div class="min-w-0">
           <div class="flex items-center gap-2">
             <h1 class="text-base sm:text-lg font-bold text-neutral-900 dark:text-[var(--theme-text-primary)] leading-none truncate">
-              Master Shift Kerja
+              Data Master Shift Kerja
             </h1>
             <BaseBadge variant="success" size="sm">
-              {{ totalShifts }} Shift
+              {{ listShifts.length }} Shift
             </BaseBadge>
           </div>
           <p class="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5 truncate">
-            Konfigurasi jam masuk-pulang kerja, istirahat, toleransi keterlambatan, dan kode visual badge untuk jadwal roster.
+            Pengelolaan data jam kerja operasional, rotasi pergantian shift, toleransi keterlambatan, dan kode visual badge.
           </p>
         </div>
       </div>
@@ -351,8 +561,18 @@ const exportToCSV = () => {
         <BaseButton
           variant="outline"
           size="sm"
-          @click="exportToCSV"
-          title="Unduh seluruh konfigurasi shift ke file CSV"
+          @click="isCsvImporterOpen = true"
+          title="Impor data shift dari berkas CSV"
+        >
+          <Upload class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+          <span class="hidden sm:inline">Impor CSV</span>
+        </BaseButton>
+
+        <BaseButton
+          variant="outline"
+          size="sm"
+          @click="exportToCSV()"
+          title="Ekspor seluruh data shift ke file CSV"
         >
           <Download class="w-3.5 h-3.5 text-neutral-500" />
           <span class="hidden sm:inline">Ekspor CSV</span>
@@ -362,7 +582,7 @@ const exportToCSV = () => {
           variant="outline"
           size="sm"
           @click="handleResetDefault"
-          title="Kembalikan data shift ke pengaturan awal"
+          title="Kembalikan data shift ke pengaturan default"
         >
           <RotateCcw class="w-3.5 h-3.5 text-neutral-500" />
           <span class="hidden sm:inline">Reset</span>
@@ -374,252 +594,320 @@ const exportToCSV = () => {
           @click="openAddModal"
         >
           <Plus class="w-3.5 h-3.5" />
-          <span>Tambah Shift</span>
+          <span>Tambah</span>
         </BaseButton>
       </div>
     </div>
 
-    <!-- 2. QUICK STATS SUMMARY CARDS -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 shrink-0">
-      <BaseStatCard
-        title="Total Master Shift"
-        :value="totalShifts"
-        unit="Shift"
-        description="Termasuk shift kerja reguler & libur"
-      >
-        <template #icon>
-          <Clock class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-        </template>
-      </BaseStatCard>
-
-      <BaseStatCard
-        title="Shift Aktif Operasional"
-        :value="activeShifts"
-        unit="Aktif"
-        description="Siap dipilih saat generate roster"
-      >
-        <template #icon>
-          <CheckCircle2 class="w-4 h-4 text-sky-600 dark:text-sky-400" />
-        </template>
-      </BaseStatCard>
-
-      <BaseStatCard
-        title="Rata-rata Jam Kerja"
-        :value="averageWorkHours"
-        unit="Jam/Hari"
-        description="Standar durasi shift kerja produktif"
-      >
-        <template #icon>
-          <Hourglass class="w-4 h-4 text-amber-600 dark:text-amber-400" />
-        </template>
-      </BaseStatCard>
-
-      <BaseStatCard
-        title="Total Pegawai Terdaftar"
-        :value="totalAssignedEmployees"
-        unit="Pegawai"
-        description="Penempatan di master shift aktif"
-      >
-        <template #icon>
-          <Users class="w-4 h-4 text-purple-600 dark:text-purple-400" />
-        </template>
-      </BaseStatCard>
-    </div>
-
-    <!-- 3. TOOLBAR: PENCARIAN & FILTER -->
-    <div class="flex flex-wrap items-center justify-between gap-2.5 p-2.5 bg-neutral-50/80 dark:bg-[var(--theme-surface-muted)]/50 rounded-xl border border-neutral-200/80 dark:border-[var(--theme-border)] shrink-0">
-      <div class="flex flex-wrap items-center gap-2 flex-1 min-w-[280px]">
-        <!-- Search Input -->
-        <div class="w-full sm:w-64">
-          <BaseInput
-            v-model="searchQuery"
-            placeholder="Cari kode atau nama shift..."
-            size="sm"
-            clearable
-          >
-            <template #prefix>
-              <Search class="w-3.5 h-3.5 text-neutral-400" />
-            </template>
-          </BaseInput>
-        </div>
-
-        <!-- Filter Status -->
-        <div class="w-40">
-          <BaseSearchableSelect
-            v-model="selectedStatus"
-            :options="statusOptions"
-            placeholder="Semua Status"
-            size="sm"
-          />
-        </div>
-
-        <!-- Filter Varian Warna Badge -->
-        <div class="w-48">
-          <BaseSearchableSelect
-            v-model="selectedVariant"
-            :options="variantOptions"
-            placeholder="Semua Warna"
-            size="sm"
-          />
-        </div>
-
-        <!-- Reset Button -->
+    <!-- 2. Filter Bar: Search + Searchable Select Kategori + Status (Persis Baris ke-2 Gambar Contoh) -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
+      <!-- Search Input -->
+      <div class="relative flex-1">
+        <Search class="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Cari nama shift, kode, jam kerja, atau kategori..."
+          class="w-full pl-9 pr-8 py-2 rounded-xl text-xs bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-[var(--theme-border-strong)] transition shadow-2xs"
+        />
         <button
-          v-if="searchQuery || selectedStatus !== 'all' || selectedVariant !== 'all'"
-          @click="searchQuery = ''; selectedStatus = 'all'; selectedVariant = 'all'"
-          class="text-xs text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200 flex items-center gap-1 px-2 py-1 transition-colors"
+          v-if="searchQuery"
+          type="button"
+          @click="searchQuery = ''"
+          class="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 cursor-pointer"
         >
-          <RotateCcw class="w-3 h-3" />
-          Bersihkan
+          <X class="w-3.5 h-3.5" />
         </button>
       </div>
 
-      <div class="text-[11px] text-neutral-500 dark:text-neutral-400 shrink-0">
-        Menampilkan <span class="font-semibold text-neutral-800 dark:text-neutral-200">{{ filteredShifts.length }}</span> dari {{ shifts.length }} shift
+      <!-- Filter Kategori: BaseSearchableSelect -->
+      <div class="w-full sm:w-56 shrink-0">
+        <BaseSearchableSelect
+          v-model="selectedKategori"
+          :options="kategoriOptions"
+          placeholder="Semua Kategori"
+          clearable
+        />
+      </div>
+
+      <!-- Filter Status Kerja: BaseSearchableSelect -->
+      <div class="w-full sm:w-48 shrink-0">
+        <BaseSearchableSelect
+          v-model="selectedStatus"
+          :options="statusOptions"
+          placeholder="Semua Status"
+          align="right"
+          clearable
+        />
       </div>
     </div>
 
-    <!-- 4. TABEL MASTER SHIFT (BASE DATA TABLE) -->
-    <div class="flex-1 min-h-0 bg-white dark:bg-[var(--theme-surface)] rounded-xl border border-neutral-200 dark:border-[var(--theme-border)] overflow-hidden shadow-2xs">
-      <BaseDataTable
-        :columns="tableColumns"
-        :rows="filteredShifts"
-        row-key="id"
-        :paginated="true"
-        :items-per-page="10"
-        :per-page-options="[10, 20, 50]"
-        :show-index="false"
-      >
-        <!-- Cell: Kode Shift (Visual Badge Warna) -->
-        <template #cell-code="{ row }">
-          <div class="flex items-center justify-center">
+    <!-- 3. Quick Stats Summary Strip (4 Kapsul Horizontal Persis Baris ke-3 Gambar Contoh) -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 shrink-0">
+      <!-- Total Shift -->
+      <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300 flex items-center justify-center shrink-0">
+          <Clock class="w-3.5 h-3.5" />
+        </div>
+        <div class="flex items-center gap-1.5 min-w-0 truncate text-xs">
+          <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider whitespace-nowrap">Total:</span>
+          <span class="font-bold text-neutral-900 dark:text-white truncate">{{ listShifts.length }} Shift</span>
+        </div>
+      </div>
+
+      <!-- Shift Aktif -->
+      <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+          <CheckCircle2 class="w-3.5 h-3.5" />
+        </div>
+        <div class="flex items-center gap-1.5 min-w-0 truncate text-xs">
+          <span class="text-[10px] uppercase font-bold text-emerald-400/80 tracking-wider whitespace-nowrap">Aktif:</span>
+          <span class="font-bold text-emerald-600 dark:text-emerald-400 truncate">{{ activeShifts }} Shift</span>
+        </div>
+      </div>
+
+      <!-- Rata-rata Durasi -->
+      <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
+          <Hourglass class="w-3.5 h-3.5" />
+        </div>
+        <div class="flex items-center gap-1.5 min-w-0 truncate text-xs">
+          <span class="text-[10px] uppercase font-bold text-sky-400/80 tracking-wider whitespace-nowrap">Rata-rata:</span>
+          <span class="font-bold text-sky-600 dark:text-sky-400 truncate">{{ averageWorkHours }} Jam</span>
+        </div>
+      </div>
+
+      <!-- Pegawai Terdaftar -->
+      <div class="h-9 px-2.5 rounded-xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+          <Users class="w-3.5 h-3.5" />
+        </div>
+        <div class="flex items-center gap-1.5 min-w-0 truncate text-xs">
+          <span class="text-[10px] uppercase font-bold text-amber-400/80 tracking-wider whitespace-nowrap">Pegawai:</span>
+          <span class="font-bold text-amber-600 dark:text-amber-400 truncate">{{ totalAssignedEmployees }} Orang</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. BASE DATA TABLE (PERSIS TABEL GAMBAR KE-2) -->
+    <BaseDataTable
+      :columns="tableColumns"
+      :rows="paginatedList"
+      :total-items="processedList.length"
+      selectable
+      v-model:selected-ids="selectedIds"
+      v-model:sort-key="sortKey"
+      v-model:sort-order="sortOrder"
+      v-model:current-page="currentPage"
+      v-model:items-per-page="itemsPerPage"
+      :per-page-options="[10, 20, 30, 'all']"
+      selected-label="Shift Terpilih"
+      empty-title="Data Shift Tidak Ditemukan"
+      empty-description="Tidak ada master shift yang cocok dengan kriteria filter atau pencarian Anda."
+      empty-action-text="Reset Filter Pencarian"
+      @empty-action="handleResetDefault"
+    >
+      <!-- Kolom: SHIFT (Avatar Badge Code + Nama Shift) -->
+      <template #cell-nama="{ row }">
+        <div class="flex items-center gap-2.5">
+          <div
+            class="w-8 h-8 rounded-xl font-bold text-xs flex items-center justify-center shrink-0 border"
+            :class="[
+              row.badgeVariant === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-950/50 dark:text-emerald-400 dark:border-emerald-900/50' :
+              row.badgeVariant === 'warning' ? 'bg-amber-50 text-amber-800 border-amber-200/80 dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-900/50' :
+              row.badgeVariant === 'purple' ? 'bg-purple-50 text-purple-700 border-purple-200/80 dark:bg-purple-950/50 dark:text-purple-400 dark:border-purple-900/50' :
+              row.badgeVariant === 'info' ? 'bg-sky-50 text-sky-700 border-sky-200/80 dark:bg-sky-950/50 dark:text-sky-400 dark:border-sky-900/50' :
+              'bg-neutral-100 text-neutral-700 border-neutral-200/80 dark:bg-[var(--theme-surface-muted)] dark:text-neutral-300 dark:border-[var(--theme-border-strong)]'
+            ]"
+          >
+            {{ row.code }}
+          </div>
+          <div class="min-w-0">
+            <span class="font-semibold text-neutral-900 dark:text-white block leading-tight truncate">
+              {{ row.name }}
+            </span>
+            <span class="text-[10.5px] font-mono text-neutral-400 block mt-0.5">
+              Kode: {{ row.code }}
+            </span>
+          </div>
+        </div>
+      </template>
+
+      <!-- Kolom: KATEGORI & ROTASI -->
+      <template #cell-kategori="{ row }">
+        <span class="font-medium text-neutral-800 dark:text-neutral-200 block leading-tight">
+          {{ row.kategori || 'Operasional Reguler' }}
+        </span>
+        <span class="text-[10.5px] text-neutral-400 block mt-0.5 truncate max-w-xs">
+          {{ row.desc || 'Shift penugasan kerja' }}
+        </span>
+      </template>
+
+      <!-- Kolom: JAM OPERASIONAL & DURASI -->
+      <template #cell-jam="{ row }">
+        <span class="font-bold text-neutral-900 dark:text-white font-mono block leading-tight">
+          {{ row.time }}
+        </span>
+        <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono block mt-0.5">
+          {{ row.hours > 0 ? `+${row.hours}.0 jam kerja` : 'Bebas jam kerja' }}
+        </span>
+      </template>
+
+      <!-- Kolom: STATUS (BaseBadge dengan dot & pulse persis foto) -->
+      <template #cell-status="{ row }">
+        <BaseBadge
+          :variant="row.isActive ? 'success' : 'neutral'"
+          :dot="true"
+          :pulse="row.isActive"
+        >
+          {{ row.isActive ? 'Aktif' : 'Nonaktif' }}
+        </BaseBadge>
+      </template>
+
+      <!-- Kolom: DISPENSASI & ISTIRAHAT -->
+      <template #cell-toleransi="{ row }">
+        <div class="flex items-center gap-1.5 text-xs">
+          <Clock class="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+          <span>{{ row.lateTolerance || 0 }} mnt disp. (istr. {{ row.breakTime || 0 }} mnt)</span>
+        </div>
+      </template>
+
+      <!-- Kolom: PEGAWAI TERKAIT -->
+      <template #cell-pegawai="{ row }">
+        <BaseBadge :variant="row.employeeCount > 0 ? 'success' : 'neutral'" size="sm">
+          {{ row.employeeCount || 0 }} Pegawai
+        </BaseBadge>
+      </template>
+
+      <!-- Kolom: AKSI (Pencil Edit + BaseDropdownMenu ...) -->
+      <template #actions="{ row }">
+        <div class="flex items-center justify-end gap-1">
+          <button
+            type="button"
+            @click="openEditModal(row)"
+            class="p-1.5 rounded-lg text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:text-white dark:hover:bg-[var(--theme-surface-muted)] transition cursor-pointer"
+            title="Edit Shift"
+          >
+            <Pencil class="w-3.5 h-3.5" />
+          </button>
+          <BaseDropdownMenu :items="getRowActionItems(row)" align="right" />
+        </div>
+      </template>
+
+      <!-- Custom Bulk Action Slot -->
+      <template #bulk-actions="{ selectedCount }">
+        <BaseButton variant="outline" size="sm" @click="exportSelected">
+          <Download class="w-3.5 h-3.5" />
+          <span>Ekspor CSV ({{ selectedCount }})</span>
+        </BaseButton>
+        <BaseButton variant="outline" size="sm" @click="handleBatchSetActive(true)">
+          <CheckCircle2 class="w-3.5 h-3.5 text-emerald-500" />
+          <span>Aktifkan ({{ selectedCount }})</span>
+        </BaseButton>
+        <BaseButton variant="outline" size="sm" @click="handleBatchSetActive(false)">
+          <RotateCcw class="w-3.5 h-3.5 text-neutral-500" />
+          <span>Nonaktifkan ({{ selectedCount }})</span>
+        </BaseButton>
+        <BaseButton variant="danger" size="sm" @click="isBatchDeleteModalOpen = true">
+          <Trash2 class="w-3.5 h-3.5" />
+          <span>Hapus ({{ selectedCount }})</span>
+        </BaseButton>
+      </template>
+
+      <!-- Kartu Mobile Slot (Persis Data Karyawan) -->
+      <template #mobile-card="{ row, isSelected, toggleSelect: onToggleSelect }">
+        <div
+          class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-xs space-y-3"
+          :class="isSelected ? 'ring-2 ring-[var(--theme-primary)]' : ''"
+        >
+          <!-- Top Row: Checkbox, Badge Code, Nama, Status -->
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2.5">
+              <BaseCheckbox
+                :model-value="isSelected"
+                size="sm"
+                class="mt-0.5"
+                @change="onToggleSelect"
+              />
+              <div
+                class="w-8 h-8 rounded-xl font-bold text-xs flex items-center justify-center shrink-0 border"
+                :class="[
+                  row.badgeVariant === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-400' :
+                  row.badgeVariant === 'warning' ? 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950 dark:text-amber-400' :
+                  row.badgeVariant === 'purple' ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-400' :
+                  'bg-neutral-100 text-neutral-700 border-neutral-200 dark:bg-neutral-800 dark:text-neutral-300'
+                ]"
+              >
+                {{ row.code }}
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-neutral-900 dark:text-white leading-tight">
+                  {{ row.name }}
+                </h3>
+                <span class="text-[10.5px] font-mono text-neutral-400 block mt-0.5">
+                  Kode: {{ row.code }} • {{ row.kategori }}
+                </span>
+              </div>
+            </div>
+
             <BaseBadge
-              :variant="row.badgeVariant || 'neutral'"
+              :variant="row.isActive ? 'success' : 'neutral'"
+              :dot="true"
+              :pulse="row.isActive"
               size="sm"
-              class="font-mono font-bold tracking-wider px-2.5 py-0.5"
             >
-              {{ row.code }}
+              {{ row.isActive ? 'Aktif' : 'Nonaktif' }}
             </BaseBadge>
           </div>
-        </template>
 
-        <!-- Cell: Nama Shift & Deskripsi -->
-        <template #cell-name="{ row }">
-          <div class="min-w-0 py-0.5">
-            <div class="flex items-center gap-2">
-              <span class="font-semibold text-neutral-900 dark:text-[var(--theme-text-primary)] text-xs truncate">
-                {{ row.name }}
-              </span>
-              <span
-                v-if="row.code === 'P' || row.code === 'S' || row.code === 'M'"
-                class="text-[9px] px-1.5 py-0.2 rounded font-medium bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400"
-              >
-                Rotasi 24 Jam
-              </span>
-            </div>
-            <p class="text-[11px] text-neutral-500 dark:text-neutral-400 truncate mt-0.5">
-              {{ row.desc || 'Tidak ada keterangan tambahan.' }}
-            </p>
-          </div>
-        </template>
-
-        <!-- Cell: Jam Kerja Operasional -->
-        <template #cell-time="{ row }">
-          <div class="flex items-center gap-2">
-            <div class="flex flex-col">
-              <span class="font-mono font-medium text-xs text-neutral-800 dark:text-neutral-200">
+          <!-- Mid Row: Jam Kerja & Toleransi -->
+          <div class="p-2.5 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-100 dark:border-[var(--theme-border)] flex items-center justify-between text-xs">
+            <div>
+              <span class="text-[10px] text-neutral-400 block font-semibold uppercase">Jam Operasional</span>
+              <span class="font-bold font-mono text-neutral-900 dark:text-white">
                 {{ row.time }}
               </span>
-              <span class="text-[10px] text-neutral-400 mt-0.5">
-                {{ row.hours > 0 ? `${row.hours} Jam Kerja Efektif` : 'Bebas Jam Kerja' }}
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] text-neutral-400 block font-semibold uppercase">Durasi Kerja</span>
+              <span class="text-emerald-600 dark:text-emerald-400 font-mono font-semibold">
+                {{ row.hours > 0 ? `${row.hours} Jam` : 'Bebas' }}
               </span>
             </div>
           </div>
-        </template>
 
-        <!-- Cell: Istirahat & Toleransi -->
-        <template #cell-breakTime="{ row }">
-          <div class="flex flex-col text-[11px] text-neutral-600 dark:text-neutral-300">
-            <div class="flex items-center gap-1.5">
-              <Coffee class="w-3 h-3 text-amber-500" />
-              <span>Istirahat: <strong class="text-neutral-800 dark:text-neutral-200">{{ row.breakTime || 0 }} mnt</strong></span>
-            </div>
-            <div class="flex items-center gap-1.5 mt-0.5 text-neutral-400 text-[10px]">
-              <Clock class="w-3 h-3 text-neutral-400" />
-              <span>Toleransi: <strong class="text-neutral-600 dark:text-neutral-300">{{ row.lateTolerance || 0 }} mnt</strong></span>
-            </div>
-          </div>
-        </template>
-
-        <!-- Cell: Pegawai Terdaftar -->
-        <template #cell-employeeCount="{ row }">
-          <div class="flex items-center justify-center">
-            <BaseBadge variant="neutral" size="sm">
-              <Users class="w-3 h-3 mr-1 text-neutral-500" />
-              {{ row.employeeCount || 0 }} Orang
+          <!-- Bottom Action Buttons Mobile -->
+          <div class="flex items-center justify-between pt-1">
+            <BaseBadge :variant="row.employeeCount > 0 ? 'success' : 'neutral'" size="sm">
+              {{ row.employeeCount || 0 }} Pegawai
             </BaseBadge>
-          </div>
-        </template>
 
-        <!-- Cell: Status Aktif (BaseSwitch interaktif) -->
-        <template #cell-isActive="{ row }">
-          <div class="flex items-center justify-center">
-            <BaseSwitch
-              :model-value="row.isActive"
-              @update:model-value="handleToggleActive(row)"
-              size="sm"
-            />
+            <div class="flex items-center gap-1.5">
+              <button
+                type="button"
+                @click="openEditModal(row)"
+                class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 transition cursor-pointer"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                @click="openDeleteConfirm(row)"
+                class="p-1 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition cursor-pointer"
+              >
+                <Trash2 class="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
-        </template>
-
-        <!-- Cell: Aksi (Edit & Hapus) -->
-        <template #cell-actions="{ row }">
-          <div class="flex items-center justify-center gap-1">
-            <button
-              type="button"
-              @click="openEditModal(row)"
-              class="p-1 rounded-lg hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 dark:hover:bg-[var(--theme-surface-hover)] dark:hover:text-neutral-100 transition-colors"
-              title="Ubah Konfigurasi Shift"
-            >
-              <Pencil class="w-3.5 h-3.5" />
-            </button>
-            <button
-              type="button"
-              @click="openDeleteConfirm(row)"
-              class="p-1 rounded-lg hover:bg-rose-50 text-neutral-400 hover:text-rose-600 dark:hover:bg-rose-950/40 dark:hover:text-rose-400 transition-colors"
-              title="Hapus Shift"
-            >
-              <Trash2 class="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </template>
-
-        <!-- Empty State Slot -->
-        <template #empty>
-          <div class="py-12 flex flex-col items-center justify-center text-center">
-            <Clock class="w-10 h-10 text-neutral-300 dark:text-neutral-600 mb-2" />
-            <p class="text-sm font-semibold text-neutral-800 dark:text-neutral-200">Tidak ada shift yang cocok</p>
-            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-sm">
-              Coba ubah kata kunci pencarian atau bersihkan filter status dan varian warna badge.
-            </p>
-            <BaseButton
-              variant="outline"
-              size="sm"
-              class="mt-3"
-              @click="searchQuery = ''; selectedStatus = 'all'; selectedVariant = 'all'"
-            >
-              Bersihkan Filter
-            </BaseButton>
-          </div>
-        </template>
-      </BaseDataTable>
-    </div>
+        </div>
+      </template>
+    </BaseDataTable>
 
     <!-- 5. MODAL FORM: TAMBAH / UBAH SHIFT -->
     <BaseModal
       v-model="isFormModalOpen"
-      :title="isEditMode ? 'Ubah Konfigurasi Shift' : 'Tambah Shift Baru'"
-      :subtitle="isEditMode ? 'Perbarui jam kerja, durasi istirahat, dan warna penanda shift' : 'Daftarkan shift baru untuk diterapkan pada jadwal roster karyawan'"
+      :title="isEditMode ? 'Ubah Data Shift' : 'Tambah Shift Baru'"
+      :subtitle="isEditMode ? 'Perbarui konfigurasi jam kerja, istirahat, dan warna penanda shift' : 'Daftarkan master shift baru untuk digunakan pada jadwal roster pegawai'"
       size="md"
     >
       <div class="space-y-4 text-xs">
@@ -629,7 +917,7 @@ const exportToCSV = () => {
             <BaseInput
               v-model="formData.code"
               label="Kode Shift"
-              placeholder="Mis. P, REG"
+              placeholder="Mis. P, S, REG"
               required
               :error="formErrors.code"
             />
@@ -645,23 +933,36 @@ const exportToCSV = () => {
           </div>
         </div>
 
+        <!-- Kategori Shift -->
+        <div>
+          <label class="block font-semibold text-neutral-700 dark:text-neutral-300 mb-1">
+            Kategori / Tipe Shift
+          </label>
+          <BaseSearchableSelect
+            v-model="formData.kategori"
+            :options="formKategoriOptions"
+            placeholder="Pilih kategori..."
+            size="md"
+          />
+        </div>
+
         <!-- Deskripsi Shift -->
         <div>
           <BaseInput
             v-model="formData.desc"
-            label="Deskripsi / Catatan Shift"
-            placeholder="Keterangan alokasi tugas atau area penugasan..."
+            label="Keterangan / Catatan Penugasan"
+            placeholder="Area penugasan atau peruntukan shift kerja..."
           />
         </div>
 
-        <!-- Jam Mulai & Jam Selesai -->
+        <!-- Jam Kerja Operasional -->
         <div class="p-3 bg-neutral-50 dark:bg-[var(--theme-surface-muted)]/60 rounded-xl border border-neutral-200/80 dark:border-[var(--theme-border)] space-y-3">
           <div class="flex items-center justify-between">
             <span class="font-semibold text-neutral-900 dark:text-[var(--theme-text-primary)]">
-              Jam Kerja Operasional
+              Jam Masuk - Jam Pulang
             </span>
             <BaseBadge variant="neutral" size="sm">
-              {{ formData.hours }} Jam Kerja
+              {{ formData.hours }} Jam Efektif
             </BaseBadge>
           </div>
 
@@ -702,7 +1003,7 @@ const exportToCSV = () => {
               type="number"
               label="Toleransi Terlambat"
               placeholder="15"
-              hint="Batas toleransi dispensasi"
+              hint="Batas dispensasi hadir"
             >
               <template #suffix>
                 <span class="text-neutral-400 text-[11px]">mnt</span>
@@ -711,7 +1012,7 @@ const exportToCSV = () => {
           </div>
         </div>
 
-        <!-- Pilihan Varian Warna Badge Shift -->
+        <!-- Warna Badge & Indikator Roster -->
         <div>
           <label class="block font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
             Warna Badge & Indikator Roster
@@ -722,7 +1023,7 @@ const exportToCSV = () => {
               :key="v.value"
               type="button"
               @click="formData.badgeVariant = v.value"
-              class="flex items-center justify-between p-2 rounded-lg border text-left transition-all"
+              class="flex items-center justify-between p-2 rounded-lg border text-left transition-all cursor-pointer"
               :class="[
                 formData.badgeVariant === v.value
                   ? 'border-[var(--theme-primary)] bg-[var(--theme-primary)]/5 ring-1 ring-[var(--theme-primary)]'
@@ -748,21 +1049,20 @@ const exportToCSV = () => {
           </div>
         </div>
 
-        <!-- Switch Status Aktif -->
+        <!-- Switch Status Shift Aktif -->
         <div class="pt-2 border-t border-neutral-200 dark:border-[var(--theme-border)] flex items-center justify-between">
           <div>
             <span class="font-semibold text-neutral-900 dark:text-[var(--theme-text-primary)] block">
               Status Shift Aktif
             </span>
             <span class="text-[11px] text-neutral-500">
-              Shift aktif dapat dipilih langsung oleh tim HR dan dalam generate roster
+              Shift aktif dapat dipilih langsung dalam form roster dan rotasi jadwal
             </span>
           </div>
           <BaseSwitch v-model="formData.isActive" />
         </div>
       </div>
 
-      <!-- Footer Modal -->
       <template #footer>
         <div class="flex items-center justify-end gap-2">
           <BaseButton variant="outline" size="sm" @click="isFormModalOpen = false">
@@ -775,7 +1075,7 @@ const exportToCSV = () => {
       </template>
     </BaseModal>
 
-    <!-- 6. CONFIRMATION MODAL: HAPUS SHIFT -->
+    <!-- 6. MODAL KONFIRMASI HAPUS SINGLE SHIFT -->
     <ConfirmationModal
       v-model="isDeleteModalOpen"
       type="delete"
@@ -784,6 +1084,25 @@ const exportToCSV = () => {
       confirm-text="Hapus Shift"
       cancel-text="Batal"
       @confirm="handleDeleteConfirm"
+    />
+
+    <!-- 7. MODAL KONFIRMASI HAPUS MASSAL SHIFT -->
+    <ConfirmationModal
+      v-model="isBatchDeleteModalOpen"
+      type="delete"
+      title="Hapus Shift Terpilih?"
+      :message="`Apakah Anda yakin ingin menghapus ${selectedIds.length} master shift terpilih sekaligus? Seluruh konfigurasi yang dihapus tidak dapat dipulihkan.`"
+      confirm-text="Hapus Terpilih"
+      cancel-text="Batal"
+      @confirm="handleBatchDeleteConfirm"
+    />
+
+    <!-- 8. MODAL IMPOR CSV -->
+    <BaseCsvImporter
+      v-model="isCsvImporterOpen"
+      title="Impor Master Shift dari CSV"
+      :target-fields="targetFieldsForImport"
+      @imported="handleCsvImported"
     />
   </div>
 </template>
