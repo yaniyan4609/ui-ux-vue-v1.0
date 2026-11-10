@@ -1,4 +1,4 @@
-import { Home, LayoutTemplate, Sliders, Palette, Shield, Bell, Layers, Mountain, Users, KanbanSquare, Component, Sparkles, LayoutDashboard, Network, Contact, CalendarDays } from 'lucide-vue-next'
+import { Home, LayoutTemplate, Sliders, Palette, Shield, Bell, Layers, Mountain, Users, KanbanSquare, Component, Sparkles, LayoutDashboard, Network, Contact, CalendarDays, Clock, CalendarRange } from 'lucide-vue-next'
 
 export const menuItems = [
   {
@@ -18,6 +18,8 @@ export const menuItems = [
       { id: 'karyawan', label: 'Direktori Karyawan', icon: Contact, route: '/contoh-ui/karyawan' },
       { id: 'organisasi', label: 'Struktur Organisasi', icon: Network, route: '/contoh-ui/organisasi' },
       { id: 'roster', label: 'Roster & Jadwal Shift', icon: CalendarDays, route: '/contoh-ui/roster' },
+      { id: 'shift', label: 'Master Shift', icon: Clock, route: '/contoh-ui/shift' },
+      { id: 'pola-roster', label: 'Pola Roster', icon: CalendarRange, route: '/contoh-ui/pola-roster' },
     ],
   },
   {

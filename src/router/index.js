@@ -9,6 +9,8 @@ import DashboardHrisView from '../views/contoh-ui/DashboardHrisView.vue'
 import KaryawanDirektoriView from '../views/contoh-ui/KaryawanDirektoriView.vue'
 import StrukturOrganisasiView from '../views/contoh-ui/StrukturOrganisasiView.vue'
 import RosterJadwalView from '../views/contoh-ui/RosterJadwalView.vue'
+import MasterShiftView from '../views/contoh-ui/MasterShiftView.vue'
+import MasterPolaView from '../views/contoh-ui/MasterPolaView.vue'
 
 // meta.fixedHeight: halaman data/tabel mengunci tinggi sendiri (AppLayout memakai overflow-hidden)
 const routes = [
@@ -43,6 +45,18 @@ const routes = [
     path: '/contoh-ui/roster',
     name: 'ContohUiRoster',
     component: RosterJadwalView,
+    meta: { fixedHeight: true },
+  },
+  {
+    path: '/contoh-ui/shift',
+    name: 'ContohUiShift',
+    component: MasterShiftView,
+    meta: { fixedHeight: true },
+  },
+  {
+    path: '/contoh-ui/pola-roster',
+    name: 'ContohUiPolaRoster',
+    component: MasterPolaView,
     meta: { fixedHeight: true },
   },
 
