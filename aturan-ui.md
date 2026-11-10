@@ -224,6 +224,7 @@ Nilai default dicetak tebal. Semua `v-model` memakai `modelValue` / `update:mode
 | `BaseOrgChart` | `data` (Object pohon hierarki), `collapsible` (**true**), `selectedId` | `node-click`, `toggle-expand` |
 | `BaseDocumentList` | `documents` (Array `{ id, title, category, fileNumber, fileName, fileSize, updatedAt, status }`), `allowUpload` (**true**) | `preview`, `download`, `upload` |
 | `BaseGallery` | `items` (Array `{ id, title, category, categoryLabel, imageUrl, timestamp, location }`), `categories` | `item-click`, `download` |
+| `BaseRosterGrid` | `days` (Array hari `{ date, dayName, dateLabel, isToday, isWeekend }`), `rows` (Array pegawai `{ id, name, nip, role, divisi, avatar, schedules }`), `shiftTypes`, `editable` (**true**), `minCoverage` | `cell-change`, `cell-click`, `row-click` |
 | `BasePagination` | `currentPage` (wajib), `totalItems` (wajib), `itemsPerPage` (**15**, angka atau `'all'`), `perPageOptions` (**`[15, 30, 50, 'all']`**), `compact`. **Tidak ada prop `totalPages`** | `update:currentPage`, `update:itemsPerPage`, `change` |
 | `BaseDropdownMenu` | `items` (`{ label, icon?, action?, danger?, disabled?, divider? }`), `align`: `left`, **`right`**, `triggerClass` | emit `select`. Slot: `trigger`, default |
 | `BaseEmptyState` | `title`, `description`, `icon`, `actionText`, `actionIcon`, `compact` | emit `action`. Slot: `icon`, `title`, `description`, `action` |

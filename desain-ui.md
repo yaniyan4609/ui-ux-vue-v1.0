@@ -1147,6 +1147,25 @@ Galeri thumbnail visual responsif dilengkapi filter kategori dan lightbox modal:
 </template>
 ```
 
+### 4.46 `BaseRosterGrid.vue` (Matriks Roster Shift & Penjadwalan Kerja Interaktif)
+Matriks jadwal kerja multi-shift profesional dengan header hari sticky, kolom pegawai sticky, selector in-place cepat, dan ringkasan kuota shift (coverage summary):
+- **Sticky Column & Header**: Baris atas (hari) dan kolom kiri (pegawai) terkunci sticky saat tabel digeser horizontal maupun vertikal.
+- **In-Place Popover Quick Changer**: Klik pada sel shift membuka popover instan untuk mengganti shift (Pagi, Siang, Malam, Libur, Cuti) secara reaktif.
+- **Coverage Summary Footer**: Baris dasar otomatis menghitung total petugas per shift di setiap tanggal dan memvalidasi kecukupan kuota minimum tim operasional.
+
+```vue
+<template>
+  <BaseRosterGrid
+    :days="weekDays"
+    :rows="employeeList"
+    :shift-types="shiftTypes"
+    :min-coverage="{ P: 2, S: 2, M: 1 }"
+    @cell-change="handleShiftChange"
+    @row-click="openEmployeeSchedule"
+  />
+</template>
+```
+
 ---
 
 
