@@ -3,21 +3,23 @@ import { ref, computed } from 'vue'
 import BaseButton from '../../components/ui/BaseButton.vue'
 import BaseModal from '../../components/ui/BaseModal.vue'
 import ConfirmationModal from '../../components/ui/ConfirmationModal.vue'
-import BaseSearchableSelect from '../../components/ui/BaseSearchableSelect.vue'
 import BaseInput from '../../components/ui/BaseInput.vue'
 import BaseBadge from '../../components/ui/BaseBadge.vue'
 import BaseSlideOver from '../../components/ui/BaseSlideOver.vue'
 import BaseAvatar from '../../components/ui/BaseAvatar.vue'
 import BaseDescriptionList from '../../components/ui/BaseDescriptionList.vue'
-import BaseSelectableCard from '../../components/ui/BaseSelectableCard.vue'
+import BaseTreeSelect from '../../components/ui/BaseTreeSelect.vue'
 import BaseRosterGrid from '../../components/ui/BaseRosterGrid.vue'
 import { useToast } from '../../composables/useToast'
 import {
   shiftTypes,
   defaultWeekDays,
+  fullMonthDays,
   rosterEmployees,
   shiftSwapRequests,
   rosterTemplates,
+  locationTreeNodes,
+  organizationTreeNodes,
 } from '../../data/hrisRosterData'
 import {
   CalendarDays,
@@ -43,42 +45,36 @@ import {
   Eye,
   Calendar,
   Briefcase,
-  HelpCircle,
+  Network,
 } from 'lucide-vue-next'
 
 const toast = useToast()
 
 // ========================================================
-// 1. DATA MASTER & STATE ROSTER JADWAL
+// 1. DATA MASTER & MODE TAMPILAN (MINGGUAN VS 1 BULAN)
 // ========================================================
+const viewMode = ref('weekly') // 'weekly' | 'monthly'
 const weekDays = ref([...defaultWeekDays])
+const monthDays = ref([...fullMonthDays])
 const employees = ref([...rosterEmployees])
 const swapRequests = ref([...shiftSwapRequests])
 
-// Filter & Pencarian
+// Hari aktif berdasarkan mode (7 Hari vs 30 Hari)
+const activeDays = computed(() => {
+  return viewMode.value === 'monthly' ? monthDays.value : weekDays.value
+})
+
+// ========================================================
+// 2. FILTER DENGAN BASETREE: WILAYAH/KANTOR & ORGANISASI
+// ========================================================
 const searchQuery = ref('')
-const selectedDivisi = ref('all')
-const selectedCabang = ref('all')
-
-const divisiOptions = [
-  { value: 'all', label: 'Semua Divisi' },
-  { value: 'Teknologi & IT', label: 'Teknologi & IT' },
-  { value: 'Keamanan & Fasilitas', label: 'Keamanan & Fasilitas' },
-  { value: 'Layanan & CS', label: 'Layanan & CS' },
-  { value: 'Operasional Gudang', label: 'Operasional Gudang' },
-  { value: 'Medis & Kesehatan', label: 'Medis & Kesehatan' },
-]
-
-const cabangOptions = [
-  { value: 'all', label: 'Semua Cabang & Lokasi' },
-  { value: 'Kantor Pusat Jakarta', label: 'Kantor Pusat Jakarta' },
-  { value: 'Cabang Bandung', label: 'Cabang Bandung' },
-  { value: 'Gudang Logistik Cikarang', label: 'Gudang Logistik Cikarang' },
-]
+const selectedLocationNode = ref('') // ID dari tree Wilayah & Kantor
+const selectedOrgNode = ref('') // ID dari tree Organisasi (Divisi -> Dept -> Jabatan)
 
 // Filtered Employees
 const filteredEmployees = computed(() => {
   return employees.value.filter((emp) => {
+    // 1. Pencarian Kata Kunci
     const q = searchQuery.value.toLowerCase().trim()
     const matchSearch =
       !q ||
@@ -86,13 +82,47 @@ const filteredEmployees = computed(() => {
       emp.nip.toLowerCase().includes(q) ||
       emp.role.toLowerCase().includes(q)
 
-    const matchDivisi =
-      selectedDivisi.value === 'all' || emp.divisi === selectedDivisi.value
+    // 2. Filter Wilayah & Kantor (Hierarki BaseTree)
+    let matchLocation = true
+    if (selectedLocationNode.value) {
+      const loc = selectedLocationNode.value
+      if (loc === 'wilayah-dki') {
+        matchLocation = emp.wilayah === 'Wilayah DKI Jakarta & Banten'
+      } else if (loc === 'wilayah-jabar') {
+        matchLocation = emp.wilayah === 'Wilayah Jawa Barat'
+      } else if (loc === 'wilayah-jatim') {
+        matchLocation = emp.wilayah === 'Wilayah Jawa Timur'
+      } else {
+        // Cocokkan persis nama kantor cabang
+        matchLocation = emp.cabang === loc
+      }
+    }
 
-    const matchCabang =
-      selectedCabang.value === 'all' || emp.cabang === selectedCabang.value
+    // 3. Filter Organisasi (Hierarki BaseTree: Divisi -> Dept -> Jabatan)
+    let matchOrg = true
+    if (selectedOrgNode.value) {
+      const org = selectedOrgNode.value
+      if (['Teknologi & IT', 'Keamanan & Fasilitas', 'Layanan & CS', 'Operasional Gudang', 'Medis & Kesehatan'].includes(org)) {
+        // Cocokkan Divisi
+        matchOrg = emp.divisi === org
+      } else if (org.startsWith('dept-')) {
+        // Cocokkan Departemen
+        const deptMap = {
+          'dept-it-ops': 'Software & Cloud 24/7',
+          'dept-sec-guard': 'Pengamanan Fisik (Satpam)',
+          'dept-sec-facility': 'Mekanikal, Elektrikal & Gedung',
+          'dept-cs-care': 'Customer Contact Center',
+          'dept-gudang-log': 'Logistik & Distribusi',
+          'dept-medis-k3': 'Layanan Kesehatan & K3',
+        }
+        matchOrg = emp.departemen === deptMap[org]
+      } else {
+        // Cocokkan Jabatan / Posisi
+        matchOrg = emp.role === org
+      }
+    }
 
-    return matchSearch && matchDivisi && matchCabang
+    return matchSearch && matchLocation && matchOrg
   })
 })
 
@@ -102,7 +132,7 @@ const totalPegawai = computed(() => filteredEmployees.value.length)
 const totalScheduledHours = computed(() => {
   let sum = 0
   filteredEmployees.value.forEach((emp) => {
-    weekDays.value.forEach((day) => {
+    activeDays.value.forEach((day) => {
       const code = emp.schedules?.[day.date]
       const meta = shiftTypes.find((s) => s.code === code)
       sum += meta?.hours || 0
@@ -115,7 +145,11 @@ const pendingSwapCount = computed(() => {
   return swapRequests.value.filter((s) => s.status === 'pending').length
 })
 
-// Handle Pergantian Shift Cell dari BaseRosterGrid
+// ========================================================
+// 3. HANDLER PERGANTIAN SHIFT (CELL & BULK COLUMN THEAD)
+// ========================================================
+
+// 1. Ubah shift per sel individu
 const handleShiftChange = ({ rowId, date, newShiftCode }) => {
   const emp = employees.value.find((e) => e.id === rowId)
   if (emp && emp.schedules) {
@@ -129,27 +163,46 @@ const handleShiftChange = ({ rowId, date, newShiftCode }) => {
   }
 }
 
+// 2. Ubah shift massal kolom via thead table (Point 2 user request)
+const handleBulkColumnShift = ({ date, dayLabel, shiftCode }) => {
+  const meta = shiftTypes.find((s) => s.code === shiftCode)
+  let count = 0
+
+  filteredEmployees.value.forEach((emp) => {
+    if (emp.schedules) {
+      emp.schedules[date] = shiftCode
+      count++
+    }
+  })
+
+  toast.success(
+    `Berhasil menerapkan "${meta?.name || shiftCode}" untuk seluruh ${count} pegawai pada ${dayLabel}!`,
+    'Shift Kolom Diperbarui'
+  )
+}
+
 // Reset Filter
 const handleResetFilter = () => {
   searchQuery.value = ''
-  selectedDivisi.value = 'all'
-  selectedCabang.value = 'all'
-  toast.info('Filter pencarian roster telah direset.', 'Filter Direset')
+  selectedLocationNode.value = ''
+  selectedOrgNode.value = ''
+  toast.info('Filter pencarian roster telah direset ke seluruh data.', 'Filter Direset')
 }
 
-// Salin Jadwal ke Minggu Depan
+// Salin Jadwal ke Minggu / Bulan Depan
 const handleCopySchedule = () => {
+  const targetPeriod = viewMode.value === 'monthly' ? 'Bulan Desember 2026' : 'Minggu Depan (17 – 23 Nov 2026)'
   toast.success(
-    'Jadwal roster aktif berhasil disalin untuk periode minggu depan (17 – 23 Nov 2026)!',
+    `Jadwal roster aktif berhasil disalin untuk periode ${targetPeriod}!`,
     'Salin Jadwal Selesai'
   )
 }
 
 // Ekspor Jadwal Roster ke CSV
 const handleExportRoster = () => {
-  const headers = ['NIP', 'Nama Pegawai', 'Jabatan', 'Divisi', 'Cabang', ...weekDays.value.map((d) => `${d.dayName} (${d.dateLabel})`)]
+  const headers = ['NIP', 'Nama Pegawai', 'Jabatan', 'Divisi', 'Cabang', ...activeDays.value.map((d) => `${d.dayName} (${d.dateLabel})`)]
   const rows = filteredEmployees.value.map((emp) => {
-    const scheduleCols = weekDays.value.map((d) => emp.schedules?.[d.date] || 'OFF')
+    const scheduleCols = activeDays.value.map((d) => emp.schedules?.[d.date] || 'OFF')
     return [
       `"${emp.nip}"`,
       `"${emp.name}"`,
@@ -165,17 +218,17 @@ const handleExportRoster = () => {
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.setAttribute('href', url)
-  link.setAttribute('download', `roster_shift_mingguan_${weekDays.value[0].date}.csv`)
+  link.setAttribute('download', `roster_shift_${viewMode.value}_${activeDays.value[0].date}.csv`)
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
   URL.revokeObjectURL(url)
 
-  toast.success('Roster jadwal shift berhasil diekspor ke format CSV!', 'Ekspor Berhasil')
+  toast.success(`Roster jadwal shift (${viewMode.value === 'monthly' ? '30 Hari' : '7 Hari'}) berhasil diekspor!`, 'Ekspor Berhasil')
 }
 
 // ========================================================
-// 2. MODAL AUTO-ROSTER: POLA SHIFT OTOMATIS
+// 4. MODAL AUTO-ROSTER: POLA SHIFT OTOMATIS
 // ========================================================
 const isAutoRosterModalOpen = ref(false)
 const selectedTemplateId = ref('tpl-2-2-2-1')
@@ -188,9 +241,8 @@ const handleApplyAutoRoster = () => {
   let count = 0
   employees.value.forEach((emp, index) => {
     if (autoRosterTargetDivisi.value === 'all' || emp.divisi === autoRosterTargetDivisi.value) {
-      // Rotasi pola bergeser antar pegawai agar shift terdistribusi merata
       const offset = index % tpl.pattern.length
-      weekDays.value.forEach((day, dayIdx) => {
+      activeDays.value.forEach((day, dayIdx) => {
         const patternIndex = (dayIdx + offset) % tpl.pattern.length
         emp.schedules[day.date] = tpl.pattern[patternIndex]
       })
@@ -206,12 +258,11 @@ const handleApplyAutoRoster = () => {
 }
 
 // ========================================================
-// 3. MODAL TUKAR SHIFT (SHIFT SWAP REQUEST)
+// 5. MODAL TUKAR SHIFT (SHIFT SWAP REQUEST)
 // ========================================================
 const isSwapModalOpen = ref(false)
 const swapActiveTab = ref('list') // 'list' | 'create'
 
-// Form Pengajuan Tukar Shift Baru
 const swapForm = ref({
   requesterId: 2,
   targetEmployeeId: 1,
@@ -220,7 +271,6 @@ const swapForm = ref({
 })
 
 const handleApproveSwap = (swap) => {
-  // Tukar jadwal pada data karyawan
   const reqEmp = employees.value.find((e) => e.id === swap.requester.id)
   const targetEmp = employees.value.find((e) => e.id === swap.targetEmployee.id)
 
@@ -288,7 +338,7 @@ const handleSubmitSwap = () => {
 }
 
 // ========================================================
-// 4. SLIDE-OVER DETAIL JADWAL PEGAWAI
+// 6. SLIDE-OVER DETAIL JADWAL PEGAWAI
 // ========================================================
 const isDetailOpen = ref(false)
 const selectedEmp = ref(null)
@@ -300,7 +350,7 @@ const openEmployeeScheduleDetail = (emp) => {
 
 const employeeScheduleDetails = computed(() => {
   if (!selectedEmp.value) return []
-  return weekDays.value.map((day) => {
+  return activeDays.value.map((day) => {
     const code = selectedEmp.value.schedules?.[day.date] || 'OFF'
     const meta = shiftTypes.find((s) => s.code === code)
     return {
@@ -335,11 +385,11 @@ const employeeScheduleDetails = computed(() => {
               Jadwal Shift & Roster Kerja
             </h1>
             <BaseBadge variant="success" size="sm">
-              10 – 16 Nov 2026
+              {{ viewMode === 'monthly' ? 'Bulan Penuh (1 – 30 Nov 2026)' : '10 – 16 Nov 2026' }}
             </BaseBadge>
           </div>
           <p class="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5 truncate">
-            Matriks manajemen rotasi shift pegawai, distribusi jam kerja, pengajuan tukar shift, dan pemenuhan kuota shift (coverage).
+            Matriks manajemen rotasi shift pegawai, distribusi jam kerja, pengajuan tukar shift, dan pemenuhan kuota shift.
           </p>
         </div>
       </div>
@@ -379,7 +429,7 @@ const employeeScheduleDetails = computed(() => {
           variant="outline"
           size="sm"
           @click="handleCopySchedule"
-          title="Salin Roster ke Minggu Depan"
+          title="Salin Roster ke Periode Berikutnya"
         >
           <Copy class="w-3.5 h-3.5 text-neutral-500" />
           <span class="hidden sm:inline">Salin Jadwal</span>
@@ -399,7 +449,7 @@ const employeeScheduleDetails = computed(() => {
     </div>
 
     <!-- ======================================================== -->
-    <!-- 2. FILTER & TOOLBAR PENCARIAN (SHRINK-0)                 -->
+    <!-- 2. FILTER BAR: SEARCH + BASETREE SELECT WILAYAH & ORGANISASI -->
     <!-- ======================================================== -->
     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
       <!-- Search Input -->
@@ -421,65 +471,113 @@ const employeeScheduleDetails = computed(() => {
         </button>
       </div>
 
-      <!-- Filter Divisi: BaseSearchableSelect -->
-      <div class="w-full sm:w-56 shrink-0">
-        <BaseSearchableSelect
-          v-model="selectedDivisi"
-          :options="divisiOptions"
-          placeholder="Filter Divisi..."
+      <!-- Filter 1: Wilayah & Kantor Menggunakan BaseTreeSelect -->
+      <div class="w-full sm:w-60 shrink-0">
+        <BaseTreeSelect
+          v-model="selectedLocationNode"
+          :nodes="locationTreeNodes"
+          placeholder="Filter Wilayah & Kantor..."
+          size="sm"
           clearable
+          searchable
         />
       </div>
 
-      <!-- Filter Cabang: BaseSearchableSelect -->
-      <div class="w-full sm:w-52 shrink-0">
-        <BaseSearchableSelect
-          v-model="selectedCabang"
-          :options="cabangOptions"
-          placeholder="Filter Cabang..."
-          align="right"
+      <!-- Filter 2: Organisasi (Divisi -> Dept -> Jabatan) Menggunakan BaseTreeSelect -->
+      <div class="w-full sm:w-64 shrink-0">
+        <BaseTreeSelect
+          v-model="selectedOrgNode"
+          :nodes="organizationTreeNodes"
+          placeholder="Filter Divisi, Dept & Jabatan..."
+          size="sm"
           clearable
+          searchable
         />
       </div>
+
+      <!-- Reset Filter Button -->
+      <button
+        v-if="searchQuery || selectedLocationNode || selectedOrgNode"
+        type="button"
+        @click="handleResetFilter"
+        class="p-2 rounded-xl text-neutral-500 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] transition cursor-pointer shrink-0"
+        title="Reset semua filter"
+      >
+        <RotateCcw class="w-4 h-4" />
+      </button>
     </div>
 
     <!-- ======================================================== -->
-    <!-- 3. STRIP LEGENDA SHIFT & METRIK COVERAGE (SHRINK-0)      -->
+    <!-- 3. STRIP SWITCHER MODE (MINGGUAN/BULANAN) & LEGENDA      -->
     <!-- ======================================================== -->
     <div class="flex flex-wrap items-center justify-between gap-2 p-2 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs shrink-0 text-xs">
       
-      <!-- Legenda Shift -->
-      <div class="flex flex-wrap items-center gap-1.5">
-        <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider mr-1">Shift:</span>
-        
-        <!-- Pagi -->
-        <div class="flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/40 text-emerald-800 dark:text-emerald-300 font-medium">
-          <Sun class="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-          <span>Pagi (07:00-15:00)</span>
+      <!-- Mode View Switcher (Mingguan vs 1 Bulan) & Legenda -->
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- Toggle Button: Mingguan vs 1 Bulan -->
+        <div class="flex items-center p-0.5 rounded-xl bg-neutral-100 dark:bg-[var(--theme-surface-muted)] border border-neutral-200/80 dark:border-[var(--theme-border)]">
+          <button
+            type="button"
+            @click="viewMode = 'weekly'"
+            class="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition cursor-pointer"
+            :class="[
+              viewMode === 'weekly'
+                ? 'bg-white dark:bg-[var(--theme-surface-raised)] text-neutral-900 dark:text-white shadow-xs'
+                : 'text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200'
+            ]"
+          >
+            <Calendar class="w-3.5 h-3.5" />
+            <span>Mingguan (7 Hari)</span>
+          </button>
+
+          <button
+            type="button"
+            @click="viewMode = 'monthly'"
+            class="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition cursor-pointer"
+            :class="[
+              viewMode === 'monthly'
+                ? 'bg-white dark:bg-[var(--theme-surface-raised)] text-neutral-900 dark:text-white shadow-xs'
+                : 'text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200'
+            ]"
+          >
+            <CalendarDays class="w-3.5 h-3.5" />
+            <span>1 Bulan (30 Hari)</span>
+          </button>
         </div>
 
-        <!-- Siang -->
-        <div class="flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/40 text-amber-800 dark:text-amber-300 font-medium">
-          <Sunset class="w-3 h-3 text-amber-600 dark:text-amber-400" />
-          <span>Siang (15:00-23:00)</span>
-        </div>
+        <div class="h-4 w-px bg-neutral-200 dark:bg-[var(--theme-border)] hidden sm:block" />
 
-        <!-- Malam -->
-        <div class="flex items-center gap-1 px-2 py-1 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200/80 dark:border-purple-800/40 text-purple-800 dark:text-purple-300 font-medium">
-          <Moon class="w-3 h-3 text-purple-600 dark:text-purple-400" />
-          <span>Malam (23:00-07:00)</span>
-        </div>
+        <!-- Legenda Shift -->
+        <div class="flex flex-wrap items-center gap-1.5">
+          <!-- Pagi -->
+          <div class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/40 text-emerald-800 dark:text-emerald-300 font-medium text-[11px]">
+            <Sun class="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+            <span>Pagi (07:00)</span>
+          </div>
 
-        <!-- Libur -->
-        <div class="flex items-center gap-1 px-2 py-1 rounded-lg bg-neutral-100 dark:bg-[var(--theme-surface-muted)] border border-neutral-200 dark:border-[var(--theme-border)] text-neutral-600 dark:text-neutral-400 font-medium">
-          <Coffee class="w-3 h-3 text-neutral-400" />
-          <span>Libur (OFF)</span>
-        </div>
+          <!-- Siang -->
+          <div class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/40 text-amber-800 dark:text-amber-300 font-medium text-[11px]">
+            <Sunset class="w-3 h-3 text-amber-600 dark:text-amber-400" />
+            <span>Siang (15:00)</span>
+          </div>
 
-        <!-- Cuti -->
-        <div class="flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/40 text-blue-800 dark:text-blue-300 font-medium">
-          <Plane class="w-3 h-3 text-blue-500" />
-          <span>Cuti (C)</span>
+          <!-- Malam -->
+          <div class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200/80 dark:border-purple-800/40 text-purple-800 dark:text-purple-300 font-medium text-[11px]">
+            <Moon class="w-3 h-3 text-purple-600 dark:text-purple-400" />
+            <span>Malam (23:00)</span>
+          </div>
+
+          <!-- Libur -->
+          <div class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-neutral-100 dark:bg-[var(--theme-surface-muted)] border border-neutral-200 dark:border-[var(--theme-border)] text-neutral-600 dark:text-neutral-400 font-medium text-[11px]">
+            <Coffee class="w-3 h-3 text-neutral-400" />
+            <span>Libur (OFF)</span>
+          </div>
+
+          <!-- Cuti -->
+          <div class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/40 text-blue-800 dark:text-blue-300 font-medium text-[11px]">
+            <Plane class="w-3 h-3 text-blue-500" />
+            <span>Cuti (C)</span>
+          </div>
         </div>
       </div>
 
@@ -497,7 +595,7 @@ const employeeScheduleDetails = computed(() => {
         <span>&bull;</span>
         <div class="flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400">
           <CheckCircle2 class="w-3.5 h-3.5" />
-          <span>Kuota Terpenuhi</span>
+          <span>Coverage 100%</span>
         </div>
       </div>
 
@@ -505,14 +603,17 @@ const employeeScheduleDetails = computed(() => {
 
     <!-- ======================================================== -->
     <!-- 4. BASE ROSTER GRID COMPONENT (FLEX-1 MIN-H-0)           -->
+    <!-- Mendukung Searchable Dropdown Cell + Dropdown Kolom Thead-->
     <!-- ======================================================== -->
     <div class="flex-1 min-h-0 overflow-hidden">
       <BaseRosterGrid
-        :days="weekDays"
+        :days="activeDays"
         :rows="filteredEmployees"
         :shift-types="shiftTypes"
+        :mode="viewMode"
         :min-coverage="{ P: 2, S: 2, M: 1 }"
         @cell-change="handleShiftChange"
+        @column-shift-change="handleBulkColumnShift"
         @row-click="openEmployeeScheduleDetail"
       />
     </div>
@@ -562,7 +663,6 @@ const employeeScheduleDetails = computed(() => {
             :key="swap.id"
             class="p-3.5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-neutral-50/50 dark:bg-[var(--theme-surface-raised)] space-y-2.5"
           >
-            <!-- Top: ID & Status -->
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <span class="font-mono font-bold text-neutral-800 dark:text-neutral-200">{{ swap.id }}</span>
@@ -577,7 +677,7 @@ const employeeScheduleDetails = computed(() => {
               </BaseBadge>
             </div>
 
-            <!-- Visual Baris Tukar Pegawai A <--> Pegawai B -->
+            <!-- Baris Tukar Pegawai A <--> Pegawai B -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-2.5 rounded-xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200/80 dark:border-[var(--theme-border)]">
               <!-- Pemohon -->
               <div class="flex items-center gap-2.5">
@@ -657,7 +757,7 @@ const employeeScheduleDetails = computed(() => {
               v-model="swapForm.date"
               class="w-full p-2.5 rounded-xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface-raised)] text-xs text-neutral-900 dark:text-white"
             >
-              <option v-for="d in weekDays" :key="d.date" :value="d.date">
+              <option v-for="d in activeDays" :key="d.date" :value="d.date">
                 {{ d.dayName }}, {{ d.dateLabel }} ({{ d.date }})
               </option>
             </select>
@@ -734,6 +834,7 @@ const employeeScheduleDetails = computed(() => {
             <option value="Keamanan & Fasilitas">Hanya Divisi Keamanan & Satpam</option>
             <option value="Layanan & CS">Hanya Divisi Layanan & Customer Service</option>
             <option value="Operasional Gudang">Hanya Divisi Gudang & Logistik</option>
+            <option value="Medis & Kesehatan">Hanya Divisi Medis & Kesehatan</option>
           </select>
         </div>
       </div>
@@ -750,7 +851,7 @@ const employeeScheduleDetails = computed(() => {
     </BaseModal>
 
     <!-- ======================================================== -->
-    <!-- 7. SLIDE-OVER DETAIL JADWAL & PREFERENSI PEGAWAI         -->
+    <!-- 7. SLIDE-OVER DETAIL JADWAL PEGAWAI                      -->
     <!-- ======================================================== -->
     <BaseSlideOver
       v-model="isDetailOpen"
@@ -773,14 +874,14 @@ const employeeScheduleDetails = computed(() => {
           </div>
         </div>
 
-        <!-- 7 Hari Rincian Shift Mingguan -->
+        <!-- Rincian Shift Hari per Hari -->
         <div class="p-3.5 rounded-2xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs space-y-2">
           <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-500 flex items-center gap-1.5 mb-2">
             <Calendar class="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-            <span>Jadwal Shift Minggu Ini (10 – 16 Nov)</span>
+            <span>Jadwal Shift ({{ viewMode === 'monthly' ? 'Bulan November' : '10 – 16 Nov' }})</span>
           </h4>
 
-          <div class="divide-y divide-neutral-100 dark:divide-[var(--theme-border)]">
+          <div class="divide-y divide-neutral-100 dark:divide-[var(--theme-border)] max-h-80 overflow-y-auto pr-1">
             <div
               v-for="d in employeeScheduleDetails"
               :key="d.date"

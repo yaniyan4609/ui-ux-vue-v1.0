@@ -1,5 +1,6 @@
 // Data Master Shift & Roster Kerja HRIS Digaji.id
-// Mencakup jadwal shift mingguan, tipe shift, pola rotasi, dan riwayat tukar shift
+// Mendukung Mode Mingguan (7 Hari) & Mode 1 Bulan Penuh (30 Hari)
+// Dilengkapi Struktur Tree Wilayah/Kantor & Organisasi (Divisi -> Departemen -> Jabatan)
 
 export const shiftTypes = [
   {
@@ -49,15 +50,40 @@ export const shiftTypes = [
   },
 ]
 
-export const defaultWeekDays = [
-  { date: '2026-11-10', dayName: 'Senin', dateLabel: '10 Nov', isToday: true, isWeekend: false },
-  { date: '2026-11-11', dayName: 'Selasa', dateLabel: '11 Nov', isToday: false, isWeekend: false },
-  { date: '2026-11-12', dayName: 'Rabu', dateLabel: '12 Nov', isToday: false, isWeekend: false },
-  { date: '2026-11-13', dayName: 'Kamis', dateLabel: '13 Nov', isToday: false, isWeekend: false },
-  { date: '2026-11-14', dayName: 'Jumat', dateLabel: '14 Nov', isToday: false, isWeekend: false },
-  { date: '2026-11-15', dayName: 'Sabtu', dateLabel: '15 Nov', isToday: false, isWeekend: true },
-  { date: '2026-11-16', dayName: 'Minggu', dateLabel: '16 Nov', isToday: false, isWeekend: true },
-]
+// 1 Bulan Penuh: November 2026 (30 Hari)
+const fullDayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
+const shortDayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
+
+export const fullMonthDays = Array.from({ length: 30 }, (_, i) => {
+  const dayNum = i + 1
+  const dateStr = `2026-11-${String(dayNum).padStart(2, '0')}`
+  const dateObj = new Date(2026, 10, dayNum) // November 2026
+  const dIndex = dateObj.getDay()
+  const isWeekend = dIndex === 0 || dIndex === 6
+
+  return {
+    date: dateStr,
+    dayName: fullDayNames[dIndex],
+    shortDay: shortDayNames[dIndex],
+    dateLabel: `${dayNum} Nov`,
+    dayNumber: dayNum,
+    isToday: dayNum === 10,
+    isWeekend,
+  }
+})
+
+// Mode Mingguan: 10 Nov - 16 Nov 2026 (Minggu ke-2)
+export const defaultWeekDays = fullMonthDays.slice(9, 16)
+
+// Pola dasar rotasi 30 hari untuk tiap pegawai
+const generateMonthlySchedule = (pattern, seedOffset = 0) => {
+  const schedules = {}
+  fullMonthDays.forEach((day, idx) => {
+    const patIndex = (idx + seedOffset) % pattern.length
+    schedules[day.date] = pattern[patIndex]
+  })
+  return schedules
+}
 
 export const rosterEmployees = [
   {
@@ -67,16 +93,10 @@ export const rosterEmployees = [
     avatar: 'RP',
     role: 'Lead IT Support 24/7',
     divisi: 'Teknologi & IT',
+    departemen: 'Software & Cloud 24/7',
     cabang: 'Kantor Pusat Jakarta',
-    schedules: {
-      '2026-11-10': 'P',
-      '2026-11-11': 'P',
-      '2026-11-12': 'P',
-      '2026-11-13': 'S',
-      '2026-11-14': 'S',
-      '2026-11-15': 'OFF',
-      '2026-11-16': 'OFF',
-    },
+    wilayah: 'Wilayah DKI Jakarta & Banten',
+    schedules: generateMonthlySchedule(['P', 'P', 'P', 'S', 'S', 'OFF', 'OFF', 'P', 'P', 'S', 'S', 'M', 'OFF', 'OFF'], 0),
   },
   {
     id: 2,
@@ -85,16 +105,10 @@ export const rosterEmployees = [
     avatar: 'BW',
     role: 'Staff DevOps & Cloud',
     divisi: 'Teknologi & IT',
+    departemen: 'Software & Cloud 24/7',
     cabang: 'Kantor Pusat Jakarta',
-    schedules: {
-      '2026-11-10': 'S',
-      '2026-11-11': 'S',
-      '2026-11-12': 'M',
-      '2026-11-13': 'M',
-      '2026-11-14': 'OFF',
-      '2026-11-15': 'OFF',
-      '2026-11-16': 'P',
-    },
+    wilayah: 'Wilayah DKI Jakarta & Banten',
+    schedules: generateMonthlySchedule(['S', 'S', 'M', 'M', 'OFF', 'OFF', 'P', 'S', 'S', 'M', 'OFF', 'OFF', 'P', 'P'], 2),
   },
   {
     id: 3,
@@ -103,16 +117,10 @@ export const rosterEmployees = [
     avatar: 'FN',
     role: 'Network Engineer On-Site',
     divisi: 'Teknologi & IT',
+    departemen: 'Software & Cloud 24/7',
     cabang: 'Kantor Pusat Jakarta',
-    schedules: {
-      '2026-11-10': 'M',
-      '2026-11-11': 'M',
-      '2026-11-12': 'OFF',
-      '2026-11-13': 'OFF',
-      '2026-11-14': 'P',
-      '2026-11-15': 'P',
-      '2026-11-16': 'S',
-    },
+    wilayah: 'Wilayah DKI Jakarta & Banten',
+    schedules: generateMonthlySchedule(['M', 'M', 'OFF', 'OFF', 'P', 'P', 'S', 'M', 'OFF', 'OFF', 'P', 'P', 'S', 'S'], 4),
   },
   {
     id: 4,
@@ -121,16 +129,10 @@ export const rosterEmployees = [
     avatar: 'BS',
     role: 'Supervisor Keamanan (Satpam)',
     divisi: 'Keamanan & Fasilitas',
+    departemen: 'Pengamanan Fisik (Satpam)',
     cabang: 'Kantor Pusat Jakarta',
-    schedules: {
-      '2026-11-10': 'P',
-      '2026-11-11': 'P',
-      '2026-11-12': 'S',
-      '2026-11-13': 'S',
-      '2026-11-14': 'M',
-      '2026-11-15': 'OFF',
-      '2026-11-16': 'OFF',
-    },
+    wilayah: 'Wilayah DKI Jakarta & Banten',
+    schedules: generateMonthlySchedule(['P', 'P', 'S', 'S', 'M', 'OFF', 'OFF'], 0),
   },
   {
     id: 5,
@@ -139,16 +141,10 @@ export const rosterEmployees = [
     avatar: 'HG',
     role: 'Petugas Jaga Regu A',
     divisi: 'Keamanan & Fasilitas',
+    departemen: 'Pengamanan Fisik (Satpam)',
     cabang: 'Kantor Pusat Jakarta',
-    schedules: {
-      '2026-11-10': 'S',
-      '2026-11-11': 'S',
-      '2026-11-12': 'M',
-      '2026-11-13': 'M',
-      '2026-11-14': 'OFF',
-      '2026-11-15': 'P',
-      '2026-11-16': 'P',
-    },
+    wilayah: 'Wilayah DKI Jakarta & Banten',
+    schedules: generateMonthlySchedule(['S', 'S', 'M', 'M', 'OFF', 'P', 'P'], 1),
   },
   {
     id: 6,
@@ -157,16 +153,10 @@ export const rosterEmployees = [
     avatar: 'AS',
     role: 'Petugas Jaga Regu B',
     divisi: 'Keamanan & Fasilitas',
+    departemen: 'Pengamanan Fisik (Satpam)',
     cabang: 'Kantor Pusat Jakarta',
-    schedules: {
-      '2026-11-10': 'M',
-      '2026-11-11': 'M',
-      '2026-11-12': 'OFF',
-      '2026-11-13': 'OFF',
-      '2026-11-14': 'P',
-      '2026-11-15': 'S',
-      '2026-11-16': 'S',
-    },
+    wilayah: 'Wilayah DKI Jakarta & Banten',
+    schedules: generateMonthlySchedule(['M', 'M', 'OFF', 'OFF', 'P', 'S', 'S'], 3),
   },
   {
     id: 7,
@@ -175,16 +165,10 @@ export const rosterEmployees = [
     avatar: 'DL',
     role: 'Supervisor Customer Care',
     divisi: 'Layanan & CS',
+    departemen: 'Customer Contact Center',
     cabang: 'Cabang Bandung',
-    schedules: {
-      '2026-11-10': 'P',
-      '2026-11-11': 'P',
-      '2026-11-12': 'P',
-      '2026-11-13': 'P',
-      '2026-11-14': 'P',
-      '2026-11-15': 'OFF',
-      '2026-11-16': 'OFF',
-    },
+    wilayah: 'Wilayah Jawa Barat',
+    schedules: generateMonthlySchedule(['P', 'P', 'P', 'P', 'P', 'OFF', 'OFF'], 0),
   },
   {
     id: 8,
@@ -193,16 +177,10 @@ export const rosterEmployees = [
     avatar: 'RM',
     role: 'Helpdesk Call Center',
     divisi: 'Layanan & CS',
+    departemen: 'Customer Contact Center',
     cabang: 'Cabang Bandung',
-    schedules: {
-      '2026-11-10': 'S',
-      '2026-11-11': 'S',
-      '2026-11-12': 'S',
-      '2026-11-13': 'S',
-      '2026-11-14': 'S',
-      '2026-11-15': 'OFF',
-      '2026-11-16': 'OFF',
-    },
+    wilayah: 'Wilayah Jawa Barat',
+    schedules: generateMonthlySchedule(['S', 'S', 'S', 'S', 'S', 'OFF', 'OFF'], 0),
   },
   {
     id: 9,
@@ -211,16 +189,10 @@ export const rosterEmployees = [
     avatar: 'AH',
     role: 'Night Support Dispatcher',
     divisi: 'Layanan & CS',
+    departemen: 'Customer Contact Center',
     cabang: 'Cabang Bandung',
-    schedules: {
-      '2026-11-10': 'M',
-      '2026-11-11': 'M',
-      '2026-11-12': 'M',
-      '2026-11-13': 'M',
-      '2026-11-14': 'OFF',
-      '2026-11-15': 'OFF',
-      '2026-11-16': 'P',
-    },
+    wilayah: 'Wilayah Jawa Barat',
+    schedules: generateMonthlySchedule(['M', 'M', 'M', 'M', 'OFF', 'OFF', 'P'], 2),
   },
   {
     id: 10,
@@ -229,16 +201,10 @@ export const rosterEmployees = [
     avatar: 'WR',
     role: 'Supervisor Gudang & Rantai Pasok',
     divisi: 'Operasional Gudang',
+    departemen: 'Logistik & Distribusi',
     cabang: 'Gudang Logistik Cikarang',
-    schedules: {
-      '2026-11-10': 'P',
-      '2026-11-11': 'P',
-      '2026-11-12': 'P',
-      '2026-11-13': 'P',
-      '2026-11-14': 'P',
-      '2026-11-15': 'OFF',
-      '2026-11-16': 'OFF',
-    },
+    wilayah: 'Wilayah DKI Jakarta & Banten',
+    schedules: generateMonthlySchedule(['P', 'P', 'P', 'P', 'P', 'OFF', 'OFF'], 0),
   },
   {
     id: 11,
@@ -247,16 +213,10 @@ export const rosterEmployees = [
     avatar: 'SR',
     role: 'Petugas Sortir & Quality Check',
     divisi: 'Operasional Gudang',
+    departemen: 'Logistik & Distribusi',
     cabang: 'Gudang Logistik Cikarang',
-    schedules: {
-      '2026-11-10': 'S',
-      '2026-11-11': 'S',
-      '2026-11-12': 'S',
-      '2026-11-13': 'OFF',
-      '2026-11-14': 'OFF',
-      '2026-11-15': 'P',
-      '2026-11-16': 'P',
-    },
+    wilayah: 'Wilayah DKI Jakarta & Banten',
+    schedules: generateMonthlySchedule(['S', 'S', 'S', 'OFF', 'OFF', 'P', 'P'], 3),
   },
   {
     id: 12,
@@ -265,16 +225,10 @@ export const rosterEmployees = [
     avatar: 'DF',
     role: 'Forklift Operator Malam',
     divisi: 'Operasional Gudang',
+    departemen: 'Logistik & Distribusi',
     cabang: 'Gudang Logistik Cikarang',
-    schedules: {
-      '2026-11-10': 'M',
-      '2026-11-11': 'M',
-      '2026-11-12': 'M',
-      '2026-11-13': 'M',
-      '2026-11-14': 'OFF',
-      '2026-11-15': 'OFF',
-      '2026-11-16': 'S',
-    },
+    wilayah: 'Wilayah DKI Jakarta & Banten',
+    schedules: generateMonthlySchedule(['M', 'M', 'M', 'M', 'OFF', 'OFF', 'S'], 1),
   },
   {
     id: 13,
@@ -283,16 +237,10 @@ export const rosterEmployees = [
     avatar: 'IP',
     role: 'Dokter Klinik Perusahaan Pagi',
     divisi: 'Medis & Kesehatan',
+    departemen: 'Layanan Kesehatan & K3',
     cabang: 'Kantor Pusat Jakarta',
-    schedules: {
-      '2026-11-10': 'P',
-      '2026-11-11': 'P',
-      '2026-11-12': 'P',
-      '2026-11-13': 'P',
-      '2026-11-14': 'P',
-      '2026-11-15': 'OFF',
-      '2026-11-16': 'OFF',
-    },
+    wilayah: 'Wilayah DKI Jakarta & Banten',
+    schedules: generateMonthlySchedule(['P', 'P', 'P', 'P', 'P', 'OFF', 'OFF'], 0),
   },
   {
     id: 14,
@@ -301,16 +249,10 @@ export const rosterEmployees = [
     avatar: 'NA',
     role: 'Perawat On-Call / UGD',
     divisi: 'Medis & Kesehatan',
+    departemen: 'Layanan Kesehatan & K3',
     cabang: 'Kantor Pusat Jakarta',
-    schedules: {
-      '2026-11-10': 'S',
-      '2026-11-11': 'S',
-      '2026-11-12': 'OFF',
-      '2026-11-13': 'M',
-      '2026-11-14': 'M',
-      '2026-11-15': 'OFF',
-      '2026-11-16': 'P',
-    },
+    wilayah: 'Wilayah DKI Jakarta & Banten',
+    schedules: generateMonthlySchedule(['S', 'S', 'OFF', 'M', 'M', 'OFF', 'P'], 2),
   },
   {
     id: 15,
@@ -319,16 +261,10 @@ export const rosterEmployees = [
     avatar: 'EP',
     role: 'Teknisi MEP & Genset',
     divisi: 'Keamanan & Fasilitas',
+    departemen: 'Mekanikal, Elektrikal & Gedung',
     cabang: 'Kantor Pusat Jakarta',
-    schedules: {
-      '2026-11-10': 'C',
-      '2026-11-11': 'C',
-      '2026-11-12': 'P',
-      '2026-11-13': 'P',
-      '2026-11-14': 'S',
-      '2026-11-15': 'OFF',
-      '2026-11-16': 'OFF',
-    },
+    wilayah: 'Wilayah DKI Jakarta & Banten',
+    schedules: generateMonthlySchedule(['C', 'C', 'P', 'P', 'S', 'OFF', 'OFF', 'P', 'P', 'P', 'S', 'S', 'OFF', 'OFF'], 0),
   },
   {
     id: 16,
@@ -337,16 +273,130 @@ export const rosterEmployees = [
     avatar: 'RK',
     role: 'Facility Officer',
     divisi: 'Keamanan & Fasilitas',
+    departemen: 'Mekanikal, Elektrikal & Gedung',
     cabang: 'Kantor Pusat Jakarta',
-    schedules: {
-      '2026-11-10': 'P',
-      '2026-11-11': 'S',
-      '2026-11-12': 'S',
-      '2026-11-13': 'OFF',
-      '2026-11-14': 'OFF',
-      '2026-11-15': 'M',
-      '2026-11-16': 'M',
-    },
+    wilayah: 'Wilayah DKI Jakarta & Banten',
+    schedules: generateMonthlySchedule(['P', 'S', 'S', 'OFF', 'OFF', 'M', 'M'], 2),
+  },
+]
+
+// Struktur Pohon Wilayah & Kantor Cabang (Untuk BaseTree / BaseTreeSelect)
+export const locationTreeNodes = [
+  {
+    id: 'wilayah-dki',
+    label: 'Wilayah DKI Jakarta & Banten',
+    badge: '11 Pegawai',
+    children: [
+      { id: 'Kantor Pusat Jakarta', label: 'Kantor Pusat Jakarta (Menara Digaji)', badge: '8 Pegawai' },
+      { id: 'Gudang Logistik Cikarang', label: 'Gudang Logistik Cikarang', badge: '3 Pegawai' },
+    ],
+  },
+  {
+    id: 'wilayah-jabar',
+    label: 'Wilayah Jawa Barat',
+    badge: '3 Pegawai',
+    children: [
+      { id: 'Cabang Bandung', label: 'Cabang Bandung (Dago)', badge: '3 Pegawai' },
+    ],
+  },
+  {
+    id: 'wilayah-jatim',
+    label: 'Wilayah Jawa Timur',
+    badge: 'Cabang Baru',
+    children: [
+      { id: 'Cabang Surabaya', label: 'Cabang Surabaya (Gubeng)', badge: 'Standby' },
+    ],
+  },
+]
+
+// Struktur Pohon Organisasi: Divisi -> Departemen -> Jabatan (Untuk BaseTree / BaseTreeSelect)
+export const organizationTreeNodes = [
+  {
+    id: 'Teknologi & IT',
+    label: 'Divisi Teknologi & IT',
+    badge: '3 Pegawai',
+    children: [
+      {
+        id: 'dept-it-ops',
+        label: 'Departemen Software & Cloud 24/7',
+        children: [
+          { id: 'Lead IT Support 24/7', label: 'Lead IT Support 24/7' },
+          { id: 'Staff DevOps & Cloud', label: 'Staff DevOps & Cloud' },
+          { id: 'Network Engineer On-Site', label: 'Network Engineer On-Site' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'Keamanan & Fasilitas',
+    label: 'Divisi Keamanan & Fasilitas',
+    badge: '5 Pegawai',
+    children: [
+      {
+        id: 'dept-sec-guard',
+        label: 'Departemen Pengamanan Fisik (Satpam)',
+        children: [
+          { id: 'Supervisor Keamanan (Satpam)', label: 'Supervisor Keamanan (Satpam)' },
+          { id: 'Petugas Jaga Regu A', label: 'Petugas Jaga Regu A' },
+          { id: 'Petugas Jaga Regu B', label: 'Petugas Jaga Regu B' },
+        ],
+      },
+      {
+        id: 'dept-sec-facility',
+        label: 'Departemen Mekanikal, Elektrikal & Gedung',
+        children: [
+          { id: 'Teknisi MEP & Genset', label: 'Teknisi MEP & Genset' },
+          { id: 'Facility Officer', label: 'Facility Officer' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'Layanan & CS',
+    label: 'Divisi Layanan & CS',
+    badge: '3 Pegawai',
+    children: [
+      {
+        id: 'dept-cs-care',
+        label: 'Departemen Customer Contact Center',
+        children: [
+          { id: 'Supervisor Customer Care', label: 'Supervisor Customer Care' },
+          { id: 'Helpdesk Call Center', label: 'Helpdesk Call Center' },
+          { id: 'Night Support Dispatcher', label: 'Night Support Dispatcher' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'Operasional Gudang',
+    label: 'Divisi Operasional Gudang',
+    badge: '3 Pegawai',
+    children: [
+      {
+        id: 'dept-gudang-log',
+        label: 'Departemen Logistik & Distribusi',
+        children: [
+          { id: 'Supervisor Gudang & Rantai Pasok', label: 'Supervisor Gudang & Rantai Pasok' },
+          { id: 'Petugas Sortir & Quality Check', label: 'Petugas Sortir & Quality Check' },
+          { id: 'Forklift Operator Malam', label: 'Forklift Operator Malam' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'Medis & Kesehatan',
+    label: 'Divisi Medis & Kesehatan',
+    badge: '2 Pegawai',
+    children: [
+      {
+        id: 'dept-medis-k3',
+        label: 'Departemen Layanan Kesehatan & K3',
+        children: [
+          { id: 'Dokter Klinik Perusahaan Pagi', label: 'Dokter Klinik Perusahaan Pagi' },
+          { id: 'Perawat On-Call / UGD', label: 'Perawat On-Call / UGD' },
+        ],
+      },
+    ],
   },
 ]
 
@@ -354,7 +404,7 @@ export const shiftSwapRequests = [
   {
     id: 'SWAP-001',
     requestDate: '10 Nov 2026',
-    targetDate: '12 Nov 2026',
+    targetDate: '2026-11-12',
     requester: {
       id: 2,
       name: 'Bagas Wicaksono',
@@ -375,7 +425,7 @@ export const shiftSwapRequests = [
   {
     id: 'SWAP-002',
     requestDate: '09 Nov 2026',
-    targetDate: '14 Nov 2026',
+    targetDate: '2026-11-14',
     requester: {
       id: 5,
       name: 'Hendro Gunawan',
