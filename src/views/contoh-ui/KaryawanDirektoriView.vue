@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import BaseButton from '../../components/ui/BaseButton.vue'
 import BaseModal from '../../components/ui/BaseModal.vue'
 import ConfirmationModal from '../../components/ui/ConfirmationModal.vue'
@@ -55,6 +56,7 @@ import {
 } from 'lucide-vue-next'
 
 const toast = useToast()
+const router = useRouter()
 
 // ========================================================
 // 1. DATA MASTER & STATE PEGAWAI (24 KARYAWAN)
@@ -452,9 +454,7 @@ const profileTabs = [
 ]
 
 const openProfile = (emp) => {
-  selectedProfile.value = resolveEmployeeFullProfile(emp)
-  activeProfileTab.value = 'pribadi'
-  isProfileOpen.value = true
+  router.push(`/contoh-ui/karyawan/${emp.id}`)
 }
 
 // Format Data Pribadi untuk BaseDescriptionList

@@ -11,6 +11,7 @@ import StrukturOrganisasiView from '../views/contoh-ui/StrukturOrganisasiView.vu
 import RosterJadwalView from '../views/contoh-ui/RosterJadwalView.vue'
 import MasterShiftView from '../views/contoh-ui/MasterShiftView.vue'
 import MasterPolaView from '../views/contoh-ui/MasterPolaView.vue'
+import KaryawanDetailView from '../views/contoh-ui/KaryawanDetailView.vue'
 
 // meta.fixedHeight: halaman data/tabel mengunci tinggi sendiri (AppLayout memakai overflow-hidden)
 const routes = [
@@ -35,6 +36,16 @@ const routes = [
     name: 'ContohUiKaryawan',
     component: KaryawanDirektoriView,
     meta: { fixedHeight: true },
+  },
+  {
+    path: '/contoh-ui/karyawan/:id',
+    name: 'ContohUiKaryawanDetail',
+    component: KaryawanDetailView,
+    meta: { fixedHeight: true },
+  },
+  {
+    path: '/contoh-ui/detail-karyawan/:id?',
+    redirect: (to) => `/contoh-ui/karyawan/${to.params.id || 1}`,
   },
   {
     path: '/contoh-ui/organisasi',

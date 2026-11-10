@@ -27,7 +27,9 @@ const router = useRouter()
 const route = useRoute()
 
 const isSubActive = (path) => {
-  return route.path === path
+  if (route.path === path) return true
+  if (path !== '/' && route.path.startsWith(path + '/')) return true
+  return false
 }
 
 const handleNavigate = (path) => {

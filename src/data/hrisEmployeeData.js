@@ -430,3 +430,211 @@ export const hrisEmployeeList = [
   },
 ]
 
+// ========================================================
+// HELPER: RESOLVE EMPLOYEE FULL PROFILE UNTUK DETAIL PAGE
+// ========================================================
+import { karyawanList } from './karyawanData.js'
+
+export const resolveEmployeeFullProfile = (empOrId) => {
+  const id = typeof empOrId === 'object' && empOrId !== null ? empOrId.id : Number(empOrId)
+  
+  // 1. Cek di hrisEmployeeList terlebih dahulu
+  const matchedHris = hrisEmployeeList.find((e) => e.id === id)
+  const matchedBasic = karyawanList.find((e) => e.id === id) || (typeof empOrId === 'object' ? empOrId : null)
+
+  const emp = matchedHris || matchedBasic || karyawanList[0]
+
+  const cleanName = emp.nama ? emp.nama.replace(/,.*$/, '') : 'Pegawai'
+  const names = cleanName.split(' ')
+  const initials = emp.avatar || names.map((n) => n[0]).slice(0, 2).join('').toUpperCase()
+  const gajiPokok = emp.gaji || emp.payroll?.gajiPokok || 16000000
+  const tunjangan = emp.tunjangan || emp.payroll?.tunjanganJabatan || 2500000
+  const bankName = emp.rekening ? emp.rekening.split(' - ')[0] : 'BCA'
+  const rekNo = emp.rekening ? emp.rekening.split(' - ')[1] : `88201948${String(emp.id).padStart(2, '0')}`
+  const lokasi = emp.lokasi || emp.cabang || 'Kantor Pusat Jakarta'
+  const divisi = emp.divisi || 'Teknologi & IT'
+  const jabatan = emp.jabatan || 'Spesialis Operasional'
+  const status = emp.status || 'Tetap'
+  const bpjsAktif = emp.bpjsAktif ?? true
+  const tanggalMasuk = emp.tanggalMasuk || '10 Jan 2021'
+
+  // Sub-kelompok Data Pribadi terperinci sesuai spesifikasi pengguna
+  const pribadiPekerjaan = {
+    kantor: lokasi,
+    jabatan: jabatan,
+    divisi: divisi,
+    departemen: emp.departemen || divisi,
+    level: emp.level || (status === 'Tetap' ? 'L3 - Senior Staff' : 'L2 - Junior Staff'),
+    status: status,
+    tanggalMasuk: tanggalMasuk,
+    masaKerja: emp.masaKerja || '3 Tahun 10 Bulan',
+  }
+
+  const pribadiBiodata = {
+    namaLengkap: emp.nama,
+    namaPanggilan: emp.panggilan || names[0],
+    kredensialLogin: emp.email || `${cleanName.toLowerCase().replace(/\s+/g, '.')}@digaji.id`,
+    akunId: `USR-${String(emp.id).padStart(4, '0')}`,
+    tempatTanggalLahir: emp.pribadi?.tanggalLahir
+      ? `${emp.pribadi.tempatLahir || lokasi}, ${emp.pribadi.tanggalLahir}`
+      : `${lokasi}, 14 Mei 1994 (30 Tahun)`,
+    jenisKelamin: emp.pribadi?.jenisKelamin || (['AP', 'RK', 'JT', 'SR', 'DK', 'NP', 'CN'].includes(initials) ? 'Perempuan' : 'Laki-Laki'),
+    agama: emp.pribadi?.agama || 'Islam',
+    statusPernikahan: emp.pribadi?.statusPernikahan || 'Kawin (K/1)',
+    ptkp: emp.pribadi?.ptkp || 'K/1 (Penghasilan Tidak Kena Pajak)',
+  }
+
+  const pribadiIdentitas = {
+    nik: emp.pribadi?.nik || `31710214059400${String(emp.id).padStart(2, '0')}`,
+    npwp: emp.pribadi?.npwp || `81.234.567.8-${String(emp.id).padStart(3, '0')}.000`,
+    telepon: emp.telepon || emp.pribadi?.telepon || '0812-3456-7890',
+    emailPribadi: emp.pribadi?.emailPribadi || `${cleanName.toLowerCase().replace(/\s+/g, '.')}94@gmail.com`,
+    alamatKtp: emp.pribadi?.alamatKtp || `Jl. Melati Raya No. ${emp.id * 7}, Tebet, ${lokasi}`,
+    alamatDomisili: emp.pribadi?.alamatDomisili || `Jl. Melati Raya No. ${emp.id * 7}, Tebet, ${lokasi} (Sesuai KTP)`,
+    statusTempatTinggal: 'Milik Sendiri / Keluarga',
+  }
+
+  const pribadiKeluarga = {
+    pendidikanTerakhir: emp.pribadi?.pendidikanTerakhir || 'S1 Teknik Informatika - Institut Teknologi Bandung (ITB)',
+    tahunKelulusan: 'Tahun 2016 · IPK 3.78',
+    namaIbuKandung: emp.pribadi?.namaIbuKandung || 'Hj. Siti Rahmawati',
+    namaPasangan: emp.pribadi?.kontakDaruratNama || 'Nurul Hidayah',
+    kontakDaruratNama: emp.pribadi?.kontakDaruratNama || 'Nurul Hidayah',
+    kontakDaruratHubungan: emp.pribadi?.kontakDaruratHubungan || 'Istri / Pasangan',
+    kontakDaruratTelp: emp.pribadi?.kontakDaruratTelp || '0813-8899-7711',
+  }
+
+  // Presensi & Shift
+  const presensi = matchedHris?.presensi || {
+    kehadiranBulanIni: '96.2%',
+    tepatWaktu: 21,
+    terlambat: 1,
+    cuti: 1,
+    sakit: 0,
+    alpha: 0,
+    totalJamKerja: '172 Jam',
+    jadwalShift: 'Reguler Pagi (08:00 - 17:00 WIB)',
+    toleransiTelat: '15 Menit',
+    lokasiGeofence: `${lokasi} (Radius Maks. 50 Meter)`,
+    riwayatTerbaru: [
+      { tgl: '10 Nov 2026', masuk: '07:54 WIB', pulang: '17:05 WIB', status: 'Tepat Waktu', lokasi: `${lokasi} (Radius 12m)` },
+      { tgl: '09 Nov 2026', masuk: '08:02 WIB', pulang: '17:15 WIB', status: 'Tepat Waktu', lokasi: `${lokasi} (Radius 15m)` },
+      { tgl: '08 Nov 2026', masuk: '08:18 WIB', pulang: '17:30 WIB', status: 'Terlambat 18m', lokasi: `${lokasi} (Radius 28m)` },
+      { tgl: '07 Nov 2026', masuk: '07:50 WIB', pulang: '17:00 WIB', status: 'Tepat Waktu', lokasi: `${lokasi} (Radius 10m)` },
+      { tgl: '06 Nov 2026', masuk: '-', pulang: '-', status: 'Cuti Tahunan (Disetujui)', lokasi: 'Cuti Resmi' },
+    ],
+  }
+
+  // Payroll & Kompensasi
+  const payroll = matchedHris?.payroll || {
+    gajiPokok: gajiPokok,
+    tunjanganJabatan: tunjangan,
+    tunjanganMakanTransport: 1500000,
+    upahLemburEstimasi: 750000,
+    potonganBpjs: Math.round(gajiPokok * 0.04),
+    potonganPph21: Math.round(gajiPokok * 0.05),
+    netSalaryEstimasi: gajiPokok + tunjangan + 1500000 + 750000 - Math.round(gajiPokok * 0.09),
+    bank: bankName,
+    rekeningNomor: rekNo,
+    rekeningNama: emp.nama,
+    metodePajak: 'TER Kategori A (Gross-Up Perusahaan)',
+  }
+
+  // BPJS & Asuransi
+  const bpjs = matchedHris?.bpjs || {
+    bpjsTkNomor: `01928374${String(emp.id).padStart(3, '0')}`,
+    bpjsTkStatus: bpjsAktif ? 'Aktif (Perusahaan)' : 'Tidak Aktif',
+    bpjsTkProgram: 'JKK, JKM, JHT, JP',
+    bpjsKesNomor: `0001928374${String(emp.id).padStart(3, '0')}`,
+    bpjsKesStatus: bpjsAktif ? 'Aktif (Kelas 1)' : 'Tidak Aktif',
+    faskes1: `Klinik Pratama Sehat Mandiri (${lokasi})`,
+    tanggunganKeluarga: '2 Jiwa (Istri & 1 Anak Terdaftar)',
+  }
+
+  // Dokumen Digital
+  const dokumen = matchedHris?.dokumen || [
+    { id: `doc-${emp.id}-1`, title: 'Kartu Tanda Penduduk (KTP)', category: 'Identitas', fileNumber: pribadiIdentitas.nik, fileName: `ktp_${cleanName.toLowerCase().replace(/\s+/g, '_')}.pdf`, fileSize: '1.2 MB', updatedAt: tanggalMasuk, status: 'verified' },
+    { id: `doc-${emp.id}-2`, title: 'Nomor Pokok Wajib Pajak (NPWP)', category: 'Pajak', fileNumber: pribadiIdentitas.npwp, fileName: `npwp_${cleanName.toLowerCase().replace(/\s+/g, '_')}.pdf`, fileSize: '850 KB', updatedAt: tanggalMasuk, status: 'verified' },
+    { id: `doc-${emp.id}-3`, title: 'Kartu Keluarga (KK)', category: 'Identitas', fileNumber: `31710299011900${String(emp.id).padStart(2, '0')}`, fileName: `kk_keluarga_${cleanName.toLowerCase().replace(/\s+/g, '_')}.pdf`, fileSize: '1.8 MB', updatedAt: '15 Mar 2022', status: 'verified' },
+    { id: `doc-${emp.id}-4`, title: 'Ijazah S1 Pendidikan Terakhir', category: 'Pendidikan', fileNumber: `IJZ-2016-${emp.id * 100}`, fileName: `ijazah_s1_${cleanName.toLowerCase().replace(/\s+/g, '_')}.pdf`, fileSize: '3.4 MB', updatedAt: tanggalMasuk, status: 'verified' },
+    { id: `doc-${emp.id}-5`, title: 'SK Perjanjian Kerja Tetap (PKWTT)', category: 'Legalitas', fileNumber: `SK-HRIS/2021/${emp.id}`, fileName: `sk_kerja_${cleanName.toLowerCase().replace(/\s+/g, '_')}.pdf`, fileSize: '2.1 MB', updatedAt: tanggalMasuk, status: 'verified' },
+    { id: `doc-${emp.id}-6`, title: 'Buku Tabungan Payroll BCA', category: 'Keuangan', fileNumber: `Rek: ${rekNo}`, fileName: `buku_tabungan_${bankName.toLowerCase()}.pdf`, fileSize: '980 KB', updatedAt: tanggalMasuk, status: 'verified' },
+  ]
+
+  // Galeri Foto Presensi, Surat & Kerja
+  const galeri = matchedHris?.galeri || [
+    { id: `gal-${emp.id}-1`, title: 'Presensi Masuk (Selfie Liveness)', category: 'absen', categoryLabel: 'Foto Presensi', timestamp: '10 Nov 2026, 07:54 WIB', location: `${lokasi} (Radius 12m)`, imageUrl: '' },
+    { id: `gal-${emp.id}-2`, title: 'Presensi Pulang (Selfie Liveness)', category: 'absen', categoryLabel: 'Foto Presensi', timestamp: '09 Nov 2026, 17:15 WIB', location: `${lokasi} (Radius 15m)`, imageUrl: '' },
+    { id: `gal-${emp.id}-3`, title: 'Surat Keterangan Dokter (SKD) / Cuti', category: 'surat', categoryLabel: 'Surat Izin / Dokter', timestamp: '05 Nov 2026', location: 'Disetujui Tim Medis & HRD', imageUrl: '' },
+    { id: `gal-${emp.id}-4`, title: 'Dokumentasi Aktivitas & Seragam Kerja', category: 'kerja', categoryLabel: 'Dokumentasi Kerja', timestamp: '01 Nov 2026', location: `Ruang Kerja ${divisi}`, imageUrl: '' },
+  ]
+
+  return {
+    id: emp.id,
+    nip: emp.nip,
+    nama: emp.nama,
+    panggilan: names[0],
+    avatar: initials,
+    jabatan: jabatan,
+    divisi: divisi,
+    departemen: emp.departemen || divisi,
+    cabang: lokasi,
+    lokasi: lokasi,
+    status: status,
+    statusBadge: status === 'Tetap' ? 'success' : status === 'Kontrak' ? 'warning' : 'info',
+    level: pribadiPekerjaan.level,
+    tanggalMasuk: tanggalMasuk,
+    masaKerja: pribadiPekerjaan.masaKerja,
+    gaji: gajiPokok,
+    tunjangan: tunjangan,
+    bpjsAktif: bpjsAktif,
+
+    // Sub-data terstruktur
+    pribadi: {
+      ...emp.pribadi,
+      pekerjaan: pribadiPekerjaan,
+      biodata: pribadiBiodata,
+      identitas: pribadiIdentitas,
+      keluarga: pribadiKeluarga,
+      // Backward compatibility props
+      nik: pribadiIdentitas.nik,
+      npwp: pribadiIdentitas.npwp,
+      tempatLahir: lokasi,
+      tanggalLahir: pribadiBiodata.tempatTanggalLahir.split(', ')[1] || '14 Mei 1994 (30 Tahun)',
+      jenisKelamin: pribadiBiodata.jenisKelamin,
+      agama: pribadiBiodata.agama,
+      statusPernikahan: pribadiBiodata.statusPernikahan,
+      ptkp: pribadiBiodata.ptkp,
+      emailKantor: pribadiBiodata.kredensialLogin,
+      emailPribadi: pribadiIdentitas.emailPribadi,
+      telepon: pribadiIdentitas.telepon,
+      alamatKtp: pribadiIdentitas.alamatKtp,
+      alamatDomisili: pribadiIdentitas.alamatDomisili,
+      kontakDaruratNama: pribadiKeluarga.kontakDaruratNama,
+      kontakDaruratHubungan: pribadiKeluarga.kontakDaruratHubungan,
+      kontakDaruratTelp: pribadiKeluarga.kontakDaruratTelp,
+      pendidikanTerakhir: pribadiKeluarga.pendidikanTerakhir,
+    },
+
+    presensi,
+    payroll,
+    bpjs,
+    dokumen,
+    galeri,
+  }
+}
+
+// Seluruh daftar karyawan untuk switcher / dropdown
+export const getAllEmployeesList = () => {
+  return karyawanList.map((emp) => ({
+    id: emp.id,
+    nip: emp.nip,
+    nama: emp.nama,
+    jabatan: emp.jabatan,
+    divisi: emp.divisi,
+    lokasi: emp.lokasi,
+    avatar: emp.avatar,
+    status: emp.status,
+  }))
+}
+
