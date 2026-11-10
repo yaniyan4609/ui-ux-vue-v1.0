@@ -360,7 +360,7 @@ const getShiftBadgeClasses = (code) => {
 
 // ========================================================
 // 6. GENERATE & PREVIEW LOGIC: FORMAT KALENDER 7 KOLOM
-//    (Tidak Geser Kanan-Kiri, Mengikuti Layout Modal Pola)
+//    (Hanya Menampilkan Nama Shift Saja di Setiap Cell)
 // ========================================================
 const durationOptions = [
   { label: 'Mingguan (7 Hari)', value: 'weekly' },
@@ -368,9 +368,6 @@ const durationOptions = [
 ]
 
 const dayNamesIndo = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
-
-// Filter tampilan pegawai pada pratinjau: 'all' atau specific employee ID
-const previewEmployeeFilter = ref('all')
 
 // Hari-hari aktif (Mingguan: 7 hari pertama; Bulanan: 30 hari penuh)
 const activeDaysList = computed(() => {
@@ -414,7 +411,7 @@ const getSelectedPattern = (draft) => {
   return list.find((p) => p.id === draft.selectedPatternId) || list[0] || dbPatterns.value[0]
 }
 
-// Generate jadwal berdasarkan pola untuk draft tertentu
+// Generate jadwal berdasarkan pola untuk draft tertentu (Semua pegawai di draft ini mengikuti shift draft)
 const generateRosterForDraft = (draft) => {
   if (!draft) return
   const patternObj = getSelectedPattern(draft)
@@ -422,13 +419,13 @@ const generateRosterForDraft = (draft) => {
 
   const newSchedule = { ...draft.generatedSchedule }
 
-  draft.selectedEmployeeIds.forEach((empId, empIndex) => {
+  draft.selectedEmployeeIds.forEach((empId) => {
     if (!newSchedule[empId]) {
       newSchedule[empId] = {}
     }
 
     props.days.forEach((day, dayIndex) => {
-      const shiftIndex = (dayIndex + empIndex) % pattern.length
+      const shiftIndex = dayIndex % pattern.length
       newSchedule[empId][day.date] = pattern[shiftIndex]
     })
   })
@@ -436,82 +433,53 @@ const generateRosterForDraft = (draft) => {
   draft.generatedSchedule = newSchedule
 }
 
-// Override cell shift manual pada preview kalender
-const activePopoverCell = ref(null) // { empId, date, applyAll }
+// Mendapatkan shift untuk tanggal tertentu pada draft yang aktif
+const getDayDraftShift = (date) => {
+  if (!activeDraft.value) return 'OFF'
+  const firstEmpId = activeDraft.value.selectedEmployeeIds[0]
+  if (firstEmpId && activeDraft.value.generatedSchedule?.[firstEmpId]?.[date]) {
+    return activeDraft.value.generatedSchedule[firstEmpId][date]
+  }
+  const patternObj = getSelectedPattern(activeDraft.value)
+  const pattern = patternObj?.pattern || ['P', 'P', 'P', 'P', 'P', 'OFF', 'OFF']
+  const dayIndex = props.days.findIndex((d) => d.date === date)
+  const pIdx = (dayIndex >= 0 ? dayIndex : 0) % pattern.length
+  return pattern[pIdx] || 'OFF'
+}
 
-const openCellShiftPopover = (empId, date, applyAll = false) => {
-  if (
-    activePopoverCell.value &&
-    activePopoverCell.value.empId === empId &&
-    activePopoverCell.value.date === date &&
-    activePopoverCell.value.applyAll === applyAll
-  ) {
+// Override cell shift manual pada preview kalender
+const activePopoverCell = ref(null) // { date }
+
+const openCellShiftPopover = (date) => {
+  if (activePopoverCell.value && activePopoverCell.value.date === date) {
     activePopoverCell.value = null
   } else {
-    activePopoverCell.value = { empId, date, applyAll }
+    activePopoverCell.value = { date }
   }
 }
 
 const setCellShift = (code) => {
   if (!activePopoverCell.value || !activeDraft.value) return
-  const { empId, date, applyAll } = activePopoverCell.value
+  const { date } = activePopoverCell.value
 
-  if (applyAll) {
-    // Terapkan ke semua pegawai di draft aktif pada tanggal ini
-    activeDraft.value.selectedEmployeeIds.forEach((eId) => {
-      if (!activeDraft.value.generatedSchedule[eId]) {
-        activeDraft.value.generatedSchedule[eId] = {}
-      }
-      activeDraft.value.generatedSchedule[eId][date] = code
-    })
-  } else if (empId) {
-    // Terapkan ke satu pegawai spesifik
+  // Terapkan ke seluruh pegawai di draft ini pada tanggal tersebut
+  activeDraft.value.selectedEmployeeIds.forEach((empId) => {
     if (!activeDraft.value.generatedSchedule[empId]) {
       activeDraft.value.generatedSchedule[empId] = {}
     }
     activeDraft.value.generatedSchedule[empId][date] = code
-  }
+  })
 
   activePopoverCell.value = null
-}
-
-// Total jam kerja pegawai dalam periode pratinjau
-const calculateEmpTotalHours = (empId) => {
-  if (!activeDraft.value?.generatedSchedule?.[empId]) return 0
-  let total = 0
-  activeDaysList.value.forEach((day) => {
-    const code = activeDraft.value.generatedSchedule[empId][day.date]
-    const meta = getShiftMeta(code)
-    total += meta.hours || 0
-  })
-  return total
-}
-
-// Coverage harian
-const getDailyCoverage = (date) => {
-  const summary = { P: 0, S: 0, M: 0, OFF: 0 }
-  activeDraft.value?.selectedEmployeeIds.forEach((empId) => {
-    const code = activeDraft.value.generatedSchedule?.[empId]?.[date] || 'OFF'
-    if (summary[code] !== undefined) summary[code]++
-  })
-  return summary
 }
 
 // ========================================================
 // 7. SUB-MODAL: BUAT POLA ROSTER BARU (MINGGUAN / BULANAN)
 //    - Ukuran Lebar & Tinggi SAMA untuk Mingguan & Bulanan
 //    - Shift Warna-Warni
-//    - Simpan ke Pola Berbentuk Toggle
+//    - Simpan ke Pola Berbentuk Toggle Switch
 // ========================================================
 const isCreatePatternModalOpen = ref(false)
-
-const shiftSelectOptions = computed(() => [
-  { label: 'P (Shift Pagi)', value: 'P', badge: '07:00' },
-  { label: 'S (Shift Siang)', value: 'S', badge: '15:00' },
-  { label: 'M (Shift Malam)', value: 'M', badge: '23:00' },
-  { label: 'OFF (Libur)', value: 'OFF', badge: 'Bebas' },
-  { label: 'C (Cuti / Izin)', value: 'C', badge: 'Izin' },
-])
 
 const patternTypeOptions = [
   { label: 'Mingguan (7 Hari)', value: 'weekly', icon: CalendarDays },
@@ -858,7 +826,6 @@ watch(
               size="sm"
               align="left"
             />
-            <!-- REVISI 1: Filter Divisi menggunakan align='right' agar popover melebar ke kiri -->
             <BaseSearchableSelect
               v-model="selectedOrgFilter"
               :options="orgFilterOptions"
@@ -920,8 +887,7 @@ watch(
 
       <!-- ======================================================== -->
       <!-- 2. RIGHT PANEL: TABS DRAFT & TABEL ROSTER KALENDER       -->
-      <!--    REVISI 5 & 6: Layout Kalender 7 Kolom Seperti Modal   -->
-      <!--    Pola, Tanpa Perlu Geser Kanan-Kiri                    -->
+      <!--    REVISI TERAKHIR: Hanya Menampilkan Nama Shift Saja    -->
       <!-- ======================================================== -->
       <div class="flex-1 min-w-0 flex flex-col min-h-0 bg-white dark:bg-[var(--theme-surface)] overflow-hidden">
         
@@ -975,7 +941,7 @@ watch(
           </div>
         </div>
 
-        <!-- Controls Bar: Periode & Pemilih Pegawai Pratinjau -->
+        <!-- Controls Bar: Periode & Daftar Pegawai di Draft Aktif -->
         <div class="px-3.5 py-2 border-b border-neutral-200 dark:border-[var(--theme-border)] flex flex-wrap items-center justify-between gap-2.5 shrink-0 bg-white dark:bg-[var(--theme-surface)]">
           <div class="flex items-center gap-2">
             <!-- Toggle Periode Mingguan vs Bulanan -->
@@ -991,37 +957,19 @@ watch(
             </div>
           </div>
 
-          <!-- Selector Pegawai Pratinjau Kalender (Memudahkan Tinjau Tanpa Geser Kanan-Kiri) -->
-          <div class="flex items-center gap-1.5 min-w-0 overflow-x-auto no-scrollbar text-xs">
-            <span class="text-neutral-400 text-[11px] shrink-0 mr-0.5">Lihat Pegawai:</span>
-            <button
-              type="button"
-              @click="previewEmployeeFilter = 'all'"
-              class="px-2 py-0.5 rounded-lg text-xs font-semibold border transition cursor-pointer shrink-0"
-              :class="previewEmployeeFilter === 'all'
-                ? 'bg-[var(--theme-primary-soft)] text-[var(--theme-primary)] border-[var(--theme-primary)] font-bold'
-                : 'bg-neutral-50 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 border-neutral-200 dark:border-[var(--theme-border)] hover:bg-neutral-100'"
-            >
-              Semua ({{ activeDraft?.selectedEmployeeIds.length || 0 }})
-            </button>
-            <button
-              v-for="empId in activeDraft?.selectedEmployeeIds"
-              :key="empId"
-              @click="previewEmployeeFilter = empId"
-              class="px-2 py-0.5 rounded-lg text-xs font-semibold border transition cursor-pointer shrink-0 flex items-center gap-1"
-              :class="previewEmployeeFilter === empId
-                ? 'bg-[var(--theme-primary-soft)] text-[var(--theme-primary)] border-[var(--theme-primary)] font-bold'
-                : 'bg-neutral-50 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 border-neutral-200 dark:border-[var(--theme-border)] hover:bg-neutral-100'"
-            >
-              <BaseAvatar :name="getEmployeeName(empId)" size="xs" />
-              <span class="truncate max-w-[85px]">{{ getEmployeeShortName(empId) }}</span>
-            </button>
+          <!-- Ringkasan Pegawai di Draft Aktif -->
+          <div class="flex items-center gap-1.5 text-xs min-w-0">
+            <Users class="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+            <span class="text-neutral-400 text-[11px] shrink-0">Pegawai ({{ activeDraft?.selectedEmployeeIds.length || 0 }}):</span>
+            <span class="font-bold text-neutral-800 dark:text-neutral-200 truncate max-w-xs text-[11px]">
+              {{ activeDraft?.selectedEmployeeIds.map(id => getEmployeeShortName(id)).join(', ') || 'Belum ada pegawai dipilih' }}
+            </span>
           </div>
         </div>
 
         <!-- ======================================================== -->
         <!-- TABEL ROSTER KALENDER 7 KOLOM (SENIN - MINGGU)           -->
-        <!-- Sesuai Permintaan: Persis Seperti Modal Pola, Tanpa Scroll -->
+        <!-- HANYA MENAMPILKAN NAMA SHIFT SAJA DI SETIAP CELL         -->
         <!-- ======================================================== -->
         <div class="flex-1 min-h-0 overflow-y-auto p-3 relative">
           <div
@@ -1045,7 +993,7 @@ watch(
                   <th
                     v-for="dayName in dayNamesIndo"
                     :key="dayName"
-                    class="py-2 px-1.5 text-center border-r border-neutral-200/80 dark:border-[var(--theme-border)] last:border-r-0 text-xs"
+                    class="py-2 px-1 text-center border-r border-neutral-200/80 dark:border-[var(--theme-border)] last:border-r-0 text-xs"
                   >
                     {{ dayName }}
                   </th>
@@ -1062,107 +1010,58 @@ watch(
                   <td
                     v-for="(cell, cIdx) in week"
                     :key="cIdx"
-                    class="p-1.5 transition align-top min-h-[72px]"
+                    class="p-1.5 transition align-top relative"
                     :class="cell ? 'bg-white dark:bg-[var(--theme-surface)] hover:bg-neutral-50/50' : 'bg-neutral-50/40 dark:bg-neutral-900/10'"
                   >
                     <template v-if="cell">
                       <!-- Header Tanggal Cell -->
-                      <div class="flex items-center justify-between mb-1">
-                        <div class="flex items-center gap-1">
-                          <span
-                            class="w-5 h-5 rounded-md flex items-center justify-center text-[10.5px] font-bold shadow-2xs"
-                            :class="cell.isToday
-                              ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-extrabold'
-                              : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300'"
-                          >
-                            {{ cell.dayNumber }}
-                          </span>
-                          <span class="text-[9.5px] text-neutral-400 font-mono">{{ cell.dateLabel }}</span>
-                        </div>
-
-                        <!-- Coverage Info Singkat -->
-                        <span class="text-[9.5px] font-mono text-neutral-400">
-                          P:{{ getDailyCoverage(cell.date).P }} S:{{ getDailyCoverage(cell.date).S }}
+                      <div class="flex items-center justify-between mb-1.5">
+                        <span
+                          class="w-5 h-5 rounded-md flex items-center justify-center text-[10.5px] font-bold shadow-2xs"
+                          :class="cell.isToday
+                            ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-extrabold'
+                            : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300'"
+                        >
+                          {{ cell.dayNumber }}
                         </span>
+                        <span class="text-[9.5px] text-neutral-400 font-mono">{{ cell.dateLabel }}</span>
                       </div>
 
-                      <!-- Mode A: Pratinjau Satu Pegawai Spesifik (Pill Shift Penuh Warna) -->
-                      <div v-if="previewEmployeeFilter !== 'all'">
-                        <button
-                          type="button"
-                          @click.stop="openCellShiftPopover(previewEmployeeFilter, cell.date, false)"
-                          class="w-full py-1.5 px-2 rounded-xl text-xs font-bold border transition flex items-center justify-between gap-1 cursor-pointer"
-                          :class="getShiftBadgeClasses(activeDraft.generatedSchedule?.[previewEmployeeFilter]?.[cell.date])"
-                          :title="`Ubah shift ${cell.dayName}, ${cell.dateLabel}`"
-                        >
-                          <div class="flex items-center gap-1.5 min-w-0">
-                            <span class="w-4 h-4 rounded-md flex items-center justify-center text-[10px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30">
-                              {{ activeDraft.generatedSchedule?.[previewEmployeeFilter]?.[cell.date] || 'OFF' }}
-                            </span>
-                            <span class="text-[11px] font-bold truncate">
-                              {{ getShiftMeta(activeDraft.generatedSchedule?.[previewEmployeeFilter]?.[cell.date]).name }}
-                            </span>
-                          </div>
-                          <ChevronDown class="w-3 h-3 opacity-50 shrink-0" />
-                        </button>
-                      </div>
-
-                      <!-- Mode B: Pratinjau Semua Pegawai di Draft (Mini Chip Shift Warna-Warni) -->
-                      <div v-else class="space-y-1">
-                        <div
-                          v-for="empId in activeDraft.selectedEmployeeIds"
-                          :key="empId"
-                          @click.stop="openCellShiftPopover(empId, cell.date, false)"
-                          class="px-1.5 py-0.5 rounded-lg text-[10.5px] font-bold border flex items-center justify-between gap-1 transition cursor-pointer hover:scale-102"
-                          :class="getShiftBadgeClasses(activeDraft.generatedSchedule?.[empId]?.[cell.date])"
-                          :title="`${getEmployeeName(empId)}: ${getShiftMeta(activeDraft.generatedSchedule?.[empId]?.[cell.date]).name}`"
-                        >
-                          <span class="truncate max-w-[65px] text-[10px] font-medium">{{ getEmployeeShortName(empId) }}</span>
-                          <span class="font-mono text-[9.5px] font-black shrink-0 px-1 py-0.2 rounded bg-white/60 dark:bg-black/20">
-                            {{ activeDraft.generatedSchedule?.[empId]?.[cell.date] || 'OFF' }}
-                          </span>
-                        </div>
-
-                        <!-- Tombol Cepat Set Semua Shift Tanggal Ini -->
-                        <button
-                          type="button"
-                          @click.stop="openCellShiftPopover(null, cell.date, true)"
-                          class="w-full text-[9.5px] text-neutral-400 hover:text-[var(--theme-primary)] hover:underline pt-0.5 text-center block cursor-pointer"
-                        >
-                          + Set Semua
-                        </button>
-                      </div>
+                      <!-- TOMBOL NAMA SHIFT NYA SAJA (Warna-warni sesuai jenis shift) -->
+                      <button
+                        type="button"
+                        @click.stop="openCellShiftPopover(cell.date)"
+                        class="w-full py-1.5 px-2 rounded-xl text-xs font-bold border transition flex items-center justify-between gap-1 shadow-2xs cursor-pointer"
+                        :class="getShiftBadgeClasses(getDayDraftShift(cell.date))"
+                        :title="`Ubah shift ${cell.dayName}, ${cell.dateLabel} untuk ${activeDraft.name}`"
+                      >
+                        <span class="truncate">{{ getShiftMeta(getDayDraftShift(cell.date)).name }}</span>
+                        <ChevronDown class="w-3.5 h-3.5 opacity-60 shrink-0" />
+                      </button>
 
                       <!-- Popover Ganti Shift Cepat -->
                       <div
                         v-if="activePopoverCell && activePopoverCell.date === cell.date"
-                        class="absolute z-50 mt-1 left-2 right-2 max-w-[200px] p-2 rounded-xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-xl text-left"
+                        class="absolute z-50 top-full mt-1 left-1 right-1 p-1.5 rounded-xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-xl text-left space-y-1"
                         @click.stop
                       >
-                        <div class="text-[10px] uppercase font-bold text-neutral-400 mb-1.5 px-1 flex items-center justify-between">
-                          <span>{{ activePopoverCell.applyAll ? 'Set Semua Pegawai' : 'Pilih Shift' }}</span>
+                        <div class="text-[10px] uppercase font-bold text-neutral-400 mb-1 px-1 flex items-center justify-between">
+                          <span>Pilih Shift ({{ cell.dayName }})</span>
                           <button type="button" @click="activePopoverCell = null" class="text-neutral-400 hover:text-neutral-600">
                             <X class="w-3 h-3" />
                           </button>
                         </div>
-                        <div class="space-y-1">
-                          <button
-                            v-for="st in shiftTypes"
-                            :key="st.code"
-                            type="button"
-                            @click="setCellShift(st.code)"
-                            class="w-full px-2 py-1 rounded-lg text-xs font-semibold flex items-center justify-between transition cursor-pointer"
-                            :class="getShiftBadgeClasses(st.code)"
-                          >
-                            <div class="flex items-center gap-1.5">
-                              <span class="w-4 h-4 rounded flex items-center justify-center text-[10px] font-black bg-white/70 dark:bg-black/30">
-                                {{ st.code }}
-                              </span>
-                              <span>{{ st.name }}</span>
-                            </div>
-                            <span class="text-[9.5px] opacity-70">{{ st.time }}</span>
-                          </button>
-                        </div>
+                        <button
+                          v-for="st in shiftTypes"
+                          :key="st.code"
+                          type="button"
+                          @click="setCellShift(st.code)"
+                          class="w-full px-2 py-1.5 rounded-lg text-xs font-bold flex items-center justify-between transition cursor-pointer"
+                          :class="getShiftBadgeClasses(st.code)"
+                        >
+                          <span>{{ st.name }}</span>
+                          <span class="text-[10px] opacity-70 font-mono">{{ st.time }}</span>
+                        </button>
                       </div>
 
                     </template>
@@ -1202,9 +1101,6 @@ watch(
 
   <!-- ======================================================== -->
   <!-- 3. SUB-MODAL: BUAT POLA ROSTER BARU (MINGGUAN / BULANAN) -->
-  <!--    REVISI 2: Shift Warna-Warni                           -->
-  <!--    REVISI 3: Simpan Ke Pola Berbentuk Toggle Switch      -->
-  <!--    REVISI 4: Bentuk Modal Lebar & Tinggi SAMA Konsisten  -->
   <!-- ======================================================== -->
   <BaseModal
     v-model="isCreatePatternModalOpen"
@@ -1212,7 +1108,6 @@ watch(
     subtitle="Definisikan urutan rotasi shift mingguan atau kalender bulanan penuh"
     size="xl"
   >
-    <!-- REVISI 4: Container Fixed Height h-[490px] agar ukuran modal SAMA PERSIS baik mingguan maupun bulanan -->
     <div class="h-[490px] flex flex-col min-h-0 space-y-3 text-xs">
       
       <!-- Baris 1: Nama & Deskripsi Pola -->
@@ -1235,7 +1130,7 @@ watch(
         </div>
       </div>
 
-      <!-- Baris 2: Model Siklus & REVISI 3: Toggle Switch Simpan Permanen ke Database -->
+      <!-- Baris 2: Model Siklus & Toggle Switch Simpan Permanen ke Database -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-2.5 rounded-2xl bg-neutral-50 dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] shrink-0 items-center">
         <div>
           <label class="font-bold text-neutral-700 dark:text-neutral-300 block mb-1">Model Siklus Rotasi:</label>
@@ -1247,7 +1142,6 @@ watch(
           />
         </div>
 
-        <!-- REVISI 3: Berbentuk Toggle Switch -->
         <div class="flex items-center justify-between pt-1 sm:pt-0">
           <div>
             <span class="font-bold text-xs text-neutral-800 dark:text-neutral-200 block">
@@ -1264,13 +1158,10 @@ watch(
         </div>
       </div>
 
-      <!-- Area Scrollable Kalender / Urutan Shift (Konsisten dalam flex-1) -->
+      <!-- Area Scrollable Kalender / Urutan Shift -->
       <div class="flex-1 min-h-0 overflow-y-auto pr-1 space-y-2">
         
-        <!-- ======================================================== -->
-        <!-- OPSI A: POLA MINGGUAN (7 Hari: Senin s/d Minggu)         -->
-        <!-- REVISI 2: Shift Warna-Warni                              -->
-        <!-- ======================================================== -->
+        <!-- OPSI A: POLA MINGGUAN (7 Hari: Senin s/d Minggu) -->
         <div v-if="newPatternForm.type === 'weekly'" class="space-y-2 pt-1">
           <div class="flex items-center justify-between">
             <label class="font-bold text-neutral-700 dark:text-neutral-300 block">
@@ -1289,7 +1180,7 @@ watch(
                 {{ dayName }}
               </span>
 
-              <!-- REVISI 2: Tombol Shift Warna-Warni -->
+              <!-- Tombol Shift Warna-Warni -->
               <button
                 type="button"
                 @click.stop="togglePatternShiftPopover('weekly', dIdx)"
@@ -1314,17 +1205,14 @@ watch(
                   class="w-full px-2 py-1 rounded-lg text-xs font-bold flex items-center justify-between transition cursor-pointer"
                   :class="getShiftBadgeClasses(st.code)"
                 >
-                  <span>{{ st.code }} - {{ st.name }}</span>
+                  <span>{{ st.name }}</span>
                 </button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- ======================================================== -->
-        <!-- OPSI B: POLA BULANAN (Tabel 7 Kolom Senin-Minggu)        -->
-        <!-- REVISI 2: Shift Warna-Warni                              -->
-        <!-- ======================================================== -->
+        <!-- OPSI B: POLA BULANAN (Tabel 7 Kolom Senin-Minggu) -->
         <div v-else class="space-y-2 pt-1">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
@@ -1409,7 +1297,7 @@ watch(
                         </span>
                       </div>
 
-                      <!-- REVISI 2: Tombol Shift Warna-Warni di Kalender Bulanan -->
+                      <!-- Tombol Shift Warna-Warni di Kalender Bulanan -->
                       <button
                         type="button"
                         @click.stop="togglePatternShiftPopover('monthly', cell.index)"
@@ -1434,7 +1322,7 @@ watch(
                           class="w-full px-2 py-1 rounded-lg text-xs font-bold flex items-center justify-between transition cursor-pointer"
                           :class="getShiftBadgeClasses(st.code)"
                         >
-                          <span>{{ st.code }} - {{ st.name }}</span>
+                          <span>{{ st.name }}</span>
                         </button>
                       </div>
                     </template>
