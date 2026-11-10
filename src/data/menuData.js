@@ -19,7 +19,7 @@ export const menuItems = [
       { id: 'organisasi', label: 'Struktur Organisasi', icon: Network, route: '/contoh-ui/organisasi' },
       { id: 'roster', label: 'Roster & Jadwal Shift', icon: CalendarDays, route: '/contoh-ui/roster' },
       { id: 'shift', label: 'Master Shift', icon: Clock, route: '/contoh-ui/shift' },
-      { id: 'pola-roster', label: 'Pola Roster', icon: CalendarRange, route: '/contoh-ui/pola-roster' },
+      { id: 'pola-roster', label: 'Pola', icon: CalendarRange, route: '/contoh-ui/pola-roster' },
     ],
   },
   {

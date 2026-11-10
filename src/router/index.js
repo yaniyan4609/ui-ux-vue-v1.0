@@ -59,6 +59,10 @@ const routes = [
     component: MasterPolaView,
     meta: { fixedHeight: true },
   },
+  {
+    path: '/contoh-ui/pola',
+    redirect: '/contoh-ui/pola-roster',
+  },
 
   // ===== Menu Template =====
   {
