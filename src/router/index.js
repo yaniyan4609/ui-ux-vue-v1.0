@@ -12,6 +12,7 @@ import RosterJadwalView from '../views/contoh-ui/RosterJadwalView.vue'
 import MasterShiftView from '../views/contoh-ui/MasterShiftView.vue'
 import MasterPolaView from '../views/contoh-ui/MasterPolaView.vue'
 import KaryawanDetailView from '../views/contoh-ui/KaryawanDetailView.vue'
+import WilayahKantorView from '../views/contoh-ui/WilayahKantorView.vue'
 
 // meta.fixedHeight: halaman data/tabel mengunci tinggi sendiri (AppLayout memakai overflow-hidden)
 const routes = [
@@ -68,6 +69,12 @@ const routes = [
     path: '/contoh-ui/pola-roster',
     name: 'ContohUiPolaRoster',
     component: MasterPolaView,
+    meta: { fixedHeight: true },
+  },
+  {
+    path: '/contoh-ui/kantor',
+    name: 'ContohUiWilayahKantor',
+    component: WilayahKantorView,
     meta: { fixedHeight: true },
   },
   {

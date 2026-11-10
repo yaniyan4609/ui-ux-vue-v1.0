@@ -1,4 +1,4 @@
-import { Home, LayoutTemplate, Sliders, Palette, Shield, Bell, Layers, Mountain, Users, KanbanSquare, Component, Sparkles, LayoutDashboard, Network, Contact, CalendarDays, Clock, CalendarRange } from 'lucide-vue-next'
+import { Home, LayoutTemplate, Sliders, Palette, Shield, Bell, Layers, Mountain, Users, KanbanSquare, Component, Sparkles, LayoutDashboard, Network, Contact, CalendarDays, Clock, CalendarRange, Map } from 'lucide-vue-next'
 
 export const menuItems = [
   {
@@ -20,6 +20,7 @@ export const menuItems = [
       { id: 'roster', label: 'Roster & Jadwal Shift', icon: CalendarDays, route: '/contoh-ui/roster' },
       { id: 'shift', label: 'Master Shift', icon: Clock, route: '/contoh-ui/shift' },
       { id: 'pola-roster', label: 'Pola', icon: CalendarRange, route: '/contoh-ui/pola-roster' },
+      { id: 'wilayah', label: 'Kantor & Wilayah', icon: Map, route: '/contoh-ui/kantor' },
     ],
   },
   {
