@@ -275,6 +275,11 @@ const activeColumnHeader = ref(null) // { date, dayName, dateLabel, placement }
 const columnSearchQuery = ref('')
 const columnSearchInputRef = ref(null)
 
+// Tanggal kolom yang sedang aktif memiliki action (dropdown thead atau cell terbuka)
+const activeActionDate = computed(() => {
+  return activeColumnHeader.value?.date || activeCell.value?.date || null
+})
+
 const toggleColumnShiftSelector = (day, event) => {
   if (!props.editable) return
 
@@ -486,11 +491,16 @@ defineExpose({
               v-for="(day, index) in days"
               :key="day.date"
               :data-today="day.isToday ? 'true' : undefined"
-              class="py-2 px-2 text-center border-r border-neutral-200/60 dark:border-[var(--theme-border)] last:border-r-0 relative group/th min-w-[125px] w-[130px]"
+              class="py-2 px-2 text-center border-r border-neutral-200/60 dark:border-[var(--theme-border)] last:border-r-0 relative group/th min-w-[125px] w-[130px] transition-colors duration-150"
               :class="[
                 (activeColumnHeader && activeColumnHeader.date === day.date) ? 'z-40' : '',
-                day.isToday ? 'bg-[var(--theme-primary-soft)] text-[var(--theme-primary)]' : '',
-                day.isWeekend && !day.isToday ? 'bg-neutral-100/50 dark:bg-neutral-900/20 text-neutral-400' : ''
+                activeActionDate === day.date
+                  ? 'bg-[var(--theme-primary-soft)] text-[var(--theme-primary)] ring-inset ring-2 ring-[var(--theme-primary)]/40 font-bold'
+                  : day.isToday
+                  ? 'bg-[var(--theme-primary-soft)] text-[var(--theme-primary)]'
+                  : day.isWeekend && !day.isToday
+                  ? 'bg-neutral-100/50 dark:bg-neutral-900/20 text-neutral-400'
+                  : ''
               ]"
             >
               <!-- Navigasi Minggu Sebelumnya (<) di tepi kiri kolom hari (hanya tampil saat kursor di thead pada mode mingguan) -->
@@ -696,11 +706,16 @@ defineExpose({
             <td
               v-for="day in days"
               :key="day.date"
-              class="p-1.5 text-center border-r border-neutral-100 dark:border-[var(--theme-border)] last:border-r-0 relative min-w-[125px]"
+              class="p-1.5 text-center border-r border-neutral-100 dark:border-[var(--theme-border)] last:border-r-0 relative min-w-[125px] transition-colors duration-150"
               :class="[
                 (activeCell && activeCell.rowId === row.id && activeCell.date === day.date) ? 'z-40' : '',
-                day.isToday ? 'bg-[var(--theme-primary-soft)]/20' : '',
-                day.isWeekend && !day.isToday ? 'bg-neutral-50/30 dark:bg-neutral-900/10' : ''
+                activeActionDate === day.date
+                  ? 'bg-[var(--theme-primary-soft)]/25 dark:bg-[var(--theme-primary-soft)]/15'
+                  : day.isToday
+                  ? 'bg-[var(--theme-primary-soft)]/20'
+                  : day.isWeekend && !day.isToday
+                  ? 'bg-neutral-50/30 dark:bg-neutral-900/10'
+                  : ''
               ]"
             >
               <!-- Cell Shift Button: Tampilan Pill Bulat Sesuai Screenshot Pengguna -->
@@ -833,8 +848,14 @@ defineExpose({
             <td
               v-for="day in days"
               :key="day.date"
-              class="p-1.5 text-center border-r border-neutral-200/60 dark:border-[var(--theme-border)] last:border-r-0 min-w-[125px]"
-              :class="day.isToday ? 'bg-[var(--theme-primary-soft)]/30' : ''"
+              class="p-1.5 text-center border-r border-neutral-200/60 dark:border-[var(--theme-border)] last:border-r-0 min-w-[125px] transition-colors duration-150"
+              :class="[
+                activeActionDate === day.date
+                  ? 'bg-[var(--theme-primary-soft)]/35 dark:bg-[var(--theme-primary-soft)]/20'
+                  : day.isToday
+                  ? 'bg-[var(--theme-primary-soft)]/30'
+                  : ''
+              ]"
             >
               <div class="space-y-1">
                 <div class="flex items-center justify-center gap-1 text-[10px] font-mono">

@@ -71,6 +71,29 @@ const emit = defineEmits(['update:modelValue', 'change', 'clear'])
 const isOpen = ref(false)
 const searchQuery = ref('')
 const containerRef = ref(null)
+const placementX = ref('left') // 'left' | 'right'
+
+const updatePlacement = () => {
+  if (!containerRef.value) return
+  const rect = containerRef.value.getBoundingClientRect()
+  // Popover akan memiliki lebar ~360px - 400px
+  // Jika jarak dari sisi kiri elemen ke tepi kanan layar kurang dari 400px,
+  // atau jarak tepi kanan elemen ke batas kanan layar tipis (< 120px),
+  // maka dropdown rata kanan (melebar ke kiri)
+  const spaceRight = window.innerWidth - rect.left
+  if (spaceRight < 400 || window.innerWidth - rect.right < 120) {
+    placementX.value = 'right'
+  } else {
+    placementX.value = 'left'
+  }
+}
+
+const toggleOpen = () => {
+  if (!isOpen.value) {
+    updatePlacement()
+  }
+  isOpen.value = !isOpen.value
+}
 
 const nodeMap = computed(() => {
   const map = new Map()
@@ -119,10 +142,12 @@ const handleClickOutside = (e) => {
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+  window.addEventListener('resize', updatePlacement)
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
+  window.removeEventListener('resize', updatePlacement)
 })
 
 const sizeClasses = computed(() => {
@@ -148,7 +173,7 @@ const sizeClasses = computed(() => {
     <div ref="containerRef" class="relative inline-block w-full select-none">
       <button
         type="button"
-        @click="isOpen = !isOpen"
+        @click="toggleOpen"
         class="w-full flex items-center justify-between border transition-all duration-150 cursor-pointer shadow-2xs text-left outline-none focus-visible:ring-2"
         :class="[
           sizeClasses,
@@ -216,7 +241,7 @@ const sizeClasses = computed(() => {
         </div>
       </button>
 
-      <!-- Floating Tree Popover -->
+      <!-- Floating Tree Popover (Lebar Nyaman & Auto-Align Kiri/Kanan) -->
       <Transition
         enter-active-class="transition duration-150 ease-out"
         enter-from-class="opacity-0 scale-95 -translate-y-1"
@@ -227,7 +252,8 @@ const sizeClasses = computed(() => {
       >
         <div
           v-if="isOpen"
-          class="absolute top-full mt-1.5 left-0 w-full min-w-[260px] z-50 rounded-2xl bg-white/95 dark:bg-[var(--theme-surface-raised)]/95 backdrop-blur-md border border-neutral-200/90 dark:border-[var(--theme-border)] shadow-xl p-2 space-y-2"
+          class="absolute top-full mt-1.5 z-50 w-[360px] sm:w-[400px] max-w-[92vw] rounded-2xl bg-white/95 dark:bg-[var(--theme-surface-raised)]/95 backdrop-blur-md border border-neutral-200/90 dark:border-[var(--theme-border)] shadow-xl p-2.5 space-y-2"
+          :class="placementX === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left'"
         >
           <div v-if="searchable" class="relative">
             <Search class="w-3.5 h-3.5 text-neutral-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />

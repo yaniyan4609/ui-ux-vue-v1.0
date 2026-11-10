@@ -214,7 +214,7 @@ const visibleRows = computed(() => {
         />
 
         <!-- Label -->
-        <span class="truncate font-medium">{{ row.node.label }}</span>
+        <span class="truncate font-medium" :title="row.node.label">{{ row.node.label }}</span>
       </div>
 
       <!-- Optional Badge -->
