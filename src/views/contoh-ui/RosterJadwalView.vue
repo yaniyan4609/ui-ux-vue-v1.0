@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import BaseButton from '../../components/ui/BaseButton.vue'
 import BaseModal from '../../components/ui/BaseModal.vue'
 import ConfirmationModal from '../../components/ui/ConfirmationModal.vue'
@@ -10,6 +10,7 @@ import BaseAvatar from '../../components/ui/BaseAvatar.vue'
 import BaseDescriptionList from '../../components/ui/BaseDescriptionList.vue'
 import BaseTreeSelect from '../../components/ui/BaseTreeSelect.vue'
 import BaseRosterGrid from '../../components/ui/BaseRosterGrid.vue'
+import BaseGenerateRosterModal from '../../components/ui/BaseGenerateRosterModal.vue'
 import { useToast } from '../../composables/useToast'
 import {
   shiftTypes,
@@ -289,32 +290,88 @@ const handleExportRoster = () => {
 }
 
 // ========================================================
-// 4. MODAL AUTO-ROSTER: POLA SHIFT OTOMATIS
+// 4. MODAL GENERATE ROSTER & DRAFT PERSISTENCE
 // ========================================================
-const isAutoRosterModalOpen = ref(false)
-const selectedTemplateId = ref('tpl-2-2-2-1')
-const autoRosterTargetDivisi = ref('all')
+const STORAGE_DRAFT_KEY = 'digaji_roster_draft_v1'
+const isGenerateModalOpen = ref(false)
+const isRestoreConfirmModalOpen = ref(false)
+const savedDrafts = ref(null)
 
-const handleApplyAutoRoster = () => {
-  const tpl = rosterTemplates.find((t) => t.id === selectedTemplateId.value)
-  if (!tpl) return
+const hasSavedDraft = computed(() => {
+  return Boolean(savedDrafts.value && savedDrafts.value.length > 0)
+})
 
-  let count = 0
-  employees.value.forEach((emp, index) => {
-    if (autoRosterTargetDivisi.value === 'all' || emp.divisi === autoRosterTargetDivisi.value) {
-      const offset = index % tpl.pattern.length
-      activeDays.value.forEach((day, dayIdx) => {
-        const patternIndex = (dayIdx + offset) % tpl.pattern.length
-        emp.schedules[day.date] = tpl.pattern[patternIndex]
-      })
-      count++
+onMounted(() => {
+  try {
+    const raw = localStorage.getItem(STORAGE_DRAFT_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        savedDrafts.value = parsed
+      }
+    }
+  } catch (err) {
+    console.error('Gagal membaca draft:', err)
+  }
+})
+
+const handleOpenGenerateRoster = () => {
+  if (hasSavedDraft.value) {
+    isRestoreConfirmModalOpen.value = true
+  } else {
+    isGenerateModalOpen.value = true
+  }
+}
+
+const handleConfirmRestoreDraft = () => {
+  isRestoreConfirmModalOpen.value = false
+  isGenerateModalOpen.value = true
+  toast.success('Draft jadwal roster berhasil dipulihkan.', 'Draft Dipulihkan')
+}
+
+const handleDiscardDraft = () => {
+  savedDrafts.value = null
+  try {
+    localStorage.removeItem(STORAGE_DRAFT_KEY)
+  } catch (err) {}
+  isRestoreConfirmModalOpen.value = false
+  toast.info('Draft roster sebelumnya telah dibersihkan.', 'Draft Dihapus')
+}
+
+const handleSaveDraft = (drafts) => {
+  savedDrafts.value = drafts
+  try {
+    localStorage.setItem(STORAGE_DRAFT_KEY, JSON.stringify(drafts))
+  } catch (err) {
+    console.error('Gagal menyimpan draft:', err)
+  }
+  toast.info(
+    `Draft otomatis tersimpan (${drafts.length} kelompok draft). Klik "Pulihkan Draft" kapan saja untuk melanjutkan.`,
+    'Draft Tersimpan'
+  )
+}
+
+const handleApplyGeneratedRoster = ({ drafts, schedules }) => {
+  let updatedCount = 0
+  employees.value.forEach((emp) => {
+    if (schedules[emp.id]) {
+      emp.schedules = {
+        ...emp.schedules,
+        ...schedules[emp.id],
+      }
+      updatedCount++
     }
   })
 
-  isAutoRosterModalOpen.value = false
+  // Bersihkan draft setelah diterapkan ke master data
+  savedDrafts.value = null
+  try {
+    localStorage.removeItem(STORAGE_DRAFT_KEY)
+  } catch (err) {}
+
   toast.success(
-    `Berhasil menerapkan "${tpl.name}" untuk ${count} pegawai! Shift telah terdistribusi otomatis.`,
-    'Auto-Roster Berhasil'
+    `Jadwal roster berhasil di-generate dan diterapkan ke ${updatedCount} pegawai dari ${drafts.length} kelompok draft!`,
+    'Roster Berhasil Diterapkan'
   )
 }
 
@@ -474,15 +531,31 @@ const employeeScheduleDetails = computed(() => {
           </span>
         </BaseButton>
 
-        <!-- Auto-Roster (Pola Shift) -->
+        <!-- Generate Roster / Pulihkan Draft -->
         <BaseButton
+          v-if="hasSavedDraft"
           variant="outline"
           size="sm"
-          @click="isAutoRosterModalOpen = true"
-          title="Terapkan Pola Rotasi Shift Otomatis (5-2, 2-2-2-1)"
+          class="border-amber-400 dark:border-amber-600 bg-amber-50/70 dark:bg-amber-950/40 text-amber-800 dark:text-amber-200 hover:bg-amber-100 font-bold shadow-2xs"
+          @click="isRestoreConfirmModalOpen = true"
+          title="Terdapat draft roster belum diterapkan. Klik untuk memulihkan atau menghapus."
         >
-          <Sparkles class="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-          <span class="hidden sm:inline">Auto-Roster</span>
+          <RotateCcw class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+          <span>Pulihkan Draft</span>
+          <span class="px-1.5 py-0.2 rounded-full text-[9px] font-extrabold bg-amber-500 text-white leading-none ml-0.5">
+            {{ savedDrafts?.length || 1 }}
+          </span>
+        </BaseButton>
+
+        <BaseButton
+          v-else
+          variant="primary"
+          size="sm"
+          @click="handleOpenGenerateRoster"
+          title="Generate Roster Kerja Otomatis Multi-Draft & Pola Shift"
+        >
+          <Sparkles class="w-3.5 h-3.5" />
+          <span>Generate Roster</span>
         </BaseButton>
 
         <!-- Salin Jadwal -->
@@ -498,13 +571,13 @@ const employeeScheduleDetails = computed(() => {
 
         <!-- Ekspor Roster -->
         <BaseButton
-          variant="primary"
+          variant="outline"
           size="sm"
           @click="handleExportRoster"
           title="Unduh Berkas Roster ke Format CSV"
         >
-          <Download class="w-3.5 h-3.5" />
-          <span>Ekspor Roster</span>
+          <Download class="w-3.5 h-3.5 text-neutral-500" />
+          <span class="hidden sm:inline">Ekspor Roster</span>
         </BaseButton>
       </div>
     </div>
@@ -920,69 +993,30 @@ const employeeScheduleDetails = computed(() => {
     </BaseModal>
 
     <!-- ======================================================== -->
-    <!-- 6. MODAL AUTO-ROSTER: POLA SHIFT OTOMATIS                -->
+    <!-- 6. MODAL GENERATE ROSTER & MULTI-DRAFT WORKSPACE         -->
     <!-- ======================================================== -->
-    <BaseModal
-      v-model="isAutoRosterModalOpen"
-      title="Generator Pola Shift Otomatis (Auto-Roster)"
-      subtitle="Terapkan formula rotasi shift baku industri secara serentak ke seluruh tim divisi"
-      size="lg"
-    >
-      <div class="space-y-4 py-1 text-xs">
-        <div>
-          <label class="font-bold text-neutral-700 dark:text-neutral-300 block mb-2">1. Pilih Template Pola Rotasi</label>
-          <div class="space-y-2.5">
-            <div
-              v-for="tpl in rosterTemplates"
-              :key="tpl.id"
-              @click="selectedTemplateId = tpl.id"
-              class="p-3.5 rounded-2xl border transition cursor-pointer"
-              :class="[
-                selectedTemplateId === tpl.id
-                  ? 'border-[var(--theme-primary)] bg-[var(--theme-primary-soft)]/20 shadow-xs'
-                  : 'border-neutral-200 dark:border-[var(--theme-border)] hover:border-neutral-300'
-              ]"
-            >
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-neutral-900 dark:text-white text-sm">{{ tpl.name }}</span>
-                <span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded-md bg-neutral-100 dark:bg-[var(--theme-surface-muted)]">
-                  {{ tpl.pattern.join(' - ') }}
-                </span>
-              </div>
-              <p class="text-[11px] text-neutral-500 mt-1">{{ tpl.desc }}</p>
-              <span class="text-[10px] text-[var(--theme-primary)] font-medium mt-1.5 block">
-                Cocok untuk: {{ tpl.suitableFor }}
-              </span>
-            </div>
-          </div>
-        </div>
+    <BaseGenerateRosterModal
+      v-model="isGenerateModalOpen"
+      :employees="employees"
+      :shift-types="shiftTypes"
+      :roster-templates="rosterTemplates"
+      :days="monthDays"
+      :initial-drafts="savedDrafts"
+      @save-draft="handleSaveDraft"
+      @apply="handleApplyGeneratedRoster"
+    />
 
-        <div>
-          <label class="font-bold text-neutral-700 dark:text-neutral-300 block mb-1.5">2. Terapkan Ke Divisi Target</label>
-          <select
-            v-model="autoRosterTargetDivisi"
-            class="w-full p-2.5 rounded-xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface-raised)] text-xs text-neutral-900 dark:text-white"
-          >
-            <option value="all">Semua Divisi & Unit Kerja (16 Pegawai)</option>
-            <option value="Teknologi & IT">Hanya Divisi Teknologi & IT</option>
-            <option value="Keamanan & Fasilitas">Hanya Divisi Keamanan & Satpam</option>
-            <option value="Layanan & CS">Hanya Divisi Layanan & Customer Service</option>
-            <option value="Operasional Gudang">Hanya Divisi Gudang & Logistik</option>
-            <option value="Medis & Kesehatan">Hanya Divisi Medis & Kesehatan</option>
-          </select>
-        </div>
-      </div>
-
-      <template #footer="{ close }">
-        <BaseButton variant="outline" size="sm" @click="close">
-          Batal
-        </BaseButton>
-        <BaseButton variant="primary" size="sm" @click="handleApplyAutoRoster">
-          <Sparkles class="w-3.5 h-3.5 mr-1" />
-          <span>Terapkan Pola Shift</span>
-        </BaseButton>
-      </template>
-    </BaseModal>
+    <!-- Confirmation Modal: Pulihkan atau Hapus Draft -->
+    <ConfirmationModal
+      v-model="isRestoreConfirmModalOpen"
+      type="warning"
+      title="Pulihkan Draft Roster?"
+      :message="`Ditemukan draf roster sebelumnya dengan ${savedDrafts?.length || 1} kelompok draft yang belum diterapkan. Apakah Anda ingin melanjutkan pekerjaan ini atau menghapusnya dan mulai baru?`"
+      confirm-text="Pulihkan Draft"
+      cancel-text="Hapus Draft"
+      @confirm="handleConfirmRestoreDraft"
+      @cancel="handleDiscardDraft"
+    />
 
     <!-- ======================================================== -->
     <!-- 7. SLIDE-OVER DETAIL JADWAL PEGAWAI                      -->
