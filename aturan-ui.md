@@ -30,8 +30,8 @@ Seluruh isi dokumen ini sudah dicocokkan dengan kode di `src/` (props dibaca dar
 | Komponen dasar | `src/components/ui/*.vue`, prefix `Base`, tanpa library UI luar |
 | Layout | `src/components/layout/`: `AppLayout`, `Header`, `PrimarySidebar`, `SubmenuSidebar` |
 | Composable | `src/composables/`: `useAuth`, `useBackground`, `useIsMobile`, `useTheme`, `useThemeColor`, `useToast` |
-| Data contoh | `src/data/` (`karyawanData`, `dashboardData`, `gunungJawaData`, `menuData`) |
-| Menu & rute | Menu di `src/data/menuData.js` (saat ini: **Beranda** dan **Template** dengan sub: Contoh Kanban, Contoh Data 1, Contoh Data 2, dan 5 sub pengaturan), rute di `src/router/index.js` (`/template/*`; rute lama `/pesanan`, `/data`, `/setting` hanya redirect). Halaman baru perlu didaftarkan di **keduanya**. Halaman data/tabel wajib `meta: { fixedHeight: true }` |
+| Data contoh | `src/data/` (`karyawanData`, `dashboardData`, `gunungJawaData`, `menuData`, `hrisDashboardData`) |
+| Menu & rute | Menu di `src/data/menuData.js` (saat ini: **Beranda**, **Contoh UI** dengan sub: Dashboard HRIS, dan **Template** dengan sub: Komponen, Contoh Kanban, Contoh Data 1, Contoh Data 2, dan 5 sub pengaturan), rute di `src/router/index.js` (`/contoh-ui/*`, `/template/*`; rute lama `/pesanan`, `/data`, `/setting` hanya redirect). Halaman baru perlu didaftarkan di **keduanya**. Halaman data/tabel wajib `meta: { fixedHeight: true }` |
 | Helper format | `src/utils/format.js` mengekspor `formatRupiah` (Intl `id-ID`, IDR, tanpa desimal). Impor relatif, mis. `../utils/format.js`. Lihat bagian 8 (temuan) |
 | Bahasa UI | Indonesia (label, placeholder, pesan, tooltip) |
 | Perintah | `npm run dev`, `npm run build` |
@@ -64,7 +64,7 @@ AppLayout memiliki dua perilaku untuk area konten (`<main>`):
 |---|---|---|
 | Daftar data (CRUD, filter, paginasi, pilih banyak) | **Data View** dengan formula container (bagian 4) | `src/views/template/DataKaryawanView.vue`, `src/views/template/DataView.vue` |
 | Katalog komponen / playground master-detail | **Master-Detail View** (`meta.fixedHeight`): dua kolom scroll mandiri | `src/views/template/KomponenView.vue` |
-| Dashboard / KPI / grafik SVG | Halaman mengalir: `space-y-4 sm:space-y-5 w-full max-w-7xl mx-auto select-none pb-8` | `src/views/template/DashboardView.vue` |
+| Dashboard / KPI / grafik SVG | Halaman mengalir: `space-y-4 sm:space-y-6 w-full max-w-7xl mx-auto select-none pb-8` | `src/views/template/DashboardView.vue`, `src/views/contoh-ui/DashboardHrisView.vue` |
 | Papan Kanban | Drag & drop HTML5 native | `src/views/template/KanbanView.vue` |
 | Pengaturan | Halaman mengalir: `space-y-6 w-full max-w-4xl mx-auto` | `src/views/template/SettingView.vue` |
 | Form tambah/ubah | `BaseModal` berisi komponen input Base | `DataKaryawanView.vue` (modal tambah/edit) |

@@ -115,10 +115,11 @@ const collapseToLogin = () => {
 }
 
 const activeMenuId = computed(() => {
-  if (route.path.startsWith('/template')) {
-    return 'template'
-  }
-  return 'beranda'
+  const matched = menuItems.find((m) => {
+    if (m.route === '/') return route.path === '/'
+    return route.path === m.route || route.path.startsWith(m.route + '/')
+  })
+  return matched ? matched.id : 'beranda'
 })
 
 const currentMenuItem = computed(() => {

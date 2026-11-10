@@ -61,11 +61,11 @@ const updatePill = () => {
   }
 
   const activeIdx = props.submenus.findIndex((sub) => isSubActive(sub.route))
-  // Jika sedang di root /template tanpa sub-path spesifik, arahkan ke index 0
+  // Jika sedang di root menu tanpa sub-path spesifik, arahkan ke index 0
   const targetIdx =
     activeIdx !== -1
       ? activeIdx
-      : route.path.startsWith('/template')
+      : props.submenus.length > 0
       ? 0
       : -1
 
