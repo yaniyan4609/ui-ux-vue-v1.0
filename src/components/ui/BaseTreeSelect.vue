@@ -44,6 +44,10 @@ const props = defineProps({
     type: String,
     default: 'md', // 'sm' | 'md' | 'lg'
   },
+  align: {
+    type: String,
+    default: 'auto', // 'auto' | 'left' | 'right'
+  },
   error: {
     type: String,
     default: '',
@@ -74,16 +78,26 @@ const containerRef = ref(null)
 const placementX = ref('left') // 'left' | 'right'
 
 const updatePlacement = () => {
+  if (props.align === 'right') {
+    placementX.value = 'right'
+    return
+  }
+  if (props.align === 'left') {
+    placementX.value = 'left'
+    return
+  }
+
+  // Auto-detection berdasarkan posisi relatif terhadap layar
   if (!containerRef.value) return
   const rect = containerRef.value.getBoundingClientRect()
-  // Popover akan memiliki lebar ~360px - 400px
-  // Jika jarak dari sisi kiri elemen ke tepi kanan layar kurang dari 400px,
-  // atau jarak tepi kanan elemen ke batas kanan layar tipis (< 120px),
-  // maka dropdown rata kanan (melebar ke kiri)
-  const spaceRight = window.innerWidth - rect.left
-  if (spaceRight < 400 || window.innerWidth - rect.right < 120) {
+  const centerX = rect.left + rect.width / 2
+
+  // Jika elemen berada di separuh kanan layar atau ruang ke kanan kurang dari 420px:
+  // Posisi di kanan -> MELEBAR KE KIRI (right-0)
+  if (centerX > window.innerWidth / 2 || (window.innerWidth - rect.left < 420)) {
     placementX.value = 'right'
   } else {
+    // Posisi di kiri -> MELEBAR KE KANAN (left-0)
     placementX.value = 'left'
   }
 }

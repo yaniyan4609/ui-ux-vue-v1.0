@@ -541,6 +541,7 @@ const employeeScheduleDetails = computed(() => {
           :multiple="true"
           placeholder="Wilayah & Kantor..."
           size="sm"
+          align="left"
           clearable
           searchable
         >
@@ -581,6 +582,7 @@ const employeeScheduleDetails = computed(() => {
           :multiple="true"
           placeholder="Struktur Organisasi..."
           size="sm"
+          align="right"
           clearable
           searchable
         >
