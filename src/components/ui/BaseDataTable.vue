@@ -16,6 +16,7 @@ const props = defineProps({
   rows: {
     type: Array,
     required: true,
+    default: () => [],
   },
   totalItems: {
     type: Number,
@@ -123,11 +124,11 @@ const hasActionsSlot = computed(() => Boolean(slots.actions))
 const computedTotalItems = computed(() => {
   return props.totalItems !== null && props.totalItems !== undefined
     ? props.totalItems
-    : props.rows.length
+    : (props.rows ? props.rows.length : 0)
 })
 
 const totalColumnsCount = computed(() => {
-  let count = props.columns.length
+  let count = (props.columns || []).length
   if (props.selectable) count++
   if (props.showIndex) count++
   if (hasActionsSlot.value) count++
@@ -139,28 +140,28 @@ const getRowNumber = (idx) => {
   return (props.currentPage - 1) * Number(props.itemsPerPage) + idx + 1
 }
 
-const getRowId = (row) => row[props.rowKey]
+const getRowId = (row) => (row ? row[props.rowKey] : null)
 
 // Multi-select logic
 const isAllPageSelected = computed(() => {
-  if (!props.selectable || props.rows.length === 0) return false
+  if (!props.selectable || !props.rows || props.rows.length === 0) return false
   return props.rows.every((row) => props.selectedIds.includes(getRowId(row)))
 })
 
 const isPageIndeterminate = computed(() => {
-  if (!props.selectable || props.rows.length === 0) return false
+  if (!props.selectable || !props.rows || props.rows.length === 0) return false
   const selectedOnPage = props.rows.filter((row) => props.selectedIds.includes(getRowId(row))).length
   return selectedOnPage > 0 && selectedOnPage < props.rows.length
 })
 
 const toggleSelectAll = () => {
-  if (!props.selectable) return
+  if (!props.selectable || !props.rows) return
   const pageIds = props.rows.map((r) => getRowId(r))
   let next
   if (isAllPageSelected.value) {
-    next = props.selectedIds.filter((id) => !pageIds.includes(id))
+    next = (props.selectedIds || []).filter((id) => !pageIds.includes(id))
   } else {
-    next = Array.from(new Set([...props.selectedIds, ...pageIds]))
+    next = Array.from(new Set([...(props.selectedIds || []), ...pageIds]))
   }
   emit('update:selectedIds', next)
 }

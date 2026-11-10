@@ -89,6 +89,32 @@ const filteredEmployees = computed(() => {
   })
 })
 
+const selectedIds = ref([])
+const sortKey = ref('')
+const sortOrder = ref('asc')
+const currentPage = ref(1)
+const itemsPerPage = ref(10)
+
+const sortedEmployees = computed(() => {
+  if (!sortKey.value) return filteredEmployees.value
+  return [...filteredEmployees.value].sort((a, b) => {
+    let valA = a[sortKey.value] ?? ''
+    let valB = b[sortKey.value] ?? ''
+    if (typeof valA === 'string') valA = valA.toLowerCase()
+    if (typeof valB === 'string') valB = valB.toLowerCase()
+    if (valA < valB) return sortOrder.value === 'asc' ? -1 : 1
+    if (valA > valB) return sortOrder.value === 'asc' ? 1 : -1
+    return 0
+  })
+})
+
+const paginatedEmployees = computed(() => {
+  if (itemsPerPage.value === 'all') return sortedEmployees.value
+  const limit = Number(itemsPerPage.value)
+  const start = (currentPage.value - 1) * limit
+  return sortedEmployees.value.slice(start, start + limit)
+})
+
 // ========================================================
 // 2. SLIDE-OVER DETAIL PROFIL LENGKAP KARYAWAN
 // ========================================================
@@ -278,10 +304,17 @@ const handleExportMaster = () => {
     <div class="flex-1 min-h-0 overflow-hidden rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs">
       <BaseDataTable
         :columns="columns"
-        :data="filteredEmployees"
-        :page-size="10"
-        searchable
+        :rows="paginatedEmployees"
+        :total-items="filteredEmployees.length"
         selectable
+        v-model:selected-ids="selectedIds"
+        v-model:sort-key="sortKey"
+        v-model:sort-order="sortOrder"
+        v-model:current-page="currentPage"
+        v-model:items-per-page="itemsPerPage"
+        :per-page-options="[10, 20, 50, 'all']"
+        empty-title="Pegawai Tidak Ditemukan"
+        empty-description="Tidak ada data pegawai yang cocok dengan filter atau kata kunci pencarian Anda."
       >
         <!-- Kolom Karyawan: Avatar + Nama + NIP -->
         <template #cell-karyawan="{ row }">
@@ -574,3 +607,4 @@ const handleExportMaster = () => {
 
   </div>
 </template>
+
