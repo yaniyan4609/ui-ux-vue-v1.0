@@ -3,12 +3,14 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import BaseButton from '../../components/ui/BaseButton.vue'
 import BaseBadge from '../../components/ui/BaseBadge.vue'
 import BaseStatCard from '../../components/ui/BaseStatCard.vue'
+import BaseSkeleton from '../../components/ui/BaseSkeleton.vue'
+import BaseCountUp from '../../components/ui/BaseCountUp.vue'
 import BaseAvatar from '../../components/ui/BaseAvatar.vue'
+import BaseDatePicker from '../../components/ui/BaseDatePicker.vue'
 import BaseSearchableSelect from '../../components/ui/BaseSearchableSelect.vue'
 import BaseProgress from '../../components/ui/BaseProgress.vue'
 import BaseModal from '../../components/ui/BaseModal.vue'
 import BaseSlideOver from '../../components/ui/BaseSlideOver.vue'
-import BaseAlert from '../../components/ui/BaseAlert.vue'
 import BaseDescriptionList from '../../components/ui/BaseDescriptionList.vue'
 import { useToast } from '../../composables/useToast'
 import {
@@ -17,8 +19,6 @@ import {
   hrisShiftSummary,
   hrisLiveAttendance,
   hrisPendingApprovals,
-  hrisDepartmentBreakdown,
-  hrisContractBreakdown,
   hrisComplianceAlerts,
   hrisAttendanceTrendPresets,
   hrisDisciplineDistribution,
@@ -29,34 +29,50 @@ import {
   UserCheck,
   Coffee,
   Wallet,
-  Building2,
-  RefreshCw,
   Clock,
   CheckCircle2,
-  XCircle,
   AlertTriangle,
   Download,
   Send,
   Calendar,
-  MapPin,
-  ChevronRight,
   ShieldCheck,
   Activity,
-  Layers,
-  Sparkles,
-  Check,
-  X,
   Waves,
   PieChart,
   BarChart3,
   TrendingUp,
-  Info,
+  RefreshCw,
+  ShoppingBag,
+  Cpu,
+  Layers,
+  ChevronRight,
+  Check,
+  X,
 } from 'lucide-vue-next'
 
 const toast = useToast()
 
 // ========================================================
-// 1. FILTER & STATE KONTROL
+// 1. SKELETON & LIVE REFRESH STATE
+// ========================================================
+const isLoading = ref(true)
+const isRefreshing = ref(false)
+
+const simulateLoading = async (duration = 600) => {
+  isLoading.value = true
+  await new Promise((resolve) => setTimeout(resolve, duration))
+  isLoading.value = false
+}
+
+const handleRefresh = async () => {
+  isRefreshing.value = true
+  await simulateLoading(500)
+  isRefreshing.value = false
+  toast.success('Metrik presensi dan lembur HRIS berhasil disinkronisasi!', 'Live Sync')
+}
+
+// ========================================================
+// 2. FILTER CONTROLS
 // ========================================================
 const selectedBranch = ref('all')
 const branchOptions = hrisBranches.map((b) => ({
@@ -64,30 +80,32 @@ const branchOptions = hrisBranches.map((b) => ({
   label: `${b.label} (${b.tz})`,
 }))
 
-const isRefreshing = ref(false)
+const dashboardDateRange = ref({
+  start: '2026-10-26',
+  end: '2026-11-25',
+})
 
-const handleRefresh = async () => {
-  isRefreshing.value = true
-  await new Promise((resolve) => setTimeout(resolve, 600))
-  isRefreshing.value = false
-  toast.success('Data presensi dan metrik HRIS berhasil disinkronisasi!', 'Live Sync')
+const handleDateRangeChange = (val) => {
+  if (val && val.start && val.end) {
+    toast.info(`Filter rentang tanggal: ${val.start} s/d ${val.end}`, 'Filter Periode')
+  }
 }
 
 // ========================================================
-// 2. DIAGRAM OMBAK (INTERACTIVE HARMONIC WAVE AREA CHART)
+// 3. DIAGRAM 1: OMBAK (HARMONIC WAVE AREA/LINE CHART)
 // ========================================================
 const selectedTrendPeriod = ref('7hari') // '7hari' | '14hari' | '30hari'
 const currentTrend = computed(() => hrisAttendanceTrendPresets[selectedTrendPeriod.value] || hrisAttendanceTrendPresets['7hari'])
 
-const svgWidth = 800
-const svgHeight = 220
+const svgWidth = 500
+const svgHeight = 200
 const padX = 35
-const padYTop = 25
-const padYBottom = 35
+const padYTop = 20
+const padYBottom = 30
 
 const isWaveActive = ref(true)
 const wavePhase = ref(0)
-const waveAmplitude = ref(3.8) // Amplitude gelombang dalam pixel
+const waveAmplitude = ref(3.5)
 const isHoveringChart = ref(false)
 const activeHoverIdx = ref(null)
 let waveFrameId = null
@@ -95,8 +113,8 @@ let waveFrameId = null
 const startWaveLoop = () => {
   if (waveFrameId) cancelAnimationFrame(waveFrameId)
   const step = () => {
-    if (isWaveActive.value && !isHoveringChart.value && !isRefreshing.value) {
-      wavePhase.value = (wavePhase.value + 0.036) % (Math.PI * 2)
+    if (isWaveActive.value && !isHoveringChart.value && !isLoading.value) {
+      wavePhase.value = (wavePhase.value + 0.038) % (Math.PI * 2)
     }
     waveFrameId = requestAnimationFrame(step)
   }
@@ -113,12 +131,11 @@ const stopWaveLoop = () => {
 const toggleWave = () => {
   isWaveActive.value = !isWaveActive.value
   toast.info(
-    isWaveActive.value ? 'Animasi ombak dinamis diaktifkan' : 'Animasi ombak dijeda',
+    isWaveActive.value ? 'Animasi ombak diaktifkan' : 'Animasi ombak dijeda',
     'Diagram Ombak'
   )
 }
 
-// Y Mapping
 const getYPresence = (pct) => {
   const min = currentTrend.value.minPct
   const max = currentTrend.value.maxPct
@@ -139,13 +156,12 @@ const getPointX = (index, total) => {
   return padX + (index / (total - 1)) * plotW
 }
 
-// Points with Wave Undulation
 const presencePoints = computed(() => {
   const vals = currentTrend.value.presencePct
   const total = vals.length
   return vals.map((val, idx) => {
     const baseY = getYPresence(val)
-    const waveOffset = isWaveActive.value && !isRefreshing.value
+    const waveOffset = isWaveActive.value && !isLoading.value
       ? Math.sin(wavePhase.value + idx * 0.85) * waveAmplitude.value
       : 0
     return {
@@ -164,7 +180,7 @@ const overtimePoints = computed(() => {
   const total = vals.length
   return vals.map((val, idx) => {
     const baseY = getYOvertime(val)
-    const waveOffset = isWaveActive.value && !isRefreshing.value
+    const waveOffset = isWaveActive.value && !isLoading.value
       ? Math.cos(wavePhase.value + idx * 0.85 + 0.5) * (waveAmplitude.value * 0.7)
       : 0
     return {
@@ -177,7 +193,6 @@ const overtimePoints = computed(() => {
   })
 })
 
-// Catmull-Rom Smooth Cubic Bezier Path Generator
 const getSmoothPath = (pts) => {
   if (!pts || pts.length === 0) return ''
   if (pts.length === 1) return `M ${pts[0].x} ${pts[0].y}`
@@ -253,10 +268,15 @@ const activeScrubberData = computed(() => {
 })
 
 // ========================================================
-// 3. DIAGRAM DONAT INTERAKTIF (DISCIPLINE DISTRIBUTION)
+// 4. DIAGRAM 2: BATANG (DISTRIBUSI LEMBUR PER DEPT)
 // ========================================================
-const donutRadius = 48
-const donutCircumference = 2 * Math.PI * donutRadius // ~301.59
+const hoveredBarDept = ref(null)
+
+// ========================================================
+// 5. DIAGRAM 3: DONAT (DISTRIBUSI DISIPLIN & PRESENSI)
+// ========================================================
+const donutRadius = 45
+const donutCircumference = 2 * Math.PI * donutRadius // ~282.74
 const hoveredDonutSlice = ref(null)
 
 const donutSlices = computed(() => {
@@ -278,40 +298,35 @@ const activeDonutInfo = computed(() => {
     return {
       title: hoveredDonutSlice.value.name,
       value: `${hoveredDonutSlice.value.pct}%`,
-      subtext: `${hoveredDonutSlice.value.count} karyawan`,
+      subtext: `${hoveredDonutSlice.value.count} staf`,
       color: hoveredDonutSlice.value.color,
     }
   }
   return {
-    title: 'Disiplin Rata-Rata',
+    title: 'Kehadiran Tepat',
     value: '94.6%',
-    subtext: '1.215 Hadir Hari Ini',
+    subtext: '1.215 / 1.284',
     color: 'var(--theme-primary)',
   }
 })
 
 // ========================================================
-// 4. DIAGRAM BATANG INTERAKTIF (OVERTIME BY DEPT)
-// ========================================================
-const hoveredBarDept = ref(null)
-
-// ========================================================
-// 5. APPROVAL LIST INTERAKTIF
+// 6. APPROVAL LIST INTERAKTIF
 // ========================================================
 const approvals = ref([...hrisPendingApprovals])
 
 const handleApprove = (item) => {
   approvals.value = approvals.value.filter((a) => a.id !== item.id)
-  toast.success(`Pengajuan ${item.type} untuk ${item.applicant} berhasil disetujui!`, 'Approval Berhasil')
+  toast.success(`Pengajuan ${item.type} untuk ${item.applicant} disetujui!`, 'Approval Berhasil')
 }
 
 const handleReject = (item) => {
   approvals.value = approvals.value.filter((a) => a.id !== item.id)
-  toast.warning(`Pengajuan ${item.type} untuk ${item.applicant} telah ditolak.`, 'Approval Ditolak')
+  toast.warning(`Pengajuan ${item.type} untuk ${item.applicant} ditolak.`, 'Approval Ditolak')
 }
 
 // ========================================================
-// 6. DETAIL PRESENSI SLIDE-OVER
+// 7. DETAIL PRESENSI SLIDE-OVER
 // ========================================================
 const isSlideOverOpen = ref(false)
 const selectedAttendance = ref(null)
@@ -337,17 +352,17 @@ const attendanceDetailItems = computed(() => {
 })
 
 // ========================================================
-// 7. MODALS (PAYROLL & BROADCAST)
+// 8. MODALS (PAYROLL & BROADCAST)
 // ========================================================
 const isPayrollModalOpen = ref(false)
 const isPayrollProcessing = ref(false)
 
 const handleExecutePayroll = async () => {
   isPayrollProcessing.value = true
-  await new Promise((resolve) => setTimeout(resolve, 900))
+  await new Promise((resolve) => setTimeout(resolve, 800))
   isPayrollProcessing.value = false
   isPayrollModalOpen.value = false
-  toast.success('Kalkulasi pra-payroll multi-cabang sukses dieksekusi!', 'Payroll Siap')
+  toast.success('Kalkulasi pra-payroll berhasil dieksekusi!', 'Payroll Siap')
 }
 
 const isBroadcastModalOpen = ref(false)
@@ -360,17 +375,18 @@ const handleSendBroadcast = () => {
   }
   isBroadcastModalOpen.value = false
   broadcastMessage.value = ''
-  toast.success('Pengumuman berhasil disiarkan ke aplikasi mobile seluruh karyawan aktif!', 'Broadcast Terkirim')
+  toast.success('Pengumuman berhasil disiarkan ke aplikasi mobile karyawan!', 'Broadcast Terkirim')
 }
 
 const handleExportAttendance = () => {
   toast.info('File Rekap_Presensi_November_2026.xlsx sedang disiapkan...', 'Mengunduh Laporan')
   setTimeout(() => {
     toast.success('Rekap presensi berhasil diunduh dalam format Excel.', 'Unduhan Selesai')
-  }, 900)
+  }, 800)
 }
 
 onMounted(() => {
+  simulateLoading(650)
   startWaveLoop()
 })
 
@@ -380,38 +396,48 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto space-y-6 select-none w-full pb-12">
+  <div class="space-y-3.5 sm:space-y-4 w-full max-w-7xl mx-auto select-none pb-8">
 
     <!-- ======================================================== -->
-    <!-- 1. TOP HEADER & FILTER CABANG                            -->
+    <!-- TOP HEADER TOOLBAR: TITLE, BRANCH, PERIODE, ACTIONS      -->
     <!-- ======================================================== -->
-    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-neutral-200 dark:border-[var(--theme-border)]">
-      <div>
-        <div class="flex items-center gap-2">
-          <span class="px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-[var(--theme-primary-soft)] text-[var(--theme-primary)] border border-[var(--theme-primary)]/20 shadow-2xs">
-            SaaS HRIS & Payroll
-          </span>
-          <span class="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            Live Sync Multi-Cabang
-          </span>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-neutral-200 dark:border-[var(--theme-border)] anim-fade-up">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[var(--theme-primary)] text-[var(--theme-primary-text)] flex items-center justify-center shrink-0 shadow-2xs">
+          <Activity class="w-5 h-5" />
         </div>
-        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 dark:text-white mt-1">
-          Dashboard Eksekutif HRIS
-        </h1>
-        <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
-          Visualisasi interaktif kehadiran biometrik, gelombang tren lembur, dan otomasi alur persetujuan SDM
-        </p>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-bold tracking-tight text-neutral-900 dark:text-white leading-tight">
+              Dashboard Eksekutif HRIS
+            </h1>
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Live Sync 4 Cabang" />
+            <BaseBadge variant="primary" size="xs">Multi-Cabang</BaseBadge>
+          </div>
+          <p class="text-[11px] text-neutral-500 dark:text-neutral-400">
+            Monitoring presensi biometrik, fluktuasi lembur, dan cut-off payroll terpusat
+          </p>
+        </div>
       </div>
 
-      <!-- Action Buttons & Branch Selector -->
-      <div class="flex flex-wrap items-center gap-2.5">
-        <div class="w-56 sm:w-64">
+      <!-- Right Controls: Branch, DatePicker, Sync, & Payroll Button -->
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="w-44 sm:w-52">
           <BaseSearchableSelect
             v-model="selectedBranch"
             :options="branchOptions"
             placeholder="Pilih Cabang"
             size="sm"
+          />
+        </div>
+
+        <div class="w-38 sm:w-44 hidden md:block">
+          <BaseDatePicker
+            v-model="dashboardDateRange"
+            range
+            size="sm"
+            placeholder="Rentang tanggal..."
+            @change="handleDateRangeChange"
           />
         </div>
 
@@ -430,507 +456,762 @@ onUnmounted(() => {
           size="sm"
           @click="isPayrollModalOpen = true"
         >
-          <Wallet class="w-3.5 h-3.5 mr-1.5" />
+          <Wallet class="w-3.5 h-3.5 mr-1" />
           <span>Proses Payroll</span>
         </BaseButton>
       </div>
-    </header>
-
-    <!-- Banner Kepatuhan / Cut-off -->
-    <BaseAlert
-      variant="info"
-      title="Periode Cut-Off Payroll Berjalan: 26 Okt - 25 Nov 2026"
-      description="Verifikasi absensi dan persetujuan lembur/cuti ditutup dalam 5 hari lagi. Seluruh data presensi otomatis terhubung ke perhitungan slip gaji."
-      action-text="Unduh Rekap Presensi"
-      @action="handleExportAttendance"
-    />
+    </div>
 
     <!-- ======================================================== -->
-    <!-- 2. KARTU METRIK EKSEKUTIF HRIS (BaseStatCard)             -->
+    <!-- BARIS 1: 6 TOP STAT KPI CARDS (COMPACT FORMULA)          -->
     <!-- ======================================================== -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 anim-fade-up">
+      <!-- KPI 1: Total Payroll -->
+      <BaseStatCard
+        title="Estimasi Payroll Netto"
+        :value="5.42"
+        prefix="Rp "
+        unit="M"
+        :icon="Wallet"
+        tone="emerald"
+        :trend="hrisKpiMetrics.estimasiPayroll.trend"
+        trend-direction="up"
+        trend-label="Cut-off H-5"
+        :loading="isLoading"
+      />
+
+      <!-- KPI 2: Total Karyawan -->
       <BaseStatCard
         title="Total Karyawan Aktif"
         :value="hrisKpiMetrics.totalKaryawan.value"
-        unit="orang"
-        :trend="hrisKpiMetrics.totalKaryawan.trend"
-        :trend-direction="hrisKpiMetrics.totalKaryawan.trendDirection"
-        :badge-text="hrisKpiMetrics.totalKaryawan.badgeText"
-        :subtext="hrisKpiMetrics.totalKaryawan.subtext"
+        unit="staf"
         :icon="Users"
-        variant="primary"
+        tone="indigo"
+        :trend="hrisKpiMetrics.totalKaryawan.trend"
+        trend-direction="up"
+        trend-label="+14 bln ini"
+        :loading="isLoading"
       />
 
+      <!-- KPI 3: Kehadiran Hari Ini -->
       <BaseStatCard
         title="Kehadiran Hari Ini"
         :value="hrisKpiMetrics.kehadiranHariIni.value"
         unit="%"
-        :trend="hrisKpiMetrics.kehadiranHariIni.trend"
-        :trend-direction="hrisKpiMetrics.kehadiranHariIni.trendDirection"
-        :badge-text="hrisKpiMetrics.kehadiranHariIni.badgeText"
-        :subtext="hrisKpiMetrics.kehadiranHariIni.subtext"
         :icon="UserCheck"
-        variant="emerald"
+        tone="sky"
+        :trend="hrisKpiMetrics.kehadiranHariIni.trend"
+        trend-direction="up"
+        trend-label="1.215 hadir"
+        :loading="isLoading"
       />
 
+      <!-- KPI 4: Karyawan Terlambat -->
+      <BaseStatCard
+        title="Presensi Terlambat"
+        :value="75"
+        unit="orang"
+        :icon="Clock"
+        tone="amber"
+        subtitle="5.8% dari total hadir"
+        :loading="isLoading"
+      />
+
+      <!-- KPI 5: Cuti & Izin Aktif -->
       <BaseStatCard
         title="Cuti, Sakit & Izin"
         :value="hrisKpiMetrics.cutiDanIzin.value"
         unit="staf"
-        :trend="hrisKpiMetrics.cutiDanIzin.trend"
-        :trend-direction="hrisKpiMetrics.cutiDanIzin.trendDirection"
-        :badge-text="hrisKpiMetrics.cutiDanIzin.badgeText"
-        :subtext="hrisKpiMetrics.cutiDanIzin.subtext"
         :icon="Coffee"
-        variant="amber"
+        tone="cyan"
+        :trend="hrisKpiMetrics.cutiDanIzin.trend"
+        trend-direction="down"
+        trend-label="28 cuti · 18 sakit"
+        :loading="isLoading"
       />
 
+      <!-- KPI 6: Pending Approvals -->
       <BaseStatCard
-        title="Estimasi Payroll Berjalan"
-        :value="5.42"
-        prefix="Rp "
-        unit="M"
-        :trend="hrisKpiMetrics.estimasiPayroll.trend"
-        :trend-direction="hrisKpiMetrics.estimasiPayroll.trendDirection"
-        :badge-text="hrisKpiMetrics.estimasiPayroll.badgeText"
-        :subtext="hrisKpiMetrics.estimasiPayroll.subtext"
-        :icon="Wallet"
-        variant="violet"
+        title="Menunggu Persetujuan"
+        :value="approvals.length"
+        unit="tiket"
+        :icon="ShieldCheck"
+        tone="rose"
+        subtitle="Antrean HRD & Supervisor"
+        :loading="isLoading"
       />
-    </section>
+    </div>
 
     <!-- ======================================================== -->
-    <!-- 3. DIAGRAM OMBAK BESAR: TREN PRESENSI & JAM LEMBUR       -->
+    <!-- BARIS 2: 3 DIAGRAM COMPACT (OMBAK + BATANG + DONAT)      -->
+    <!-- 12 KOLOM: Col 5 (Ombak), Col 4 (Batang), Col 3 (Donat)   -->
     <!-- ======================================================== -->
-    <section class="rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface-raised)] p-4 sm:p-6 shadow-xs relative overflow-hidden">
-      <!-- Background Ambient Glow -->
-      <div class="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-[var(--theme-primary)]/5 blur-3xl pointer-events-none" />
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 anim-fade-up anim-delay-2">
 
-      <!-- Chart Header with Period Pills & Wave Toggle -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-neutral-200 dark:border-[var(--theme-border)]">
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-[var(--theme-primary)]" />
-            <h2 class="text-sm sm:text-base font-bold text-neutral-900 dark:text-white">
-              Tren Kehadiran & Fluktuasi Jam Lembur
-            </h2>
-            <BaseBadge variant="primary" size="xs">Harmonic Wave</BaseBadge>
-          </div>
-          <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
-            Area berombak menunjukkan % kehadiran harian; kurva amber menunjukkan jam lembur terakumulasi
-          </p>
-        </div>
-
-        <!-- Controls: Periode & Toggle Ombak -->
-        <div class="flex items-center gap-2">
-          <!-- Wave Animation Toggle -->
-          <button
-            type="button"
-            @click="toggleWave"
-            class="p-1.5 rounded-xl border border-neutral-200 dark:border-[var(--theme-border)] text-xs font-medium transition cursor-pointer flex items-center gap-1.5 shadow-2xs"
-            :class="isWaveActive ? 'bg-[var(--theme-primary-soft)] text-[var(--theme-primary)] border-[var(--theme-primary)]/30' : 'bg-neutral-50 dark:bg-[var(--theme-surface)] text-neutral-500'"
-            :title="isWaveActive ? 'Jeda Animasi Ombak' : 'Aktifkan Animasi Ombak'"
-          >
-            <Waves class="w-4 h-4" :class="isWaveActive ? 'animate-pulse' : ''" />
-            <span class="text-[11px] hidden sm:inline">{{ isWaveActive ? 'Ombak Aktif' : 'Ombak Jeda' }}</span>
-          </button>
-
-          <!-- Period Buttons -->
-          <div class="inline-flex p-1 rounded-xl bg-neutral-100 dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] text-xs">
-            <button
-              v-for="p in [{ id: '7hari', label: '7 Hari' }, { id: '14hari', label: '14 Hari' }, { id: '30hari', label: '30 Hari' }]"
-              :key="p.id"
-              type="button"
-              @click="selectedTrendPeriod = p.id"
-              class="px-2.5 py-1 rounded-lg font-medium transition cursor-pointer"
-              :class="selectedTrendPeriod === p.id ? 'bg-white dark:bg-[var(--theme-surface-muted)] text-[var(--theme-primary)] shadow-2xs font-semibold' : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'"
-            >
-              {{ p.label }}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Live Hover Scrubber Info Ticker -->
-      <div class="mt-3.5 mb-1 px-3 py-2 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface)] border border-neutral-100 dark:border-[var(--theme-border)] flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div class="flex items-center gap-2">
-          <Calendar class="w-3.5 h-3.5 text-neutral-400" />
-          <span class="text-neutral-500">Tanggal Terpilih:</span>
-          <span class="font-bold text-neutral-900 dark:text-white">
-            {{ activeScrubberData.point ? activeScrubberData.point.label : '-' }}
-          </span>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-4">
-          <div class="flex items-center gap-1.5">
-            <span class="w-2.5 h-2.5 rounded-full bg-[var(--theme-primary)]" />
-            <span class="text-neutral-500">Tingkat Hadir:</span>
-            <span class="font-bold text-[var(--theme-primary)]">
-              {{ activeScrubberData.point ? activeScrubberData.point.val : '-' }}%
-            </span>
-            <span class="text-[11px] text-neutral-400">
-              ({{ activeScrubberData.point ? activeScrubberData.point.count : '-' }} staf)
-            </span>
-          </div>
-
-          <div class="flex items-center gap-1.5">
-            <span class="w-2.5 h-2.5 rounded-full bg-amber-500" />
-            <span class="text-neutral-500">Total Lembur:</span>
-            <span class="font-bold text-amber-600 dark:text-amber-400">
-              {{ activeScrubberData.overtime ? activeScrubberData.overtime.val : '-' }} Jam
-            </span>
-          </div>
-
-          <div class="flex items-center gap-1.5">
-            <span class="w-2.5 h-2.5 rounded-full bg-rose-500" />
-            <span class="text-neutral-500">Terlambat:</span>
-            <span class="font-bold text-rose-600 dark:text-rose-400">
-              {{ activeScrubberData.overtime ? activeScrubberData.overtime.late : '-' }} orang
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Pure SVG Interactive Harmonic Wave Chart -->
-      <div
-        class="relative w-full h-[220px] cursor-crosshair select-none"
-        @mousemove="handleChartMouseMove"
-        @mouseleave="handleChartMouseLeave"
-      >
-        <svg
-          class="w-full h-full overflow-visible"
-          :viewBox="`0 0 ${svgWidth} ${svgHeight}`"
-          preserveAspectRatio="none"
-        >
-          <defs>
-            <!-- Area Gradient Fill -->
-            <linearGradient id="presenceWaveGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="var(--theme-primary)" stop-opacity="0.32" />
-              <stop offset="65%" stop-color="var(--theme-primary)" stop-opacity="0.08" />
-              <stop offset="100%" stop-color="var(--theme-primary)" stop-opacity="0.00" />
-            </linearGradient>
-
-            <!-- Line Glow Filter -->
-            <filter id="waveGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="2.5" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-          </defs>
-
-          <!-- Grid Lines (Horizontal) -->
-          <g class="stroke-neutral-200 dark:stroke-[var(--theme-border)]" stroke-dasharray="3 3" stroke-width="0.75">
-            <line :x1="padX" :y1="getYPresence(100)" :x2="svgWidth - padX" :y2="getYPresence(100)" />
-            <line :x1="padX" :y1="getYPresence(95)" :x2="svgWidth - padX" :y2="getYPresence(95)" />
-            <line :x1="padX" :y1="getYPresence(90)" :x2="svgWidth - padX" :y2="getYPresence(90)" />
-            <line :x1="padX" :y1="svgHeight - padYBottom" :x2="svgWidth - padX" :y2="svgHeight - padYBottom" />
-          </g>
-
-          <!-- Y-Axis Labels -->
-          <g class="fill-neutral-400 text-[10px] font-mono">
-            <text :x="padX - 8" :y="getYPresence(100) + 3" text-anchor="end">100%</text>
-            <text :x="padX - 8" :y="getYPresence(95) + 3" text-anchor="end">95%</text>
-            <text :x="padX - 8" :y="getYPresence(90) + 3" text-anchor="end">90%</text>
-          </g>
-
-          <!-- Wave Area Gradient Path -->
-          <path
-            :d="presenceAreaPath"
-            fill="url(#presenceWaveGrad)"
-            class="transition-all duration-150"
-          />
-
-          <!-- Overtime Line (Amber) -->
-          <path
-            :d="overtimeLinePath"
-            fill="none"
-            stroke="#f59e0b"
-            stroke-width="2"
-            stroke-dasharray="4 3"
-            class="transition-all duration-150"
-          />
-
-          <!-- Presence Wave Line (Primary Theme) -->
-          <path
-            :d="presenceLinePath"
-            fill="none"
-            stroke="var(--theme-primary)"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            filter="url(#waveGlow)"
-            class="transition-all duration-150"
-          />
-
-          <!-- X-Axis Labels -->
-          <g class="fill-neutral-400 text-[10px] font-mono">
-            <text
-              v-for="p in presencePoints"
-              :key="p.label"
-              :x="p.x"
-              :y="svgHeight - 12"
-              text-anchor="middle"
-            >
-              {{ p.label }}
-            </text>
-          </g>
-
-          <!-- Interactive Hover Scrubber -->
-          <g v-if="activeScrubberData.point">
-            <!-- Vertical Guideline -->
-            <line
-              :x1="activeScrubberData.point.x"
-              :y1="padYTop"
-              :x2="activeScrubberData.point.x"
-              :y2="svgHeight - padYBottom"
-              stroke="var(--theme-primary)"
-              stroke-width="1.5"
-              stroke-dasharray="3 3"
-              class="opacity-75"
-            />
-
-            <!-- Halo Wave Ripple on Presence Point -->
-            <circle
-              :cx="activeScrubberData.point.x"
-              :cy="activeScrubberData.point.y"
-              r="7"
-              fill="var(--theme-primary)"
-              class="opacity-30 animate-ping"
-            />
-            <circle
-              :cx="activeScrubberData.point.x"
-              :cy="activeScrubberData.point.y"
-              r="4.5"
-              fill="var(--theme-primary)"
-              stroke="#ffffff"
-              stroke-width="2"
-              class="shadow-md"
-            />
-
-            <!-- Point on Overtime Line -->
-            <circle
-              v-if="activeScrubberData.overtime"
-              :cx="activeScrubberData.overtime.x"
-              :cy="activeScrubberData.overtime.y"
-              r="3.5"
-              fill="#f59e0b"
-              stroke="#ffffff"
-              stroke-width="1.5"
-            />
-          </g>
-        </svg>
-      </div>
-    </section>
-
-    <!-- ======================================================== -->
-    <!-- 4. DIAGRAM DONAT & DIAGRAM BATANG KOMPARATIF             -->
-    <!-- ======================================================== -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-
-      <!-- Kolom Kiri (5 Kolom): DIAGRAM DONAT INTERAKTIF -->
-      <div class="lg:col-span-5 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface-raised)] p-4 sm:p-5 shadow-xs flex flex-col justify-between">
-        <div>
-          <div class="flex items-center justify-between pb-3 border-b border-neutral-200 dark:border-[var(--theme-border)]">
+      <!-- ====================================================== -->
+      <!-- DIAGRAM 1: OMBAK (TREN PRESENSI & FLUKTUASI LEMBUR)    -->
+      <!-- ====================================================== -->
+      <div class="lg:col-span-5 p-4 sm:p-4.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex flex-col justify-between space-y-3">
+        <!-- Skeleton Chart 1 -->
+        <template v-if="isLoading">
+          <div class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-2">
-              <PieChart class="w-4 h-4 text-[var(--theme-primary)]" />
-              <h2 class="text-sm font-bold text-neutral-900 dark:text-white">
-                Distribusi Disiplin & Presensi
+              <BaseSkeleton variant="circular" width="16px" height="16px" />
+              <BaseSkeleton width="130px" height="15px" />
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <BaseSkeleton width="32px" height="32px" class="rounded-xl" />
+              <BaseSkeleton width="120px" height="32px" class="rounded-xl" />
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <BaseSkeleton width="80px" height="12px" />
+            <BaseSkeleton width="80px" height="12px" />
+          </div>
+          <div class="h-44 w-full rounded-xl skeleton-shimmer flex items-center justify-center">
+            <div class="w-8 h-8 rounded-full border-2 border-neutral-300 dark:border-neutral-600 border-t-transparent animate-spin opacity-30" />
+          </div>
+        </template>
+
+        <!-- Real Chart 1 dengan Harmonic Wave -->
+        <template v-else>
+          <!-- Header -->
+          <div class="flex items-center justify-between gap-2 min-w-0">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <TrendingUp class="w-4 h-4 text-[var(--theme-primary)] shrink-0" />
+              <h2 class="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white truncate" title="Tren Kehadiran & Lembur">
+                Tren Kehadiran & Lembur
               </h2>
             </div>
-            <span class="text-xs text-neutral-500">Hari Ini</span>
-          </div>
 
-          <!-- Interactive Donut Chart Container -->
-          <div class="flex flex-col sm:flex-row items-center gap-4 py-4">
-            <!-- Donut SVG with Center Readout -->
-            <div class="relative w-40 h-40 shrink-0 flex items-center justify-center">
-              <svg class="w-full h-full -rotate-90 transform-gpu overflow-visible" viewBox="-65 -65 130 130">
-                <!-- Background Base Track -->
-                <circle
-                  cx="0"
-                  cy="0"
-                  :r="donutRadius"
-                  fill="none"
-                  stroke="currentColor"
-                  class="text-neutral-100 dark:text-[var(--theme-surface-muted)]"
-                  stroke-width="13"
-                />
-
-                <!-- Donut Segments with Interactive Stroke Magnification -->
-                <circle
-                  v-for="slice in donutSlices"
-                  :key="slice.id"
-                  cx="0"
-                  cy="0"
-                  :r="donutRadius"
-                  fill="none"
-                  :stroke="slice.color"
-                  :stroke-width="hoveredDonutSlice && hoveredDonutSlice.id === slice.id ? 17 : 13"
-                  :stroke-dasharray="slice.strokeDasharray"
-                  :stroke-dashoffset="slice.strokeDashoffset"
-                  stroke-linecap="round"
-                  class="cursor-pointer transition-all duration-300 ease-out origin-center"
-                  :class="hoveredDonutSlice && hoveredDonutSlice.id === slice.id ? 'opacity-100 scale-105 filter drop-shadow-md' : (hoveredDonutSlice ? 'opacity-40' : 'opacity-100')"
-                  @mouseenter="hoveredDonutSlice = slice"
-                  @mouseleave="hoveredDonutSlice = null"
-                />
-              </svg>
-
-              <!-- Dynamic Center Readout -->
-              <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-2">
-                <span
-                  class="text-base sm:text-lg font-bold tracking-tight transition-all duration-200"
-                  :style="{ color: activeDonutInfo.color }"
-                >
-                  {{ activeDonutInfo.value }}
-                </span>
-                <span class="text-[10px] font-medium text-neutral-500 dark:text-neutral-400 leading-tight block truncate max-w-[85px]">
-                  {{ activeDonutInfo.title }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Donut Legend List with Hover Highlighting -->
-            <div class="space-y-1.5 flex-1 w-full text-xs">
-              <div
-                v-for="slice in donutSlices"
-                :key="slice.id"
-                @mouseenter="hoveredDonutSlice = slice"
-                @mouseleave="hoveredDonutSlice = null"
-                class="px-2 py-1.5 rounded-lg flex items-center justify-between gap-2 cursor-pointer transition"
-                :class="hoveredDonutSlice && hoveredDonutSlice.id === slice.id ? 'bg-neutral-100 dark:bg-[var(--theme-surface-muted)] font-semibold' : 'hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface)]'"
+            <!-- Periode Controls & Wave Toggle Button -->
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                @click="toggleWave"
+                class="w-8 h-8 rounded-xl border flex items-center justify-center transition cursor-pointer shrink-0"
+                :class="isWaveActive ? 'bg-[var(--theme-primary-soft)] text-[var(--theme-primary)] border-[var(--theme-primary)]/30' : 'bg-neutral-100 dark:bg-[var(--theme-surface-raised)] text-neutral-400 border-neutral-200 dark:border-[var(--theme-border)]'"
+                :title="isWaveActive ? 'Jeda Animasi Gelombang' : 'Aktifkan Animasi Gelombang'"
               >
-                <div class="flex items-center gap-2 truncate">
-                  <span
-                    class="w-2.5 h-2.5 rounded-full shrink-0 transition-transform"
-                    :class="hoveredDonutSlice && hoveredDonutSlice.id === slice.id ? 'scale-125 ring-2 ring-white dark:ring-neutral-800' : ''"
-                    :style="{ backgroundColor: slice.color }"
-                  />
-                  <span class="text-neutral-700 dark:text-neutral-300 truncate">{{ slice.name }}</span>
-                </div>
-                <div class="text-right shrink-0">
-                  <span class="font-bold text-neutral-900 dark:text-white">{{ slice.count }}</span>
-                  <span class="text-[10px] text-neutral-400 ml-1">({{ slice.pct }}%)</span>
-                </div>
+                <Waves class="w-4 h-4" :class="isWaveActive ? 'animate-pulse' : ''" />
+              </button>
+
+              <div class="inline-flex p-0.5 rounded-xl bg-neutral-100 dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] text-[11px]">
+                <button
+                  v-for="p in [{ id: '7hari', label: '7H' }, { id: '14hari', label: '14H' }, { id: '30hari', label: '30H' }]"
+                  :key="p.id"
+                  type="button"
+                  @click="selectedTrendPeriod = p.id"
+                  class="px-2 py-0.5 rounded-lg font-medium transition cursor-pointer"
+                  :class="selectedTrendPeriod === p.id ? 'bg-white dark:bg-[var(--theme-surface-muted)] text-[var(--theme-primary)] shadow-2xs font-semibold' : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'"
+                >
+                  {{ p.label }}
+                </button>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="p-2.5 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface)] border border-neutral-100 dark:border-[var(--theme-border)] text-[11px] text-neutral-500 flex items-center justify-between">
-          <span>Toleransi telat kantor: 15 menit</span>
-          <span class="text-emerald-600 dark:text-emerald-400 font-semibold">94.6% Disiplin</span>
-        </div>
-      </div>
-
-      <!-- Kolom Kanan (7 Kolom): DIAGRAM BATANG KOMPARASI LEMBUR -->
-      <div class="lg:col-span-7 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface-raised)] p-4 sm:p-5 shadow-xs flex flex-col justify-between">
-        <div>
-          <div class="flex items-center justify-between pb-3 border-b border-neutral-200 dark:border-[var(--theme-border)]">
-            <div class="flex items-center gap-2">
-              <BarChart3 class="w-4 h-4 text-[var(--theme-primary)]" />
-              <h2 class="text-sm font-bold text-neutral-900 dark:text-white">
-                Komparasi Jam Lembur vs Kuota per Departemen
-              </h2>
+          <!-- Legend Bar with Live Scrubber Info -->
+          <div class="flex items-center justify-between text-[11px] text-neutral-500 dark:text-neutral-400">
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-[var(--theme-primary)]" />
+                <span class="font-medium text-neutral-700 dark:text-neutral-300">
+                  {{ activeScrubberData.point ? activeScrubberData.point.val : '-' }}% Hadir
+                </span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                <span class="font-medium text-neutral-700 dark:text-neutral-300">
+                  {{ activeScrubberData.overtime ? activeScrubberData.overtime.val : '-' }}j Lembur
+                </span>
+              </div>
             </div>
-            <BaseBadge variant="neutral" size="xs">Bulan Berjalan</BaseBadge>
+
+            <div class="text-[10.5px] font-mono text-neutral-400">
+              {{ activeScrubberData.point ? activeScrubberData.point.label : '' }}
+            </div>
           </div>
 
-          <!-- Vertical / Horizontal Comparative Bars with Glow -->
-          <div class="space-y-3.5 py-4">
+          <!-- SVG Harmonic Wave Canvas -->
+          <div
+            class="relative w-full h-44 cursor-crosshair select-none"
+            @mousemove="handleChartMouseMove"
+            @mouseleave="handleChartMouseLeave"
+          >
+            <svg
+              class="w-full h-full overflow-visible"
+              :viewBox="`0 0 ${svgWidth} ${svgHeight}`"
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <linearGradient id="hrisPresenceGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="var(--theme-primary)" stop-opacity="0.30" />
+                  <stop offset="70%" stop-color="var(--theme-primary)" stop-opacity="0.06" />
+                  <stop offset="100%" stop-color="var(--theme-primary)" stop-opacity="0.00" />
+                </linearGradient>
+              </defs>
+
+              <!-- Horizontal Grid Lines -->
+              <g class="stroke-neutral-200 dark:stroke-[var(--theme-border)]" stroke-dasharray="3 3" stroke-width="0.75">
+                <line :x1="padX" :y1="getYPresence(100)" :x2="svgWidth - padX" :y2="getYPresence(100)" />
+                <line :x1="padX" :y1="getYPresence(95)" :x2="svgWidth - padX" :y2="getYPresence(95)" />
+                <line :x1="padX" :y1="getYPresence(90)" :x2="svgWidth - padX" :y2="getYPresence(90)" />
+                <line :x1="padX" :y1="svgHeight - padYBottom" :x2="svgWidth - padX" :y2="svgHeight - padYBottom" />
+              </g>
+
+              <!-- Wave Area Path -->
+              <path :d="presenceAreaPath" fill="url(#hrisPresenceGrad)" class="transition-all duration-150" />
+
+              <!-- Overtime Line (Amber) -->
+              <path
+                :d="overtimeLinePath"
+                fill="none"
+                stroke="#f59e0b"
+                stroke-width="1.75"
+                stroke-dasharray="4 3"
+                class="transition-all duration-150"
+              />
+
+              <!-- Presence Wave Line (Primary Theme) -->
+              <path
+                :d="presenceLinePath"
+                fill="none"
+                stroke="var(--theme-primary)"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                class="transition-all duration-150"
+              />
+
+              <!-- X-Axis Labels -->
+              <g class="fill-neutral-400 text-[10px] font-mono">
+                <text
+                  v-for="p in presencePoints"
+                  :key="p.label"
+                  :x="p.x"
+                  :y="svgHeight - 10"
+                  text-anchor="middle"
+                >
+                  {{ p.label }}
+                </text>
+              </g>
+
+              <!-- Interactive Hover Scrubber -->
+              <g v-if="activeScrubberData.point">
+                <line
+                  :x1="activeScrubberData.point.x"
+                  :y1="padYTop"
+                  :x2="activeScrubberData.point.x"
+                  :y2="svgHeight - padYBottom"
+                  stroke="var(--theme-primary)"
+                  stroke-width="1.5"
+                  stroke-dasharray="3 3"
+                  class="opacity-75"
+                />
+                <circle
+                  :cx="activeScrubberData.point.x"
+                  :cy="activeScrubberData.point.y"
+                  r="6"
+                  fill="var(--theme-primary)"
+                  class="opacity-30 animate-ping"
+                />
+                <circle
+                  :cx="activeScrubberData.point.x"
+                  :cy="activeScrubberData.point.y"
+                  r="4"
+                  fill="var(--theme-primary)"
+                  stroke="#ffffff"
+                  stroke-width="2"
+                />
+                <circle
+                  v-if="activeScrubberData.overtime"
+                  :cx="activeScrubberData.overtime.x"
+                  :cy="activeScrubberData.overtime.y"
+                  r="3.5"
+                  fill="#f59e0b"
+                  stroke="#ffffff"
+                  stroke-width="1.5"
+                />
+              </g>
+            </svg>
+          </div>
+        </template>
+      </div>
+
+      <!-- ====================================================== -->
+      <!-- DIAGRAM 2: BATANG (DISTRIBUSI LEMBUR PER DEVISI)       -->
+      <!-- ====================================================== -->
+      <div class="lg:col-span-4 p-4 sm:p-4.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex flex-col justify-between space-y-3">
+        <!-- Skeleton Chart 2 -->
+        <template v-if="isLoading">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <BaseSkeleton variant="circular" width="16px" height="16px" />
+              <BaseSkeleton width="135px" height="15px" />
+            </div>
+            <BaseSkeleton width="50px" height="18px" class="rounded-md" />
+          </div>
+          <div class="space-y-3 pt-1">
+            <div v-for="i in 5" :key="'bar-skel-' + i" class="space-y-1">
+              <div class="flex items-center justify-between">
+                <BaseSkeleton width="75px" height="12px" />
+                <BaseSkeleton width="45px" height="12px" />
+              </div>
+              <BaseSkeleton height="8px" class="rounded-full" />
+            </div>
+          </div>
+          <div class="pt-1 border-t border-neutral-100 dark:border-[var(--theme-border)]">
+            <BaseSkeleton width="100%" height="10px" />
+          </div>
+        </template>
+
+        <!-- Real Chart 2 -->
+        <template v-else>
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <BarChart3 class="w-4 h-4 text-blue-500" />
+              <h2 class="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white">
+                Beban Lembur per Divisi
+              </h2>
+            </div>
+            <span class="text-[10.5px] font-semibold text-neutral-400 bg-neutral-100 dark:bg-[var(--theme-surface-muted)] px-2 py-0.5 rounded-md">
+              Bulan Berjalan
+            </span>
+          </div>
+
+          <!-- Horizontal Bar List dengan Animated Expansion & CountUp -->
+          <div class="space-y-2.5 pt-1">
             <div
               v-for="dept in hrisOvertimeByDept"
               :key="dept.code"
+              class="space-y-1 group cursor-pointer"
               @mouseenter="hoveredBarDept = dept"
               @mouseleave="hoveredBarDept = null"
-              class="p-2.5 rounded-xl border border-transparent transition cursor-pointer"
-              :class="hoveredBarDept && hoveredBarDept.code === dept.code ? 'bg-neutral-50 dark:bg-[var(--theme-surface)] border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs' : ''"
             >
-              <div class="flex items-center justify-between text-xs mb-1.5">
-                <div class="flex items-center gap-2">
-                  <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-600 dark:text-neutral-400">
-                    {{ dept.code }}
-                  </span>
-                  <span class="font-semibold text-neutral-800 dark:text-neutral-200">
-                    {{ dept.dept }}
-                  </span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <span class="font-bold text-neutral-900 dark:text-white">{{ dept.hours }} Jam</span>
-                  <span class="text-[11px] text-neutral-400">/ max {{ dept.maxQuota }} Jam</span>
-                </div>
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-medium text-neutral-700 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-white transition">
+                  {{ dept.dept }}
+                </span>
+                <span class="font-bold font-mono text-neutral-900 dark:text-white">
+                  <BaseCountUp :to="dept.hours" suffix=" " />
+                  <span class="text-[10px] font-normal text-neutral-400 font-sans">jam</span>
+                </span>
               </div>
 
-              <!-- Bar Track & Fill with Smooth Width Motion -->
-              <div class="w-full h-3 rounded-full bg-neutral-100 dark:bg-[var(--theme-surface-muted)] overflow-hidden relative">
+              <!-- Animated Progress Bar -->
+              <div class="h-2 rounded-full bg-neutral-100 dark:bg-[var(--theme-surface-muted)] overflow-hidden flex">
                 <div
-                  class="h-full rounded-full transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                  class="h-full rounded-full transition-all duration-1000 ease-out"
                   :style="{
                     width: `${Math.min(100, (dept.hours / dept.maxQuota) * 100)}%`,
-                    backgroundColor: dept.color,
+                    backgroundColor: dept.code === 'OPS' ? 'var(--theme-primary)' : dept.color,
                   }"
-                  :class="hoveredBarDept && hoveredBarDept.code === dept.code ? 'brightness-110 shadow-sm' : ''"
+                  :class="hoveredBarDept && hoveredBarDept.code === dept.code ? 'brightness-110' : ''"
                 />
-              </div>
-
-              <!-- Interactive Hover Subtext -->
-              <div
-                v-if="hoveredBarDept && hoveredBarDept.code === dept.code"
-                class="mt-2 pt-1 border-t border-neutral-200/60 dark:border-[var(--theme-border)]/60 flex items-center justify-between text-[11px] text-neutral-500 animate-fadeIn"
-              >
-                <span>Akumulasi upah lembur: <strong class="text-neutral-800 dark:text-neutral-200">{{ dept.cost }}</strong></span>
-                <span class="text-[var(--theme-primary)] font-semibold">{{ Math.round((dept.hours / dept.maxQuota) * 100) }}% Kuota Terpakai</span>
               </div>
             </div>
           </div>
+
+          <!-- Axis Helper Label -->
+          <div class="flex items-center justify-between text-[10px] text-neutral-400 font-mono pt-1 border-t border-neutral-100 dark:border-[var(--theme-border)]">
+            <span>0</span>
+            <span>100</span>
+            <span>200</span>
+            <span>350 jam kuota</span>
+          </div>
+        </template>
+      </div>
+
+      <!-- ====================================================== -->
+      <!-- DIAGRAM 3: DONAT (DISTRIBUSI DISIPLIN & PRESENSI)      -->
+      <!-- ====================================================== -->
+      <div class="lg:col-span-3 p-4 sm:p-4.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex flex-col justify-between space-y-3">
+        <!-- Skeleton Chart 3 -->
+        <template v-if="isLoading">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <BaseSkeleton variant="circular" width="16px" height="16px" />
+              <BaseSkeleton width="100px" height="15px" />
+            </div>
+            <BaseSkeleton width="55px" height="18px" class="rounded-md" />
+          </div>
+          <div class="flex items-center justify-center py-2">
+            <div class="w-28 h-28 rounded-full border-[12px] border-neutral-200 dark:border-[var(--theme-border)] skeleton-shimmer flex items-center justify-center">
+              <BaseSkeleton width="40px" height="14px" />
+            </div>
+          </div>
+          <div class="space-y-2 pt-1 border-t border-neutral-100 dark:border-[var(--theme-border)]">
+            <div v-for="i in 4" :key="'donut-skel-' + i" class="flex items-center justify-between">
+              <BaseSkeleton width="70px" height="12px" />
+              <BaseSkeleton width="45px" height="12px" />
+            </div>
+          </div>
+        </template>
+
+        <!-- Real Chart 3 -->
+        <template v-else>
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <PieChart class="w-4 h-4 text-emerald-500" />
+              <h2 class="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white">
+                Disiplin & Status Kehadiran
+              </h2>
+            </div>
+            <BaseBadge variant="neutral" size="sm">Hari Ini</BaseBadge>
+          </div>
+
+          <!-- Circular Donut Chart dengan Hover & Dynamic Center Text -->
+          <div class="flex items-center justify-center relative py-1">
+            <svg class="w-32 h-32 -rotate-90 transform" viewBox="0 0 120 120">
+              <circle
+                cx="60"
+                cy="60"
+                :r="donutRadius"
+                fill="none"
+                stroke="currentColor"
+                class="text-neutral-100 dark:text-[var(--theme-surface-muted)]"
+                stroke-width="12"
+              />
+
+              <circle
+                v-for="slice in donutSlices"
+                :key="slice.id"
+                cx="60"
+                cy="60"
+                :r="donutRadius"
+                fill="none"
+                :stroke="slice.color"
+                :stroke-width="hoveredDonutSlice && hoveredDonutSlice.id === slice.id ? 16 : 12"
+                :stroke-dasharray="slice.strokeDasharray"
+                :stroke-dashoffset="slice.strokeDashoffset"
+                stroke-linecap="round"
+                class="cursor-pointer transition-all duration-300 ease-out origin-center"
+                :class="hoveredDonutSlice && hoveredDonutSlice.id === slice.id ? 'opacity-100 scale-105' : (hoveredDonutSlice ? 'opacity-40' : 'opacity-100')"
+                @mouseenter="hoveredDonutSlice = slice"
+                @mouseleave="hoveredDonutSlice = null"
+              />
+            </svg>
+
+            <!-- Center Dynamic Text -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+              <span
+                class="text-base font-bold font-mono tracking-tight transition-all duration-200"
+                :style="{ color: activeDonutInfo.color }"
+              >
+                {{ activeDonutInfo.value }}
+              </span>
+              <span class="text-[9.5px] text-neutral-400 block truncate max-w-[75px] leading-tight mt-0.5">
+                {{ activeDonutInfo.title }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Donut Legend Compact List -->
+          <div class="space-y-1.5 pt-1 border-t border-neutral-100 dark:border-[var(--theme-border)] text-xs">
+            <div
+              v-for="slice in donutSlices"
+              :key="slice.id"
+              @mouseenter="hoveredDonutSlice = slice"
+              @mouseleave="hoveredDonutSlice = null"
+              class="flex items-center justify-between text-[11px] cursor-pointer transition py-0.5 px-1 rounded-md"
+              :class="hoveredDonutSlice && hoveredDonutSlice.id === slice.id ? 'bg-neutral-100 dark:bg-[var(--theme-surface-muted)] font-semibold' : ''"
+            >
+              <div class="flex items-center gap-1.5 truncate">
+                <span class="w-2 h-2 rounded-full shrink-0" :style="{ backgroundColor: slice.color }" />
+                <span class="text-neutral-600 dark:text-neutral-400 truncate">{{ slice.name }}</span>
+              </div>
+              <span class="font-bold font-mono text-neutral-900 dark:text-white">
+                {{ slice.count }} <span class="text-[10px] font-normal text-neutral-400 font-sans">({{ slice.pct }}%)</span>
+              </span>
+            </div>
+          </div>
+        </template>
+      </div>
+
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- BARIS 3: 4 KARTU MODUL OPERASIONAL HRIS (COMPACT 4-GRID) -->
+    <!-- ======================================================== -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 anim-fade-up anim-delay-3">
+
+      <!-- Modul 1: Ringkasan Anggaran Payroll -->
+      <div class="p-4 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex flex-col justify-between space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <Wallet class="w-4 h-4 text-emerald-500" />
+            <h2 class="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white">
+              Komposisi Biaya Payroll
+            </h2>
+          </div>
+          <BaseBadge variant="emerald" size="xs">Bulan Ini</BaseBadge>
         </div>
 
-        <div class="p-2.5 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface)] border border-neutral-100 dark:border-[var(--theme-border)] text-[11px] text-neutral-500 flex items-center justify-between">
-          <span>Kepatuhan PP 35/2021: Lembur maks 4 jam/hari atau 18 jam/minggu</span>
-          <span class="text-neutral-700 dark:text-neutral-300 font-semibold">Total 654 Jam</span>
+        <div class="space-y-2 text-xs divide-y divide-neutral-100 dark:divide-[var(--theme-border)]">
+          <div class="flex items-center justify-between pt-1">
+            <span class="text-neutral-500">Gaji Pokok & Tetap:</span>
+            <span class="font-mono font-semibold text-neutral-800 dark:text-neutral-200">Rp 3,52 M</span>
+          </div>
+          <div class="flex items-center justify-between pt-1.5">
+            <span class="text-neutral-500">Tunjangan & Fasilitas:</span>
+            <span class="font-mono font-semibold text-neutral-800 dark:text-neutral-200">Rp 975 Jt</span>
+          </div>
+          <div class="flex items-center justify-between pt-1.5">
+            <span class="text-neutral-500">Upah Lembur L1/L2:</span>
+            <span class="font-mono font-semibold text-amber-600 dark:text-amber-400">Rp 420 Jt</span>
+          </div>
+          <div class="flex items-center justify-between pt-1.5">
+            <span class="text-neutral-500">BPJS Ketenagakerjaan:</span>
+            <span class="font-mono font-semibold text-neutral-800 dark:text-neutral-200">Rp 325 Jt</span>
+          </div>
+        </div>
+
+        <div class="pt-1.5 border-t border-neutral-100 dark:border-[var(--theme-border)] flex items-center justify-between text-[11px]">
+          <span class="text-neutral-500">Total Netto:</span>
+          <span class="font-bold text-[var(--theme-primary)] font-mono text-xs">Rp 5.420.800.000</span>
+        </div>
+      </div>
+
+      <!-- Modul 2: Integritas Presensi Biometrik & GPS -->
+      <div class="p-4 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex flex-col justify-between space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <ShieldCheck class="w-4 h-4 text-[var(--theme-primary)]" />
+            <h2 class="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white">
+              Integritas Presensi GPS
+            </h2>
+          </div>
+          <BaseBadge variant="primary" size="xs">98.6% Valid</BaseBadge>
+        </div>
+
+        <div class="space-y-2 text-xs">
+          <div>
+            <div class="flex justify-between text-[11px] mb-1">
+              <span class="text-neutral-500">Validasi Radius Cabang (&le;50m):</span>
+              <span class="font-semibold text-neutral-800 dark:text-neutral-200">96.2%</span>
+            </div>
+            <BaseProgress :value="96" variant="primary" size="xs" />
+          </div>
+
+          <div>
+            <div class="flex justify-between text-[11px] mb-1">
+              <span class="text-neutral-500">Face Match & Liveness:</span>
+              <span class="font-semibold text-neutral-800 dark:text-neutral-200">98.6%</span>
+            </div>
+            <BaseProgress :value="98" variant="success" size="xs" />
+          </div>
+
+          <div class="flex items-center justify-between text-[11px] pt-1 border-t border-neutral-100 dark:border-[var(--theme-border)]">
+            <span class="text-neutral-500">Deteksi Mock GPS:</span>
+            <span class="font-bold text-emerald-600 dark:text-emerald-400">0 Pelanggaran</span>
+          </div>
+        </div>
+
+        <div class="pt-1.5 border-t border-neutral-100 dark:border-[var(--theme-border)] flex items-center justify-between text-[11px]">
+          <span class="text-neutral-500">Status Gateway:</span>
+          <span class="font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Online (4 Lokasi)
+          </span>
+        </div>
+      </div>
+
+      <!-- Modul 3: Peringatan Kepatuhan & Masa Kerja -->
+      <div class="p-4 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex flex-col justify-between space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <AlertTriangle class="w-4 h-4 text-amber-500" />
+            <h2 class="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white">
+              Evaluasi & Kepatuhan
+            </h2>
+          </div>
+          <BaseBadge variant="warning" size="xs">3 Perlu Tindakan</BaseBadge>
+        </div>
+
+        <div class="space-y-2 text-xs">
+          <div
+            v-for="alert in hrisComplianceAlerts"
+            :key="alert.id"
+            class="p-2 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface-muted)] border border-neutral-100 dark:border-[var(--theme-border)] flex items-center justify-between gap-2"
+          >
+            <div class="truncate">
+              <span class="font-semibold text-neutral-800 dark:text-neutral-200 block truncate text-[11px]">
+                {{ alert.title }}
+              </span>
+              <span class="text-[10px] text-neutral-400 block truncate">
+                {{ alert.desc }}
+              </span>
+            </div>
+            <BaseButton
+              variant="neutral"
+              size="xs"
+              @click="toast.info(`Membuka: ${alert.title}`)"
+              class="shrink-0 text-[10px] py-0.5 px-1.5"
+            >
+              Lihat
+            </BaseButton>
+          </div>
+        </div>
+
+        <div class="pt-1.5 border-t border-neutral-100 dark:border-[var(--theme-border)] flex items-center justify-between text-[11px]">
+          <span class="text-neutral-500">Batas Lapor PPh 21:</span>
+          <span class="font-bold text-neutral-800 dark:text-neutral-200">20 Nov 2026</span>
+        </div>
+      </div>
+
+      <!-- Modul 4: Status Shift Kerja Hari Ini -->
+      <div class="p-4 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex flex-col justify-between space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <Clock class="w-4 h-4 text-[var(--theme-primary)]" />
+            <h2 class="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white">
+              Status Shift Hari Ini
+            </h2>
+          </div>
+          <BaseBadge variant="neutral" size="xs">1.284 Staf</BaseBadge>
+        </div>
+
+        <div class="space-y-2 text-xs">
+          <div
+            v-for="shift in hrisShiftSummary"
+            :key="shift.id"
+            class="space-y-1"
+          >
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="text-neutral-600 dark:text-neutral-400">{{ shift.name }}</span>
+              <span class="font-semibold text-neutral-800 dark:text-neutral-200">
+                {{ shift.id !== 'off' ? `${shift.present}/${shift.total}` : `${shift.total} Off` }}
+              </span>
+            </div>
+            <BaseProgress
+              v-if="shift.id !== 'off'"
+              :value="Math.round((shift.present / shift.total) * 100)"
+              :variant="shift.id === 'pagi' ? 'primary' : (shift.id === 'siang' ? 'warning' : 'info')"
+              size="xs"
+            />
+          </div>
+        </div>
+
+        <div class="pt-1.5 border-t border-neutral-100 dark:border-[var(--theme-border)] flex items-center justify-between text-[11px]">
+          <span class="text-neutral-500">Pergantian Shift:</span>
+          <button
+            type="button"
+            @click="isBroadcastModalOpen = true"
+            class="text-[var(--theme-primary)] font-semibold hover:underline cursor-pointer flex items-center gap-1"
+          >
+            Broadcast <Send class="w-3 h-3" />
+          </button>
         </div>
       </div>
 
     </div>
 
     <!-- ======================================================== -->
-    <!-- 5. REAL-TIME ATTENDANCE FEED & SHIFT PROGRESS            -->
+    <!-- BARIS 4: 12 KOLOM AKSI & LOG PRESENSI REAL-TIME          -->
+    <!-- Col 5: Pending Approvals | Col 7: Live Attendance Feed   -->
     <!-- ======================================================== -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 anim-fade-up anim-delay-4">
 
-      <!-- Kolom Kiri (7 Kolom): Stream Presensi Real-Time -->
-      <div class="lg:col-span-7 flex flex-col rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface-raised)] overflow-hidden shadow-xs">
-        <div class="p-4 sm:p-5 border-b border-neutral-200 dark:border-[var(--theme-border)] flex items-center justify-between">
-          <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-xl bg-[var(--theme-primary-soft)] text-[var(--theme-primary)] flex items-center justify-center shrink-0 shadow-2xs">
-              <Activity class="w-4 h-4" />
+      <!-- ====================================================== -->
+      <!-- PENDING APPROVALS BAR (Col 5)                          -->
+      <!-- ====================================================== -->
+      <div class="lg:col-span-5 p-4 sm:p-4.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex flex-col justify-between space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-[var(--theme-border)]">
+          <div class="flex items-center gap-2">
+            <ShieldCheck class="w-4 h-4 text-amber-500" />
+            <h2 class="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white">
+              Persetujuan Tertunda
+            </h2>
+          </div>
+          <BaseBadge variant="warning" size="xs">{{ approvals.length }} Menunggu</BaseBadge>
+        </div>
+
+        <div v-if="approvals.length > 0" class="space-y-2.5 flex-1 overflow-y-auto max-h-[320px]">
+          <div
+            v-for="item in approvals"
+            :key="item.id"
+            class="p-2.5 rounded-xl border border-neutral-100 dark:border-[var(--theme-border)] bg-neutral-50/60 dark:bg-[var(--theme-surface-muted)] flex items-center justify-between gap-2.5 transition hover:border-neutral-300 dark:hover:border-[var(--theme-border-strong)]"
+          >
+            <div class="flex items-center gap-2.5 min-w-0">
+              <BaseAvatar :name="item.applicant" size="sm" />
+              <div class="min-w-0">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-xs font-bold text-neutral-900 dark:text-white truncate">
+                    {{ item.applicant }}
+                  </span>
+                  <BaseBadge :variant="item.typeBadge" size="xs">
+                    {{ item.type }}
+                  </BaseBadge>
+                </div>
+                <div class="text-[10px] text-neutral-400 truncate mt-0.5">
+                  {{ item.dept }} · {{ item.duration }}
+                </div>
+              </div>
             </div>
-            <div>
-              <h2 class="text-sm font-bold text-neutral-900 dark:text-white">
-                Stream Presensi Biometrik & GPS
-              </h2>
-              <p class="text-[11px] text-neutral-500 dark:text-neutral-400">
-                Log absensi masuk/pulang terverifikasi liveness detection & radius kantor
-              </p>
+
+            <!-- Tombol Setujui / Tolak -->
+            <div class="flex items-center gap-1 shrink-0">
+              <button
+                type="button"
+                @click="handleReject(item)"
+                class="w-7 h-7 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center justify-center transition cursor-pointer"
+                title="Tolak Pengajuan"
+              >
+                <X class="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                @click="handleApprove(item)"
+                class="w-7 h-7 rounded-lg bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 flex items-center justify-center transition cursor-pointer shadow-2xs"
+                title="Setujui Pengajuan"
+              >
+                <Check class="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
+        </div>
 
+        <div v-else class="text-center py-8">
+          <CheckCircle2 class="w-8 h-8 text-emerald-500 mx-auto mb-1 opacity-80" />
+          <p class="text-xs font-semibold text-neutral-800 dark:text-neutral-200">Semua pengajuan telah diproses!</p>
+          <p class="text-[10px] text-neutral-400">Tidak ada permohonan tertunda.</p>
+        </div>
+
+        <div class="pt-2 border-t border-neutral-100 dark:border-[var(--theme-border)] flex items-center justify-between text-[11px] text-neutral-400">
+          <span>Otomasi alur bertingkat: L1 &rarr; L2 &rarr; HRD</span>
+          <span class="text-[var(--theme-primary)] font-medium">Buka Alur Approval &rarr;</span>
+        </div>
+      </div>
+
+      <!-- ====================================================== -->
+      <!-- REAL-TIME ATTENDANCE FEED (Col 7)                      -->
+      <!-- ====================================================== -->
+      <div class="lg:col-span-7 p-4 sm:p-4.5 rounded-2xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-2xs flex flex-col justify-between space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-[var(--theme-border)]">
+          <div class="flex items-center gap-2">
+            <Users class="w-4 h-4 text-[var(--theme-primary)]" />
+            <h2 class="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white">
+              Stream Presensi Karyawan Real-Time
+            </h2>
+          </div>
           <BaseButton
             variant="ghost"
             size="xs"
             @click="handleExportAttendance"
           >
             <Download class="w-3.5 h-3.5 mr-1" />
-            <span>Ekspor</span>
+            <span>Ekspor Excel</span>
           </BaseButton>
         </div>
 
-        <div class="divide-y divide-neutral-100 dark:divide-[var(--theme-border)] flex-1 overflow-y-auto max-h-[380px]">
+        <!-- Attendance List -->
+        <div class="divide-y divide-neutral-100 dark:divide-[var(--theme-border)] flex-1 overflow-y-auto max-h-[320px]">
           <div
             v-for="att in hrisLiveAttendance"
             :key="att.id"
             @click="openAttendanceDetail(att)"
-            class="p-3.5 sm:px-4 sm:py-3 hover:bg-neutral-50/80 dark:hover:bg-[var(--theme-surface-muted)] transition flex items-center justify-between gap-3 cursor-pointer group"
+            class="py-2.5 px-1 hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-muted)] transition flex items-center justify-between gap-3 cursor-pointer group rounded-lg"
           >
-            <div class="flex items-center gap-3 min-w-0">
+            <div class="flex items-center gap-2.5 min-w-0">
               <BaseAvatar
                 :name="att.name"
                 size="md"
@@ -948,223 +1229,27 @@ onUnmounted(() => {
                     {{ att.statusLabel }}
                   </BaseBadge>
                 </div>
-                <div class="text-[11px] text-neutral-500 dark:text-neutral-400 truncate flex items-center gap-1.5 mt-0.5">
-                  <span>{{ att.role }}</span>
-                  <span>·</span>
-                  <span class="font-medium text-neutral-700 dark:text-neutral-300">{{ att.branch }}</span>
+                <div class="text-[10px] text-neutral-400 truncate mt-0.5">
+                  {{ att.role }} · <span class="text-neutral-600 dark:text-neutral-300 font-medium">{{ att.branch }}</span>
                 </div>
               </div>
             </div>
 
             <div class="text-right shrink-0">
-              <div class="text-xs font-bold text-neutral-900 dark:text-neutral-100 flex items-center justify-end gap-1">
+              <div class="text-xs font-bold font-mono text-neutral-900 dark:text-white flex items-center justify-end gap-1">
                 <Clock class="w-3 h-3 text-neutral-400" />
                 <span>{{ att.time }}</span>
               </div>
-              <div class="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">
+              <div class="text-[10px] text-neutral-400 mt-0.5">
                 {{ att.locationAccuracy }}
               </div>
             </div>
           </div>
         </div>
 
-        <div class="px-4 py-2.5 bg-neutral-50 dark:bg-[var(--theme-surface)] border-t border-neutral-200 dark:border-[var(--theme-border)] flex items-center justify-between text-[11px] text-neutral-500">
-          <span>Menampilkan 6 presensi terbaru</span>
-          <span class="text-[var(--theme-primary)] font-medium">Klik baris untuk verifikasi biometrik</span>
-        </div>
-      </div>
-
-      <!-- Kolom Kanan (5 Kolom): Rangkuman Shift Kerja Hari Ini -->
-      <div class="lg:col-span-5 flex flex-col rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface-raised)] p-4 sm:p-5 shadow-xs">
-        <div class="flex items-center justify-between pb-3 border-b border-neutral-200 dark:border-[var(--theme-border)]">
-          <div class="flex items-center gap-2">
-            <Clock class="w-4 h-4 text-[var(--theme-primary)]" />
-            <h2 class="text-sm font-bold text-neutral-900 dark:text-white">
-              Status Shift Kerja Hari Ini
-            </h2>
-          </div>
-          <span class="text-xs text-neutral-500 dark:text-neutral-400">
-            Total 1.284 Personil
-          </span>
-        </div>
-
-        <!-- List Shift -->
-        <div class="space-y-3.5 my-auto py-3">
-          <div
-            v-for="shift in hrisShiftSummary"
-            :key="shift.id"
-            class="space-y-1.5 p-3 rounded-xl bg-neutral-50/60 dark:bg-[var(--theme-surface)] border border-neutral-100 dark:border-[var(--theme-border)]"
-          >
-            <div class="flex items-center justify-between text-xs">
-              <div class="flex items-center gap-2">
-                <span class="font-bold text-neutral-800 dark:text-neutral-200">{{ shift.name }}</span>
-                <span class="text-[11px] text-neutral-400">({{ shift.time }})</span>
-              </div>
-              <div class="font-semibold text-neutral-900 dark:text-white">
-                <span v-if="shift.id !== 'off'">{{ shift.present }} / {{ shift.total }} Hadir</span>
-                <span v-else>{{ shift.total }} Karyawan</span>
-              </div>
-            </div>
-
-            <BaseProgress
-              v-if="shift.id !== 'off'"
-              :value="Math.round((shift.present / shift.total) * 100)"
-              :variant="shift.id === 'pagi' ? 'primary' : (shift.id === 'siang' ? 'warning' : 'info')"
-              size="sm"
-            />
-          </div>
-        </div>
-
-        <div class="pt-3 border-t border-neutral-200 dark:border-[var(--theme-border)] flex items-center justify-between">
-          <span class="text-xs text-neutral-500 dark:text-neutral-400">Ada kendala pergantian shift?</span>
-          <BaseButton
-            variant="secondary"
-            size="xs"
-            @click="isBroadcastModalOpen = true"
-          >
-            <Send class="w-3 h-3 mr-1" />
-            <span>Kirim Broadcast</span>
-          </BaseButton>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ======================================================== -->
-    <!-- 6. PENDING APPROVALS BAR (ALUR PERSETUJUAN CEPAT)         -->
-    <!-- ======================================================== -->
-    <section class="rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface-raised)] p-4 sm:p-5 shadow-xs">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-neutral-200 dark:border-[var(--theme-border)]">
-        <div class="flex items-center gap-2.5">
-          <div class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-xs">
-            {{ approvals.length }}
-          </div>
-          <div>
-            <h2 class="text-sm font-bold text-neutral-900 dark:text-white">
-              Persetujuan Menunggu Tindakan (Pending Approvals)
-            </h2>
-            <p class="text-[11px] text-neutral-500 dark:text-neutral-400">
-              Permohonan cuti tahunan, jam lembur, dan klaim medis yang membutuhkan tindakan HRD / L2
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div v-if="approvals.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3.5">
-        <div
-          v-for="item in approvals"
-          :key="item.id"
-          class="p-3.5 rounded-xl border border-neutral-200 dark:border-[var(--theme-border)] bg-neutral-50/40 dark:bg-[var(--theme-surface)] flex flex-col justify-between gap-3 hover:border-neutral-300 dark:hover:border-[var(--theme-border-strong)] transition"
-        >
-          <div class="flex items-start justify-between gap-2">
-            <div class="flex items-center gap-2.5">
-              <BaseAvatar :name="item.applicant" size="sm" />
-              <div>
-                <span class="text-xs font-bold text-neutral-900 dark:text-white block leading-tight">
-                  {{ item.applicant }}
-                </span>
-                <span class="text-[10px] text-neutral-500 dark:text-neutral-400">
-                  {{ item.dept }} · {{ item.approverLevel }}
-                </span>
-              </div>
-            </div>
-            <BaseBadge :variant="item.typeBadge" size="xs">
-              {{ item.type }}
-            </BaseBadge>
-          </div>
-
-          <div class="text-xs bg-white dark:bg-[var(--theme-surface-muted)] p-2.5 rounded-lg border border-neutral-100 dark:border-[var(--theme-border)] space-y-0.5">
-            <div class="font-medium text-neutral-800 dark:text-neutral-200">
-              Durasi: {{ item.duration }}
-            </div>
-            <div class="text-[11px] text-neutral-500 dark:text-neutral-400 italic">
-              "{{ item.reason }}"
-            </div>
-          </div>
-
-          <div class="flex items-center justify-end gap-2 pt-1 border-t border-neutral-200/60 dark:border-[var(--theme-border)]/60">
-            <BaseButton
-              variant="neutral"
-              size="xs"
-              @click="handleReject(item)"
-            >
-              <X class="w-3.5 h-3.5 mr-1 text-rose-500" />
-              <span>Tolak</span>
-            </BaseButton>
-
-            <BaseButton
-              variant="primary"
-              size="xs"
-              @click="handleApprove(item)"
-            >
-              <Check class="w-3.5 h-3.5 mr-1" />
-              <span>Setujui</span>
-            </BaseButton>
-          </div>
-        </div>
-      </div>
-
-      <div v-else class="text-center py-8">
-        <CheckCircle2 class="w-10 h-10 text-emerald-500 mx-auto mb-2 opacity-80" />
-        <p class="text-xs font-semibold text-neutral-800 dark:text-neutral-200">Semua permohonan telah selesai diproses!</p>
-        <p class="text-[11px] text-neutral-500">Tidak ada pengajuan cuti atau lembur yang tertunda saat ini.</p>
-      </div>
-    </section>
-
-    <!-- ======================================================== -->
-    <!-- 7. STATUS KONTRAK & PENGINGAT KEPATUHAN SDM              -->
-    <!-- ======================================================== -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-
-      <!-- Kolom Kiri: Status Ikatan Kerja -->
-      <div class="lg:col-span-6 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface-raised)] p-4 shadow-xs">
-        <h2 class="text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-3">
-          Status Ikatan Hubungan Kerja
-        </h2>
-
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          <div
-            v-for="contract in hrisContractBreakdown"
-            :key="contract.label"
-            class="p-2.5 rounded-xl bg-neutral-50/80 dark:bg-[var(--theme-surface)] border border-neutral-100 dark:border-[var(--theme-border)] text-center"
-          >
-            <span class="text-[10px] text-neutral-500 block truncate">{{ contract.label }}</span>
-            <span class="text-base font-bold text-neutral-900 dark:text-white block mt-0.5">{{ contract.count }}</span>
-            <span class="text-[10px] text-neutral-400 font-medium">{{ contract.percent }}%</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Kolom Kanan: Peringatan Kepatuhan -->
-      <div class="lg:col-span-6 rounded-2xl border border-neutral-200 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface-raised)] p-4 shadow-xs space-y-2.5">
-        <h2 class="text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5">
-          <AlertTriangle class="w-3.5 h-3.5 text-amber-500" />
-          <span>Pengingat Masa Kerja & Legalitas</span>
-        </h2>
-
-        <div class="space-y-2">
-          <div
-            v-for="alert in hrisComplianceAlerts"
-            :key="alert.id"
-            class="p-2.5 rounded-xl border border-neutral-100 dark:border-[var(--theme-border)] bg-neutral-50/60 dark:bg-[var(--theme-surface)] flex items-center justify-between gap-3"
-          >
-            <div class="min-w-0">
-              <span class="text-xs font-semibold text-neutral-900 dark:text-white block truncate">
-                {{ alert.title }}
-              </span>
-              <span class="text-[11px] text-neutral-500 dark:text-neutral-400 block truncate">
-                {{ alert.desc }}
-              </span>
-            </div>
-            <BaseButton
-              variant="neutral"
-              size="xs"
-              @click="toast.info(`Membuka rincian: ${alert.title}`)"
-              class="shrink-0"
-            >
-              {{ alert.actionText }}
-            </BaseButton>
-          </div>
+        <div class="pt-2 border-t border-neutral-100 dark:border-[var(--theme-border)] flex items-center justify-between text-[11px] text-neutral-400">
+          <span>Menampilkan 6 entri absensi terbaru</span>
+          <span class="text-[var(--theme-primary)] font-medium">Klik untuk detail koordinat GPS & biometrik</span>
         </div>
       </div>
 
@@ -1179,11 +1264,9 @@ onUnmounted(() => {
       size="md"
     >
       <div class="space-y-4 text-xs text-neutral-600 dark:text-neutral-300">
-        <BaseAlert
-          variant="warning"
-          title="Verifikasi Akhir Sebelum Cut-Off"
-          description="Kalkulasi ini akan menghitung akumulasi jam hadir, keterlambatan, lembur L1/L2, serta potongan BPJS & PPh 21 untuk 1.284 karyawan."
-        />
+        <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-[11px]">
+          Kalkulasi ini menghitung akumulasi jam hadir, lembur L1/L2, serta potongan BPJS & PPh 21 untuk 1.284 karyawan di 4 kantor cabang.
+        </div>
 
         <div class="p-3.5 rounded-xl bg-neutral-50 dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] space-y-2">
           <div class="flex justify-between">
@@ -1192,10 +1275,10 @@ onUnmounted(() => {
           </div>
           <div class="flex justify-between">
             <span class="text-neutral-500">Cabang Tercakup:</span>
-            <span class="font-bold text-neutral-900 dark:text-white">Semua Cabang (Jakarta, Surabaya, Bali, Medan)</span>
+            <span class="font-bold text-neutral-900 dark:text-white">Semua Cabang (JKT, SBY, DPS, MDN)</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-neutral-500">Total Estimasi Net Payroll:</span>
+            <span class="text-neutral-500">Total Estimasi Netto:</span>
             <span class="font-bold text-[var(--theme-primary)] text-sm">Rp 5.420.800.000</span>
           </div>
         </div>
@@ -1217,7 +1300,7 @@ onUnmounted(() => {
             :loading="isPayrollProcessing"
             @click="handleExecutePayroll"
           >
-            Mulai Hitung Pra-Payroll
+            Mulai Hitung Payroll
           </BaseButton>
         </div>
       </template>
@@ -1233,18 +1316,18 @@ onUnmounted(() => {
     >
       <div class="space-y-3.5 text-xs">
         <p class="text-neutral-600 dark:text-neutral-400">
-          Pesan ini akan dikirimkan via push notification aplikasi Digaji Mobile dan terpasang di papan pengumuman karyawan.
+          Pesan broadcast akan dikirim via push notification aplikasi Digaji Mobile ke seluruh karyawan aktif.
         </p>
 
         <div>
           <label class="block font-semibold text-neutral-700 dark:text-neutral-300 mb-1">
-            Isi Pesan Pengumuman
+            Isi Pengumuman
           </label>
           <textarea
             v-model="broadcastMessage"
-            rows="4"
-            placeholder="Contoh: Pengingat penyesuaian jadwal shift malam untuk cabang Surabaya sehubungan dengan perbaikan trafo listrik..."
-            class="w-full p-3 rounded-xl border border-neutral-300 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface-raised)] text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] transition text-xs"
+            rows="3"
+            placeholder="Contoh: Pengingat penyesuaian jadwal shift malam untuk cabang Surabaya..."
+            class="w-full p-2.5 rounded-xl border border-neutral-300 dark:border-[var(--theme-border)] bg-white dark:bg-[var(--theme-surface-raised)] text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] transition text-xs"
           />
         </div>
       </div>
@@ -1308,11 +1391,11 @@ onUnmounted(() => {
 
         <div class="p-3.5 rounded-xl border border-neutral-200 dark:border-[var(--theme-border)] bg-neutral-50/50 dark:bg-[var(--theme-surface)] space-y-2">
           <span class="font-bold text-neutral-800 dark:text-neutral-200 block">
-            Verifikasi Lokasi & Biometrik Wajah
+            Verifikasi Koordinat & Biometrik
           </span>
-          <div class="h-28 rounded-lg bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center text-neutral-500 text-[11px] gap-2 border border-dashed border-neutral-300 dark:border-neutral-700">
+          <div class="h-24 rounded-lg bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center text-neutral-500 text-[11px] gap-2 border border-dashed border-neutral-300 dark:border-neutral-700">
             <ShieldCheck class="w-4 h-4 text-emerald-500" />
-            <span>Koordinat GPS & Liveness Detection Terverifikasi</span>
+            <span>Liveness Detection & Geofence Terverifikasi</span>
           </div>
         </div>
       </div>
