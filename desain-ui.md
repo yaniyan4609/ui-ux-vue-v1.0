@@ -1101,6 +1101,54 @@ Kanvas peta interaktif berbasis SVG + tile OpenStreetMap ringan dengan proyeksi 
 ```
 
 ---
+### 4.43 `BaseOrgChart.vue` (Bagan Pohon Organisasi Visual Berjenjang)
+Komponen bagan hierarki organisasi berbasis kartu dan garis ortogonal SVG:
+- **Hierarki 3 Tingkat**: Mendukung struktur Direksi ➔ Divisi ➔ Departemen ➔ Jabatan.
+- **Interaktif Buka/Tutup Cabang**: Tombol + / − di bawah tiap kartu node untuk expand/collapse anak cabang.
+- **Metadata Node**: Menampilkan avatar, nama, jabatan, badge level, dan jumlah bawahan langsung.
+
+```vue
+<template>
+  <BaseOrgChart
+    :data="orgHierarchyData"
+    collapsible
+    @node-click="handleNodeSelect"
+  />
+</template>
+```
+
+### 4.44 `BaseDocumentList.vue` (Daftar Arsip & Verifikasi Dokumen Karyawan)
+Kartu berkas digital pegawai dengan status verifikasi dan tombol aksi langsung:
+- **Status Berkas**: `verified` (hijau), `pending` (kuning), `expired` (merah), `missing` (abu-abu).
+- **Aksi Terintegrasi**: Pratinjau berkas, unduh file, dan tombol unggah berkas baru.
+
+```vue
+<template>
+  <BaseDocumentList
+    :documents="employeeDocuments"
+    @preview="handlePreview"
+    @download="handleDownload"
+    @upload="handleUpload"
+  />
+</template>
+```
+
+### 4.45 `BaseGallery.vue` (Galeri Foto Presensi, Surat Izin & Dokumentasi Kerja)
+Galeri thumbnail visual responsif dilengkapi filter kategori dan lightbox modal:
+- **Filter Kategori**: Filter instan berdasarkan jenis foto (Semua, Presensi, Surat Dokter, Kerja).
+- **Lightbox Terpadu**: Klik foto membuka modal tampilan penuh dengan zoom, cap waktu, dan tombol unduh.
+
+```vue
+<template>
+  <BaseGallery
+    :items="employeePhotos"
+    @download="handleSavePhoto"
+  />
+</template>
+```
+
+---
+
 
 ## 5. Standar Desain Dashboard & Visualisasi SVG (Zero Library)
 
@@ -1221,6 +1269,8 @@ Setiap halaman di folder `src/views/` mengikuti pola tata letak berjenjang yang 
 |---|---|---|---|
 | **Dashboard ERP & Payroll** | `/` | [`DashboardView.vue`](./src/views/template/DashboardView.vue) | 6 KPI stat cards, SVG real-time wave chart beriak, horizontal bar alokasi budget divisi, donut chart distribusi status pegawai, audit log realtime, simulasi skeleton loading. |
 | **Dashboard HRIS Eksekutif** | `/contoh-ui/dashboard-hris` | [`DashboardHrisView.vue`](./src/views/contoh-ui/DashboardHrisView.vue) | Dashboard multi-cabang, 4 KPI eksekutif (Karyawan, Kehadiran, Cuti/Sakit, Payroll), Real-Time Attendance Stream, Status Shift Kerja Hari Ini, Alur Approval Cepat Cuti/Lembur, Komposisi Divisi SVG, Status Ikatan Kerja, Pengingat Masa Probation/PKWT. |
+| **Direktori & Profil Karyawan** | `/contoh-ui/karyawan` | [`KaryawanDirektoriView.vue`](./src/views/contoh-ui/KaryawanDirektoriView.vue) | Tabel master pegawai (Aktif, Probation, PKWT), Slide-Over Profil Terpadu 6 Tab (Data Pribadi, Presensi & Jam Kerja, Payroll & Rekening, BPJS, Dokumen Digital, Galeri Foto Absen/Surat). |
+| **Struktur Organisasi (Org Chart)** | `/contoh-ui/organisasi` | [`StrukturOrganisasiView.vue`](./src/views/contoh-ui/StrukturOrganisasiView.vue) | Bagan hierarki pohon visual 3 tingkat (Direksi &rsaquo; Divisi &rsaquo; Departemen &rsaquo; Jabatan), kartu interaktif ber-avatar & badge tim, buka-tutup cabang, dan modal rincian jabatan. |
 | **Login In-Place (Morphing Card)** | Terintegrasi di `/` (Single Screen) | [`AppLayout.vue`](./src/components/layout/AppLayout.vue) | Autentikasi in-place tanpa navigasi/pindah halaman (*Zero Route Split*). Menampilkan kartu login terpusat (Frame 1), beralih ke lingkaran LOADING & timeline progress horizontal pada tombol "Masuk" (Frame 2-4: 0% &rarr; 100%), lalu kartu morphing melebar menjadi card besar dashboard. |
 | **Data Karyawan & Payroll** | `/template/data-2` | [`DataKaryawanView.vue`](./src/views/template/DataKaryawanView.vue) | Tabel CRUD enterprise, multi-select checkbox, floating bulk action bar, wizard impor CSV, modal form tambah/edit adaptif, slide-over detail karyawan, modal konfirmasi hapus massal. |
 | **Data Gunung Jawa** | `/template/data-1` | [`DataView.vue`](./src/views/template/DataView.vue) | Tabel master data 159 gunung di Jawa, filter provinsi & status aktif, pencarian instan, sorting multi-kolom, modal tambah/edit dan pratinjau detail. |

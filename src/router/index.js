@@ -6,6 +6,8 @@ import DataKaryawanView from '../views/template/DataKaryawanView.vue'
 import SettingView from '../views/template/SettingView.vue'
 import KomponenView from '../views/template/KomponenView.vue'
 import DashboardHrisView from '../views/contoh-ui/DashboardHrisView.vue'
+import KaryawanDirektoriView from '../views/contoh-ui/KaryawanDirektoriView.vue'
+import StrukturOrganisasiView from '../views/contoh-ui/StrukturOrganisasiView.vue'
 
 // meta.fixedHeight: halaman data/tabel mengunci tinggi sendiri (AppLayout memakai overflow-hidden)
 const routes = [
@@ -24,6 +26,17 @@ const routes = [
     path: '/contoh-ui/dashboard-hris',
     name: 'ContohUiDashboardHris',
     component: DashboardHrisView,
+  },
+  {
+    path: '/contoh-ui/karyawan',
+    name: 'ContohUiKaryawan',
+    component: KaryawanDirektoriView,
+    meta: { fixedHeight: true },
+  },
+  {
+    path: '/contoh-ui/organisasi',
+    name: 'ContohUiOrganisasi',
+    component: StrukturOrganisasiView,
   },
 
   // ===== Menu Template =====

@@ -30,8 +30,8 @@ Seluruh isi dokumen ini sudah dicocokkan dengan kode di `src/` (props dibaca dar
 | Komponen dasar | `src/components/ui/*.vue`, prefix `Base`, tanpa library UI luar |
 | Layout | `src/components/layout/`: `AppLayout`, `Header`, `PrimarySidebar`, `SubmenuSidebar` |
 | Composable | `src/composables/`: `useAuth`, `useBackground`, `useIsMobile`, `useTheme`, `useThemeColor`, `useToast` |
-| Data contoh | `src/data/` (`karyawanData`, `dashboardData`, `gunungJawaData`, `menuData`, `hrisDashboardData`) |
-| Menu & rute | Menu di `src/data/menuData.js` (saat ini: **Beranda**, **Contoh UI** dengan sub: Dashboard HRIS, dan **Template** dengan sub: Komponen, Contoh Kanban, Contoh Data 1, Contoh Data 2, dan 5 sub pengaturan), rute di `src/router/index.js` (`/contoh-ui/*`, `/template/*`; rute lama `/pesanan`, `/data`, `/setting` hanya redirect). Halaman baru perlu didaftarkan di **keduanya**. Halaman data/tabel wajib `meta: { fixedHeight: true }` |
+| Data contoh | `src/data/` (`karyawanData`, `dashboardData`, `gunungJawaData`, `menuData`, `hrisDashboardData`, `hrisEmployeeData`, `hrisOrgData`) |
+| Menu & rute | Menu di `src/data/menuData.js` (saat ini: **Beranda**, **Contoh UI** dengan sub: Dashboard HRIS, Direktori Karyawan, Struktur Organisasi, dan **Template** dengan sub: Komponen, Contoh Kanban, Contoh Data 1, Contoh Data 2, dan 5 sub pengaturan), rute di `src/router/index.js` (`/contoh-ui/*`, `/template/*`; rute lama `/pesanan`, `/data`, `/setting` hanya redirect). Halaman baru perlu didaftarkan di **keduanya**. Halaman data/tabel wajib `meta: { fixedHeight: true }` |
 | Helper format | `src/utils/format.js` mengekspor `formatRupiah` (Intl `id-ID`, IDR, tanpa desimal). Impor relatif, mis. `../utils/format.js`. Lihat bagian 8 (temuan) |
 | Bahasa UI | Indonesia (label, placeholder, pesan, tooltip) |
 | Perintah | `npm run dev`, `npm run build` |
@@ -62,7 +62,7 @@ AppLayout memiliki dua perilaku untuk area konten (`<main>`):
 
 | Kebutuhan | Pola | View contoh (salin dari sini) |
 |---|---|---|
-| Daftar data (CRUD, filter, paginasi, pilih banyak) | **Data View** dengan formula container (bagian 4) | `src/views/template/DataKaryawanView.vue`, `src/views/template/DataView.vue` |
+| Daftar data (CRUD, filter, paginasi, pilih banyak) | **Data View** dengan formula container (bagian 4) | `src/views/template/DataKaryawanView.vue`, `src/views/template/DataView.vue`, `src/views/contoh-ui/KaryawanDirektoriView.vue` |
 | Katalog komponen / playground master-detail | **Master-Detail View** (`meta.fixedHeight`): dua kolom scroll mandiri | `src/views/template/KomponenView.vue` |
 | Dashboard / KPI / grafik SVG | Halaman mengalir: `space-y-4 sm:space-y-6 w-full max-w-7xl mx-auto select-none pb-8` | `src/views/template/DashboardView.vue`, `src/views/contoh-ui/DashboardHrisView.vue` |
 | Papan Kanban | Drag & drop HTML5 native | `src/views/template/KanbanView.vue` |
@@ -221,6 +221,9 @@ Nilai default dicetak tebal. Semua `v-model` memakai `modelValue` / `update:mode
 | `BaseMapPolygonEditor` | `modelValue` (Array multi-polygon), `center`, `zoom` (**16**), `editable` (**true**), `height` (**`360px`**), `label` | `update:modelValue`, `change` |
 | `BaseTree` | `nodes`, `modelValue`, `selectable` (**false**), `multiple` (**false**), `cascade` (**true**), `searchQuery`, `defaultExpandAll` (**true**) | `update:modelValue`, `select`, `toggle` |
 | `BaseTreeSelect` | `modelValue`, `nodes`, `multiple` (**false**), `cascade` (**true**), `label`, `required` (**false**), `placeholder`, `searchable` (**true**), `clearable` (**true**), `size`: `sm`, **`md`**, `lg`. `error`, `hint` | `update:modelValue`, `change`, `clear` |
+| `BaseOrgChart` | `data` (Object pohon hierarki), `collapsible` (**true**), `selectedId` | `node-click`, `toggle-expand` |
+| `BaseDocumentList` | `documents` (Array `{ id, title, category, fileNumber, fileName, fileSize, updatedAt, status }`), `allowUpload` (**true**) | `preview`, `download`, `upload` |
+| `BaseGallery` | `items` (Array `{ id, title, category, categoryLabel, imageUrl, timestamp, location }`), `categories` | `item-click`, `download` |
 | `BasePagination` | `currentPage` (wajib), `totalItems` (wajib), `itemsPerPage` (**15**, angka atau `'all'`), `perPageOptions` (**`[15, 30, 50, 'all']`**), `compact`. **Tidak ada prop `totalPages`** | `update:currentPage`, `update:itemsPerPage`, `change` |
 | `BaseDropdownMenu` | `items` (`{ label, icon?, action?, danger?, disabled?, divider? }`), `align`: `left`, **`right`**, `triggerClass` | emit `select`. Slot: `trigger`, default |
 | `BaseEmptyState` | `title`, `description`, `icon`, `actionText`, `actionIcon`, `compact` | emit `action`. Slot: `icon`, `title`, `description`, `action` |

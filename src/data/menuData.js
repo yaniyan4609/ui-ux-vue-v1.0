@@ -1,4 +1,4 @@
-import { Home, LayoutTemplate, Sliders, Palette, Shield, Bell, Layers, Mountain, Users, KanbanSquare, Component, Sparkles, LayoutDashboard } from 'lucide-vue-next'
+import { Home, LayoutTemplate, Sliders, Palette, Shield, Bell, Layers, Mountain, Users, KanbanSquare, Component, Sparkles, LayoutDashboard, Network, Contact } from 'lucide-vue-next'
 
 export const menuItems = [
   {
@@ -15,6 +15,8 @@ export const menuItems = [
     route: '/contoh-ui',
     submenus: [
       { id: 'dashboard-hris', label: 'Dashboard HRIS', icon: LayoutDashboard, route: '/contoh-ui/dashboard-hris' },
+      { id: 'karyawan', label: 'Direktori Karyawan', icon: Contact, route: '/contoh-ui/karyawan' },
+      { id: 'organisasi', label: 'Struktur Organisasi', icon: Network, route: '/contoh-ui/organisasi' },
     ],
   },
   {
