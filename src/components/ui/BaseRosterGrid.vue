@@ -539,7 +539,7 @@ defineExpose({
                 v-if="mode === 'weekly' && index === 0"
                 type="button"
                 @click.stop="emit('prev-week')"
-                class="absolute -left-3.5 top-1/2 -translate-y-1/2 z-40 w-7 h-7 rounded-full bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-300 dark:border-[var(--theme-border)] shadow-md flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-muted)] transition-all opacity-0 group-hover/thead:opacity-100"
+                class="absolute left-2 top-1/2 -translate-y-1/2 z-40 w-7 h-7 rounded-full bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-300 dark:border-[var(--theme-border)] shadow-md flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-muted)] transition-all opacity-0 group-hover/thead:opacity-100 shrink-0"
                 :class="[
                   activeColumnHeader ? 'pointer-events-none !opacity-0' : '',
                   canPrevWeek ? 'hover:scale-110 active:scale-95 cursor-pointer' : 'opacity-40 cursor-not-allowed'
@@ -555,7 +555,7 @@ defineExpose({
                 v-if="mode === 'weekly' && index === days.length - 1"
                 type="button"
                 @click.stop="emit('next-week')"
-                class="absolute -right-3.5 top-1/2 -translate-y-1/2 z-40 w-7 h-7 rounded-full bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-300 dark:border-[var(--theme-border)] shadow-md flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-muted)] transition-all opacity-0 group-hover/thead:opacity-100"
+                class="absolute right-2 top-1/2 -translate-y-1/2 z-40 w-7 h-7 rounded-full bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-300 dark:border-[var(--theme-border)] shadow-md flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-[var(--theme-surface-muted)] transition-all opacity-0 group-hover/thead:opacity-100 shrink-0"
                 :class="[
                   activeColumnHeader ? 'pointer-events-none !opacity-0' : '',
                   canNextWeek ? 'hover:scale-110 active:scale-95 cursor-pointer' : 'opacity-40 cursor-not-allowed'
