@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseButton from '../../components/ui/BaseButton.vue'
 import BaseModal from '../../components/ui/BaseModal.vue'
@@ -30,8 +30,8 @@ import {
   X,
   Copy,
   Sparkles,
-  Clock,
   ChevronDown,
+  SlidersHorizontal,
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -58,7 +58,104 @@ const itemsPerPage = ref(10)
 const selectedIds = ref([])
 const isBatchDeleteModalOpen = ref(false)
 
-// Day Mapping (Senin - Minggu)
+// ========================================================
+// 2. MODE EDIT CEPAT & FLOATING CELL POPOVER
+// ========================================================
+const isQuickEditMode = ref(false)
+const activeCellEditor = ref(null) // { rowId, rowName, dayIndex, dayName, currentCode, top, left }
+const cellSearchQuery = ref('')
+const searchInputRef = ref(null)
+
+const toggleQuickEditMode = () => {
+  isQuickEditMode.value = !isQuickEditMode.value
+  activeCellEditor.value = null
+  if (isQuickEditMode.value) {
+    toast.info('Mode Edit Cepat aktif: Klik sel shift mana saja untuk memilih shift baru.', 'Mode Edit Aktif')
+  } else {
+    toast.success('Mode Edit Cepat selesai. Perubahan pola roster telah tersimpan.', 'Selesai Edit')
+  }
+}
+
+// Buka Searchable Dropdown Popover saat sel diklik pada Mode Edit
+const openCellEditor = (row, dayIndex, event) => {
+  if (!isQuickEditMode.value) {
+    return
+  }
+
+  const rect = event.currentTarget.getBoundingClientRect()
+  const currentCode = row.pattern[dayIndex] || 'OFF'
+
+  // Hitung posisi popover (flip ke atas jika mepet batas bawah layar)
+  const popoverHeight = 270
+  const spaceBelow = window.innerHeight - rect.bottom
+  const openUpwards = spaceBelow < popoverHeight && rect.top > popoverHeight
+
+  const top = openUpwards ? rect.top - popoverHeight - 6 : rect.bottom + 6
+
+  // Pastikan posisi horizontal tidak keluar layar
+  let left = rect.left + rect.width / 2 - 110 // center popover 220px
+  if (left < 10) left = 10
+  if (left + 230 > window.innerWidth) left = window.innerWidth - 240
+
+  cellSearchQuery.value = ''
+  activeCellEditor.value = {
+    rowId: row.id,
+    rowName: row.name,
+    dayIndex,
+    dayName: daysList[dayIndex].label,
+    currentCode,
+    top,
+    left,
+  }
+
+  nextTick(() => {
+    searchInputRef.value?.focus()
+  })
+}
+
+// Pilih shift baru untuk sel yang sedang diedit
+const selectShiftForCell = (code) => {
+  if (!activeCellEditor.value) return
+  const { rowId, dayIndex, dayName } = activeCellEditor.value
+  const targetPola = listPola.value.find((p) => p.id === rowId)
+  if (targetPola && targetPola.pattern) {
+    targetPola.pattern[dayIndex] = code
+    const meta = getShiftMeta(code)
+    toast.success(`Shift ${dayName} pada "${targetPola.name}" diubah ke ${meta.name}.`, 'Shift Diperbarui')
+  }
+  activeCellEditor.value = null
+}
+
+// Filter daftar shift di dalam popover
+const filteredShiftTypes = computed(() => {
+  if (!cellSearchQuery.value.trim()) return shiftTypes
+  const q = cellSearchQuery.value.toLowerCase().trim()
+  return shiftTypes.filter(
+    (s) =>
+      s.code.toLowerCase().includes(q) ||
+      s.name.toLowerCase().includes(q) ||
+      (s.time && s.time.toLowerCase().includes(q))
+  )
+})
+
+// Listener global untuk Escape & klik luar popover
+const handleGlobalKeydown = (e) => {
+  if (e.key === 'Escape' && activeCellEditor.value) {
+    activeCellEditor.value = null
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleGlobalKeydown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleGlobalKeydown)
+})
+
+// ========================================================
+// 3. DAY MAPPING & SHIFT META HELPERS
+// ========================================================
 const daysList = [
   { key: 'senin', label: 'Senin', index: 0 },
   { key: 'selasa', label: 'Selasa', index: 1 },
@@ -69,7 +166,6 @@ const daysList = [
   { key: 'minggu', label: 'Minggu', index: 6 },
 ]
 
-// Helper lookup info shift
 const getShiftMeta = (code) => {
   return (
     shiftTypes.find((s) => s.code === code) || {
@@ -81,7 +177,29 @@ const getShiftMeta = (code) => {
   )
 }
 
-// Styling pill badge shift per sel (persis pola BaseRosterGrid)
+// Nama pendek untuk sel compact agar tidak pernah overflow
+const getShiftShortName = (code) => {
+  switch (code) {
+    case 'P':
+      return 'Pagi'
+    case 'S':
+      return 'Siang'
+    case 'M':
+      return 'Malam'
+    case 'OFF':
+      return 'Libur'
+    case 'REG':
+      return 'Reguler'
+    case 'FLX':
+      return 'Fleksibel'
+    case 'C':
+      return 'Cuti'
+    default:
+      return code || 'Off'
+  }
+}
+
+// Styling pill badge shift per sel
 const getShiftPillClasses = (code) => {
   switch (code) {
     case 'P':
@@ -100,7 +218,6 @@ const getShiftPillClasses = (code) => {
   }
 }
 
-// Inisial avatar pola
 const getPatternAvatar = (pola) => {
   if (pola.id === 'tpl-5-2') return '5-2'
   if (pola.id === 'tpl-2-2-2-1') return '2-1'
@@ -112,7 +229,6 @@ const getPatternAvatar = (pola) => {
   return (pola.name || 'PL').slice(0, 3).toUpperCase()
 }
 
-// Hitung total jam kerja per minggu
 const calculatePatternTotalHours = (pattern) => {
   if (!pattern || !Array.isArray(pattern)) return 0
   return pattern.reduce((sum, code) => {
@@ -121,7 +237,7 @@ const calculatePatternTotalHours = (pattern) => {
   }, 0)
 }
 
-// Dropdown Options: Target Divisi
+// Dropdown Options
 const divisiOptions = computed(() => {
   const counts = {}
   listPola.value.forEach((p) => {
@@ -139,7 +255,6 @@ const divisiOptions = computed(() => {
   ]
 })
 
-// Dropdown Options: Status Penyimpanan
 const storageOptions = computed(() => {
   const dbCount = listPola.value.filter((p) => p.isDatabase).length
   const tempCount = listPola.value.length - dbCount
@@ -152,22 +267,77 @@ const storageOptions = computed(() => {
 })
 
 // ========================================================
-// 2. TABLE COLUMNS (PERSIS INSTRUKSI PENGGUNA)
-// thead: Nama Pola | Senin | Selasa | Rabu | Kamis | Jumat | Sabtu | Minggu | Aksi
+// 4. TABLE COLUMNS: PROPORSIONAL DAN COMPACT TANPA SCROLL
 // ========================================================
 const tableColumns = [
-  { key: 'nama', label: 'NAMA POLA', sortable: true, cellClass: 'whitespace-nowrap min-w-[230px] w-72' },
-  { key: 'senin', label: 'Senin', align: 'center', cellClass: 'whitespace-nowrap p-1.5 min-w-[130px]' },
-  { key: 'selasa', label: 'Selasa', align: 'center', cellClass: 'whitespace-nowrap p-1.5 min-w-[130px]' },
-  { key: 'rabu', label: 'Rabu', align: 'center', cellClass: 'whitespace-nowrap p-1.5 min-w-[130px]' },
-  { key: 'kamis', label: 'Kamis', align: 'center', cellClass: 'whitespace-nowrap p-1.5 min-w-[130px]' },
-  { key: 'jumat', label: 'Jumat', align: 'center', cellClass: 'whitespace-nowrap p-1.5 min-w-[130px]' },
-  { key: 'sabtu', label: 'Sabtu', align: 'center', cellClass: 'whitespace-nowrap p-1.5 min-w-[130px]' },
-  { key: 'minggu', label: 'Minggu', align: 'center', cellClass: 'whitespace-nowrap p-1.5 min-w-[130px]' },
+  {
+    key: 'nama',
+    label: 'NAMA POLA',
+    sortable: true,
+    width: 'w-48 sm:w-56',
+    headerClass: '!px-2.5',
+    cellClass: 'whitespace-nowrap !px-2.5 max-w-[210px]',
+  },
+  {
+    key: 'senin',
+    label: 'Senin',
+    align: 'center',
+    width: 'w-[84px]',
+    headerClass: '!px-1 text-center',
+    cellClass: 'whitespace-nowrap !px-1 text-center',
+  },
+  {
+    key: 'selasa',
+    label: 'Selasa',
+    align: 'center',
+    width: 'w-[84px]',
+    headerClass: '!px-1 text-center',
+    cellClass: 'whitespace-nowrap !px-1 text-center',
+  },
+  {
+    key: 'rabu',
+    label: 'Rabu',
+    align: 'center',
+    width: 'w-[84px]',
+    headerClass: '!px-1 text-center',
+    cellClass: 'whitespace-nowrap !px-1 text-center',
+  },
+  {
+    key: 'kamis',
+    label: 'Kamis',
+    align: 'center',
+    width: 'w-[84px]',
+    headerClass: '!px-1 text-center',
+    cellClass: 'whitespace-nowrap !px-1 text-center',
+  },
+  {
+    key: 'jumat',
+    label: 'Jumat',
+    align: 'center',
+    width: 'w-[84px]',
+    headerClass: '!px-1 text-center',
+    cellClass: 'whitespace-nowrap !px-1 text-center',
+  },
+  {
+    key: 'sabtu',
+    label: 'Sabtu',
+    align: 'center',
+    width: 'w-[84px]',
+    headerClass: '!px-1 text-center',
+    cellClass: 'whitespace-nowrap !px-1 text-center',
+  },
+  {
+    key: 'minggu',
+    label: 'Minggu',
+    align: 'center',
+    width: 'w-[84px]',
+    headerClass: '!px-1 text-center',
+    cellClass: 'whitespace-nowrap !px-1 text-center',
+  },
 ]
 
 // ========================================================
-// 3. COMPUTED METRICS & FILTERED DATA
+// 5. COMPUTED METRICS & FILTERED DATA
 // ========================================================
 const databaseCount = computed(() => listPola.value.filter((p) => p.isDatabase).length)
 const totalAssignedEmployees = computed(() =>
@@ -177,7 +347,6 @@ const rotasi24JamCount = computed(() =>
   listPola.value.filter((p) => (p.pattern || []).includes('M') || (p.pattern || []).includes('S')).length
 )
 
-// Filtered & Sorted List
 const processedList = computed(() => {
   let list = [...listPola.value]
 
@@ -236,7 +405,7 @@ const paginatedList = computed(() => {
 })
 
 // ========================================================
-// 4. ACTION ITEMS UNTUK ROW DROPDOWN
+// 6. ACTION ITEMS UNTUK ROW DROPDOWN
 // ========================================================
 const getRowActionItems = (pola) => [
   {
@@ -302,7 +471,7 @@ const handleBatchSetDatabase = (isDb) => {
 }
 
 // ========================================================
-// 5. MODAL FORM: TAMBAH & EDIT POLA (UKURAN BALANCED PROPORSI)
+// 7. MODAL FORM: TAMBAH & EDIT POLA (UKURAN BALANCED PROPORSI)
 // ========================================================
 const isFormModalOpen = ref(false)
 const isEditMode = ref(false)
@@ -417,7 +586,7 @@ const handleSavePola = () => {
 }
 
 // ========================================================
-// 6. CONFIRMATION MODAL DELETE
+// 8. CONFIRMATION MODAL DELETE
 // ========================================================
 const isDeleteModalOpen = ref(false)
 const itemToDelete = ref(null)
@@ -449,7 +618,7 @@ const handleResetDefault = () => {
 }
 
 // ========================================================
-// 7. CSV IMPORTER & EXPORTER
+// 9. CSV IMPORTER & EXPORTER
 // ========================================================
 const isCsvImporterOpen = ref(false)
 const targetFieldsForImport = [
@@ -566,6 +735,26 @@ const exportSelected = () => {
 
       <!-- Action Buttons -->
       <div class="flex items-center gap-2 shrink-0">
+        <!-- Tombol Aksi: MODE EDIT (Sesuai Permintaan) -->
+        <BaseButton
+          :variant="isQuickEditMode ? 'primary' : 'outline'"
+          size="sm"
+          @click="toggleQuickEditMode"
+          :title="isQuickEditMode ? 'Klik untuk selesai mengedit shift' : 'Aktifkan mode edit untuk mengubah shift langsung pada tabel'"
+          class="transition-all"
+        >
+          <component
+            :is="isQuickEditMode ? Check : Pencil"
+            class="w-3.5 h-3.5"
+            :class="isQuickEditMode ? 'text-white' : 'text-neutral-500'"
+          />
+          <span>{{ isQuickEditMode ? 'Selesai Edit' : 'Mode Edit' }}</span>
+          <span
+            v-if="isQuickEditMode"
+            class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5"
+          />
+        </BaseButton>
+
         <BaseButton
           variant="outline"
           size="sm"
@@ -607,6 +796,26 @@ const exportSelected = () => {
       </div>
     </div>
 
+    <!-- Banner Notifikasi Saat Mode Edit Aktif -->
+    <div
+      v-if="isQuickEditMode"
+      class="px-3 py-1.5 rounded-xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/30 text-xs flex items-center justify-between text-[var(--theme-primary)] shrink-0 animate-in fade-in duration-150"
+    >
+      <div class="flex items-center gap-2">
+        <SlidersHorizontal class="w-4 h-4 animate-spin text-[var(--theme-primary)]" style="animation-duration: 4s;" />
+        <span class="font-medium">
+          <strong>Mode Edit Aktif:</strong> Klik tombol shift mana saja pada hari Senin s/d Minggu untuk membuka pilihan shift langsung.
+        </span>
+      </div>
+      <button
+        type="button"
+        @click="toggleQuickEditMode"
+        class="text-xs font-bold underline hover:opacity-80 cursor-pointer ml-2"
+      >
+        Tutup Mode Edit
+      </button>
+    </div>
+
     <!-- 2. Filter Bar: Search + Target Divisi + Status Penyimpanan -->
     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
       <!-- Search Input -->
@@ -634,6 +843,7 @@ const exportSelected = () => {
           v-model="selectedDivisi"
           :options="divisiOptions"
           placeholder="Semua Target Divisi"
+          align="right"
           clearable
         />
       </div>
@@ -697,7 +907,7 @@ const exportSelected = () => {
       </div>
     </div>
 
-    <!-- 4. BASE DATA TABLE: TAMPILAN PERSIS BASE ROSTER GRID GAMBAR ACUAN -->
+    <!-- 4. BASE DATA TABLE: COMPACT & PROPORSIONAL (TANPA SCROLL GESER-GESER) -->
     <BaseDataTable
       :columns="tableColumns"
       :rows="paginatedList"
@@ -715,9 +925,9 @@ const exportSelected = () => {
       empty-action-text="Reset Filter Pencarian"
       @empty-action="handleResetDefault"
     >
-      <!-- Custom Header Kolom: NAMA POLA & TOTAL JAM (Persis thead gambar acuan) -->
+      <!-- Custom Header Kolom: NAMA POLA & TOTAL JAM -->
       <template #header-nama>
-        <div class="flex items-center justify-between w-full pr-2">
+        <div class="flex items-center justify-between w-full pr-1">
           <span class="uppercase text-[10px] tracking-wider font-bold text-neutral-500">
             Nama Pola ({{ listPola.length }})
           </span>
@@ -725,148 +935,190 @@ const exportSelected = () => {
         </div>
       </template>
 
-      <!-- Kolom: NAMA POLA (Avatar Initial + Nama Pola + Subtitle + Total Jam Badge) -->
+      <!-- Kolom: NAMA POLA (Compact Avatar + Nama Pola + Total Jam) -->
       <template #cell-nama="{ row }">
-        <div class="flex items-center justify-between gap-2 py-1 pr-1">
-          <div class="flex items-center gap-2.5 min-w-0">
-            <div class="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-[var(--theme-surface-muted)] border border-neutral-200/80 dark:border-[var(--theme-border-strong)] text-neutral-800 dark:text-neutral-200 font-bold text-xs flex items-center justify-center shrink-0">
+        <div class="flex items-center justify-between gap-1.5 py-1 pr-1 max-w-[210px]">
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="w-7 h-7 rounded-lg bg-neutral-100 dark:bg-[var(--theme-surface-muted)] border border-neutral-200/80 dark:border-[var(--theme-border-strong)] text-neutral-800 dark:text-neutral-200 font-bold text-[10px] flex items-center justify-center shrink-0">
               {{ getPatternAvatar(row) }}
             </div>
             <div class="min-w-0">
               <span class="font-bold text-neutral-900 dark:text-white block leading-tight truncate text-xs">
                 {{ row.name }}
               </span>
-              <span class="text-[10px] text-neutral-400 block truncate mt-0.5 max-w-[160px]">
+              <span class="text-[9.5px] text-neutral-400 block truncate mt-0.5">
                 {{ row.suitableFor }}
               </span>
             </div>
           </div>
 
-          <!-- Total Hours Badge (Persis 176j di screenshot) -->
+          <!-- Total Hours Badge -->
           <div class="text-right shrink-0">
-            <span class="px-1.5 py-0.5 rounded-md text-[10.5px] font-mono font-bold bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300">
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300">
               {{ calculatePatternTotalHours(row.pattern) }}j
             </span>
           </div>
         </div>
       </template>
 
-      <!-- Kolom: SENIN (Pill Bulat Persis Screenshot) -->
+      <!-- Kolom: SENIN (Compact Pill Sesuai Format Screenshot) -->
       <template #cell-senin="{ row }">
         <div
-          class="w-full py-1.5 px-2 rounded-xl text-xs font-semibold border transition-all flex items-center justify-between gap-1.5 shadow-2xs whitespace-nowrap"
-          :class="getShiftPillClasses(row.pattern[0])"
+          class="w-full py-1 px-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center justify-between gap-1 shadow-2xs whitespace-nowrap"
+          :class="[
+            getShiftPillClasses(row.pattern[0]),
+            isQuickEditMode ? 'cursor-pointer hover:ring-2 hover:ring-[var(--theme-primary)] hover:border-[var(--theme-primary)] hover:scale-[1.02]' : 'cursor-default'
+          ]"
+          @click="openCellEditor(row, 0, $event)"
+          :title="isQuickEditMode ? 'Klik untuk mengganti shift Senin' : `Senin: ${getShiftMeta(row.pattern[0]).name}`"
         >
-          <div class="flex items-center gap-1.5 min-w-0">
-            <span class="w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
+          <div class="flex items-center gap-1 min-w-0">
+            <span class="w-4 h-4 rounded flex items-center justify-center text-[9px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
               {{ row.pattern[0] || 'OFF' }}
             </span>
-            <span class="text-[11px] font-semibold truncate">
-              {{ getShiftMeta(row.pattern[0]).name }}
+            <span class="text-[10px] font-semibold truncate max-w-[58px]">
+              {{ getShiftShortName(row.pattern[0]) }}
             </span>
           </div>
+          <ChevronDown v-if="isQuickEditMode" class="w-2.5 h-2.5 opacity-60 shrink-0" />
         </div>
       </template>
 
       <!-- Kolom: SELASA -->
       <template #cell-selasa="{ row }">
         <div
-          class="w-full py-1.5 px-2 rounded-xl text-xs font-semibold border transition-all flex items-center justify-between gap-1.5 shadow-2xs whitespace-nowrap"
-          :class="getShiftPillClasses(row.pattern[1])"
+          class="w-full py-1 px-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center justify-between gap-1 shadow-2xs whitespace-nowrap"
+          :class="[
+            getShiftPillClasses(row.pattern[1]),
+            isQuickEditMode ? 'cursor-pointer hover:ring-2 hover:ring-[var(--theme-primary)] hover:border-[var(--theme-primary)] hover:scale-[1.02]' : 'cursor-default'
+          ]"
+          @click="openCellEditor(row, 1, $event)"
+          :title="isQuickEditMode ? 'Klik untuk mengganti shift Selasa' : `Selasa: ${getShiftMeta(row.pattern[1]).name}`"
         >
-          <div class="flex items-center gap-1.5 min-w-0">
-            <span class="w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
+          <div class="flex items-center gap-1 min-w-0">
+            <span class="w-4 h-4 rounded flex items-center justify-center text-[9px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
               {{ row.pattern[1] || 'OFF' }}
             </span>
-            <span class="text-[11px] font-semibold truncate">
-              {{ getShiftMeta(row.pattern[1]).name }}
+            <span class="text-[10px] font-semibold truncate max-w-[58px]">
+              {{ getShiftShortName(row.pattern[1]) }}
             </span>
           </div>
+          <ChevronDown v-if="isQuickEditMode" class="w-2.5 h-2.5 opacity-60 shrink-0" />
         </div>
       </template>
 
       <!-- Kolom: RABU -->
       <template #cell-rabu="{ row }">
         <div
-          class="w-full py-1.5 px-2 rounded-xl text-xs font-semibold border transition-all flex items-center justify-between gap-1.5 shadow-2xs whitespace-nowrap"
-          :class="getShiftPillClasses(row.pattern[2])"
+          class="w-full py-1 px-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center justify-between gap-1 shadow-2xs whitespace-nowrap"
+          :class="[
+            getShiftPillClasses(row.pattern[2]),
+            isQuickEditMode ? 'cursor-pointer hover:ring-2 hover:ring-[var(--theme-primary)] hover:border-[var(--theme-primary)] hover:scale-[1.02]' : 'cursor-default'
+          ]"
+          @click="openCellEditor(row, 2, $event)"
+          :title="isQuickEditMode ? 'Klik untuk mengganti shift Rabu' : `Rabu: ${getShiftMeta(row.pattern[2]).name}`"
         >
-          <div class="flex items-center gap-1.5 min-w-0">
-            <span class="w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
+          <div class="flex items-center gap-1 min-w-0">
+            <span class="w-4 h-4 rounded flex items-center justify-center text-[9px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
               {{ row.pattern[2] || 'OFF' }}
             </span>
-            <span class="text-[11px] font-semibold truncate">
-              {{ getShiftMeta(row.pattern[2]).name }}
+            <span class="text-[10px] font-semibold truncate max-w-[58px]">
+              {{ getShiftShortName(row.pattern[2]) }}
             </span>
           </div>
+          <ChevronDown v-if="isQuickEditMode" class="w-2.5 h-2.5 opacity-60 shrink-0" />
         </div>
       </template>
 
       <!-- Kolom: KAMIS -->
       <template #cell-kamis="{ row }">
         <div
-          class="w-full py-1.5 px-2 rounded-xl text-xs font-semibold border transition-all flex items-center justify-between gap-1.5 shadow-2xs whitespace-nowrap"
-          :class="getShiftPillClasses(row.pattern[3])"
+          class="w-full py-1 px-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center justify-between gap-1 shadow-2xs whitespace-nowrap"
+          :class="[
+            getShiftPillClasses(row.pattern[3]),
+            isQuickEditMode ? 'cursor-pointer hover:ring-2 hover:ring-[var(--theme-primary)] hover:border-[var(--theme-primary)] hover:scale-[1.02]' : 'cursor-default'
+          ]"
+          @click="openCellEditor(row, 3, $event)"
+          :title="isQuickEditMode ? 'Klik untuk mengganti shift Kamis' : `Kamis: ${getShiftMeta(row.pattern[3]).name}`"
         >
-          <div class="flex items-center gap-1.5 min-w-0">
-            <span class="w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
+          <div class="flex items-center gap-1 min-w-0">
+            <span class="w-4 h-4 rounded flex items-center justify-center text-[9px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
               {{ row.pattern[3] || 'OFF' }}
             </span>
-            <span class="text-[11px] font-semibold truncate">
-              {{ getShiftMeta(row.pattern[3]).name }}
+            <span class="text-[10px] font-semibold truncate max-w-[58px]">
+              {{ getShiftShortName(row.pattern[3]) }}
             </span>
           </div>
+          <ChevronDown v-if="isQuickEditMode" class="w-2.5 h-2.5 opacity-60 shrink-0" />
         </div>
       </template>
 
       <!-- Kolom: JUMAT -->
       <template #cell-jumat="{ row }">
         <div
-          class="w-full py-1.5 px-2 rounded-xl text-xs font-semibold border transition-all flex items-center justify-between gap-1.5 shadow-2xs whitespace-nowrap"
-          :class="getShiftPillClasses(row.pattern[4])"
+          class="w-full py-1 px-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center justify-between gap-1 shadow-2xs whitespace-nowrap"
+          :class="[
+            getShiftPillClasses(row.pattern[4]),
+            isQuickEditMode ? 'cursor-pointer hover:ring-2 hover:ring-[var(--theme-primary)] hover:border-[var(--theme-primary)] hover:scale-[1.02]' : 'cursor-default'
+          ]"
+          @click="openCellEditor(row, 4, $event)"
+          :title="isQuickEditMode ? 'Klik untuk mengganti shift Jumat' : `Jumat: ${getShiftMeta(row.pattern[4]).name}`"
         >
-          <div class="flex items-center gap-1.5 min-w-0">
-            <span class="w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
+          <div class="flex items-center gap-1 min-w-0">
+            <span class="w-4 h-4 rounded flex items-center justify-center text-[9px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
               {{ row.pattern[4] || 'OFF' }}
             </span>
-            <span class="text-[11px] font-semibold truncate">
-              {{ getShiftMeta(row.pattern[4]).name }}
+            <span class="text-[10px] font-semibold truncate max-w-[58px]">
+              {{ getShiftShortName(row.pattern[4]) }}
             </span>
           </div>
+          <ChevronDown v-if="isQuickEditMode" class="w-2.5 h-2.5 opacity-60 shrink-0" />
         </div>
       </template>
 
       <!-- Kolom: SABTU -->
       <template #cell-sabtu="{ row }">
         <div
-          class="w-full py-1.5 px-2 rounded-xl text-xs font-semibold border transition-all flex items-center justify-between gap-1.5 shadow-2xs whitespace-nowrap"
-          :class="getShiftPillClasses(row.pattern[5])"
+          class="w-full py-1 px-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center justify-between gap-1 shadow-2xs whitespace-nowrap"
+          :class="[
+            getShiftPillClasses(row.pattern[5]),
+            isQuickEditMode ? 'cursor-pointer hover:ring-2 hover:ring-[var(--theme-primary)] hover:border-[var(--theme-primary)] hover:scale-[1.02]' : 'cursor-default'
+          ]"
+          @click="openCellEditor(row, 5, $event)"
+          :title="isQuickEditMode ? 'Klik untuk mengganti shift Sabtu' : `Sabtu: ${getShiftMeta(row.pattern[5]).name}`"
         >
-          <div class="flex items-center gap-1.5 min-w-0">
-            <span class="w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
+          <div class="flex items-center gap-1 min-w-0">
+            <span class="w-4 h-4 rounded flex items-center justify-center text-[9px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
               {{ row.pattern[5] || 'OFF' }}
             </span>
-            <span class="text-[11px] font-semibold truncate">
-              {{ getShiftMeta(row.pattern[5]).name }}
+            <span class="text-[10px] font-semibold truncate max-w-[58px]">
+              {{ getShiftShortName(row.pattern[5]) }}
             </span>
           </div>
+          <ChevronDown v-if="isQuickEditMode" class="w-2.5 h-2.5 opacity-60 shrink-0" />
         </div>
       </template>
 
       <!-- Kolom: MINGGU -->
       <template #cell-minggu="{ row }">
         <div
-          class="w-full py-1.5 px-2 rounded-xl text-xs font-semibold border transition-all flex items-center justify-between gap-1.5 shadow-2xs whitespace-nowrap"
-          :class="getShiftPillClasses(row.pattern[6])"
+          class="w-full py-1 px-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center justify-between gap-1 shadow-2xs whitespace-nowrap"
+          :class="[
+            getShiftPillClasses(row.pattern[6]),
+            isQuickEditMode ? 'cursor-pointer hover:ring-2 hover:ring-[var(--theme-primary)] hover:border-[var(--theme-primary)] hover:scale-[1.02]' : 'cursor-default'
+          ]"
+          @click="openCellEditor(row, 6, $event)"
+          :title="isQuickEditMode ? 'Klik untuk mengganti shift Minggu' : `Minggu: ${getShiftMeta(row.pattern[6]).name}`"
         >
-          <div class="flex items-center gap-1.5 min-w-0">
-            <span class="w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
+          <div class="flex items-center gap-1 min-w-0">
+            <span class="w-4 h-4 rounded flex items-center justify-center text-[9px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
               {{ row.pattern[6] || 'OFF' }}
             </span>
-            <span class="text-[11px] font-semibold truncate">
-              {{ getShiftMeta(row.pattern[6]).name }}
+            <span class="text-[10px] font-semibold truncate max-w-[58px]">
+              {{ getShiftShortName(row.pattern[6]) }}
             </span>
           </div>
+          <ChevronDown v-if="isQuickEditMode" class="w-2.5 h-2.5 opacity-60 shrink-0" />
         </div>
       </template>
 
@@ -997,6 +1249,86 @@ const exportSelected = () => {
         </div>
       </template>
     </BaseDataTable>
+
+    <!-- FLOATING SEARCHABLE SHIFT SELECTOR POPOVER (MODE EDIT CEPAT) -->
+    <Teleport to="body">
+      <div
+        v-if="activeCellEditor"
+        class="fixed inset-0 z-[100]"
+        @click="activeCellEditor = null"
+      >
+        <div
+          class="fixed z-[101] w-56 rounded-xl bg-white dark:bg-[var(--theme-surface)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-xl p-2.5 text-xs animate-in fade-in zoom-in-95 duration-100"
+          :style="{ top: `${activeCellEditor.top}px`, left: `${activeCellEditor.left}px` }"
+          @click.stop
+        >
+          <!-- Header Popover -->
+          <div class="flex items-center justify-between pb-1.5 mb-2 border-b border-neutral-100 dark:border-[var(--theme-border)]">
+            <div class="truncate">
+              <span class="font-bold text-neutral-900 dark:text-white block text-xs">Pilih Shift</span>
+              <span class="text-[10px] text-neutral-400 block truncate">{{ activeCellEditor.dayName }} • {{ activeCellEditor.rowName }}</span>
+            </div>
+            <button
+              type="button"
+              @click="activeCellEditor = null"
+              class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-0.5 rounded cursor-pointer"
+            >
+              <X class="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <!-- Search Input -->
+          <div class="relative mb-2">
+            <Search class="w-3.5 h-3.5 text-neutral-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              ref="searchInputRef"
+              v-model="cellSearchQuery"
+              type="text"
+              placeholder="Cari shift..."
+              class="w-full pl-8 pr-6 py-1.5 rounded-lg text-xs bg-neutral-50 dark:bg-[var(--theme-surface-muted)] border border-neutral-200 dark:border-[var(--theme-border)] text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary)]"
+            />
+            <button
+              v-if="cellSearchQuery"
+              type="button"
+              @click="cellSearchQuery = ''"
+              class="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer"
+            >
+              <X class="w-3 h-3" />
+            </button>
+          </div>
+
+          <!-- List of Shifts -->
+          <div class="space-y-1 max-h-48 overflow-y-auto pr-0.5">
+            <button
+              v-for="s in filteredShiftTypes"
+              :key="s.code"
+              type="button"
+              @click="selectShiftForCell(s.code)"
+              class="w-full px-2 py-1.5 rounded-lg text-left text-xs transition flex items-center justify-between gap-1.5 hover:bg-neutral-100 dark:hover:bg-[var(--theme-surface-muted)] cursor-pointer"
+              :class="activeCellEditor.currentCode === s.code ? 'bg-neutral-100 dark:bg-[var(--theme-surface-muted)] font-bold' : ''"
+            >
+              <div class="flex items-center gap-2 min-w-0">
+                <span
+                  class="w-5 h-5 rounded-md flex items-center justify-center font-mono text-[10px] font-bold shrink-0"
+                  :class="getShiftPillClasses(s.code)"
+                >
+                  {{ s.code }}
+                </span>
+                <div class="min-w-0">
+                  <span class="block leading-tight text-xs font-semibold truncate">{{ s.name }}</span>
+                  <span class="block text-[9.5px] text-neutral-400 font-mono">{{ s.time }}</span>
+                </div>
+              </div>
+              <Check v-if="activeCellEditor.currentCode === s.code" class="w-3.5 h-3.5 text-[var(--theme-primary)] shrink-0" />
+            </button>
+
+            <div v-if="filteredShiftTypes.length === 0" class="py-3 text-center text-neutral-400 text-[11px]">
+              Shift tidak ditemukan
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
 
     <!-- 5. MODAL FORM: TAMBAH / UBAH POLA ROSTER (UKURAN BALANCED PROPORSI) -->
     <BaseModal
