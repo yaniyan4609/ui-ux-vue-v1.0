@@ -69,6 +69,9 @@ const theadRef = ref(null)
 
 const onTheadWheel = (e) => {
   if (!scrollContainerRef.value) return
+  // Jangan scroll horizontal tabel jika kursor sedang di dalam popover dropdown
+  if (e.target.closest('.dropdown-popover')) return
+
   if (Math.abs(e.deltaY) > 0) {
     e.preventDefault()
     // Scroll horizontal secara mulus
@@ -76,26 +79,128 @@ const onTheadWheel = (e) => {
   }
 }
 
+// Handler khusus untuk mencegah scroll chaining saat scroll list shift di dalam popover
+const onDropdownListWheel = (e) => {
+  e.stopPropagation()
+  const el = e.currentTarget
+  if (!el) return
+  const isScrollingDown = e.deltaY > 0
+  const isScrollingUp = e.deltaY < 0
+
+  const isAtBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 1
+  const isAtTop = el.scrollTop <= 0
+
+  if ((isScrollingDown && isAtBottom) || (isScrollingUp && isAtTop)) {
+    e.preventDefault()
+  }
+}
+
+// Click outside & Escape listener untuk menutup popover
+const handleDocumentClick = (e) => {
+  if (
+    !e.target.closest('.dropdown-popover') &&
+    !e.target.closest('.roster-trigger-btn')
+  ) {
+    activeCell.value = null
+    activeColumnHeader.value = null
+  }
+}
+
+const handleDocumentKeydown = (e) => {
+  if (e.key === 'Escape') {
+    activeCell.value = null
+    activeColumnHeader.value = null
+  }
+}
+
 onMounted(() => {
   if (theadRef.value) {
     theadRef.value.addEventListener('wheel', onTheadWheel, { passive: false })
   }
+  document.addEventListener('click', handleDocumentClick)
+  document.addEventListener('keydown', handleDocumentKeydown)
 })
 
 onUnmounted(() => {
   if (theadRef.value) {
     theadRef.value.removeEventListener('wheel', onTheadWheel)
   }
+  document.removeEventListener('click', handleDocumentClick)
+  document.removeEventListener('keydown', handleDocumentKeydown)
 })
 
 // ========================================================
-// 2. STATE POPOVER CELL INDIVIDU (SEARCHABLE DROPDOWN)
+// 2. DYNAMIC POPOVER PLACEMENT (SMART AUTO FLIP & ALIGN)
+// Bawah -> flip ke atas (bottom-full mb-1.5)
+// Kanan -> melebar ke kiri (right-0 left-auto)
+// Kiri -> melebar ke kanan (left-0 right-auto)
+// Tengah -> center (left-1/2 -translate-x-1/2)
 // ========================================================
-const activeCell = ref(null) // { rowId, rowName, date, dayLabel, currentCode }
+const computePopoverPlacement = (targetEl) => {
+  if (!targetEl) return { vertical: 'bottom', horizontal: 'center' }
+
+  const rect = targetEl.getBoundingClientRect()
+  const container = scrollContainerRef.value
+  const containerRect = container?.getBoundingClientRect() || {
+    top: 0,
+    bottom: window.innerHeight,
+    left: 0,
+    right: window.innerWidth,
+  }
+
+  // thead sticky ~48px, tfoot sticky ~56px
+  const effectiveContainerTop = containerRect.top + 48
+  const effectiveContainerBottom = Math.min(containerRect.bottom - 56, window.innerHeight - 10)
+
+  const spaceBelow = effectiveContainerBottom - rect.bottom
+  const spaceAbove = rect.top - effectiveContainerTop
+
+  // Popover butuh tinggi ~250px - 270px
+  let vertical = 'bottom'
+  if (spaceBelow < 265 && spaceAbove > spaceBelow) {
+    vertical = 'top'
+  } else if (spaceBelow < 220) {
+    vertical = 'top'
+  }
+
+  // Tentukan batas horizontal
+  const effectiveContainerRight = Math.min(containerRect.right, window.innerWidth)
+  const effectiveContainerLeft = Math.max(containerRect.left + 240, 0) // setelah sticky Pegawai (~240px)
+  const centerX = rect.left + rect.width / 2
+
+  let horizontal = 'center'
+  if (effectiveContainerRight - centerX < 115 || effectiveContainerRight - rect.left < 215) {
+    horizontal = 'right'
+  } else if (centerX - effectiveContainerLeft < 115 || rect.right - effectiveContainerLeft < 215) {
+    horizontal = 'left'
+  }
+
+  return { vertical, horizontal }
+}
+
+const getPlacementClasses = (placement) => {
+  if (!placement) return 'top-full mt-1.5 left-1/2 -translate-x-1/2 bottom-auto'
+
+  const vClass = placement.vertical === 'top' ? 'bottom-full mb-1.5 top-auto' : 'top-full mt-1.5 bottom-auto'
+
+  let hClass = 'left-1/2 -translate-x-1/2'
+  if (placement.horizontal === 'right') {
+    hClass = 'right-0 left-auto'
+  } else if (placement.horizontal === 'left') {
+    hClass = 'left-0 right-auto'
+  }
+
+  return `${vClass} ${hClass}`
+}
+
+// ========================================================
+// 3. STATE POPOVER CELL INDIVIDU (SEARCHABLE DROPDOWN)
+// ========================================================
+const activeCell = ref(null) // { rowId, rowName, date, dayLabel, currentCode, placement }
 const cellSearchQuery = ref('')
 const cellSearchInputRef = ref(null)
 
-const openShiftSelector = (row, day) => {
+const openShiftSelector = (row, day, event) => {
   if (!props.editable) {
     emit('cell-click', { row, day, currentCode: row.schedules?.[day.date] || 'OFF' })
     return
@@ -109,12 +214,14 @@ const openShiftSelector = (row, day) => {
     activeCell.value = null
   } else {
     cellSearchQuery.value = ''
+    const placement = computePopoverPlacement(event?.currentTarget)
     activeCell.value = {
       rowId: row.id,
       rowName: row.name,
       date: day.date,
       dayLabel: `${day.dayName}, ${day.dateLabel}`,
       currentCode,
+      placement,
     }
     nextTick(() => {
       cellSearchInputRef.value?.focus()
@@ -144,13 +251,13 @@ const filteredCellShiftTypes = computed(() => {
 })
 
 // ========================================================
-// 3. STATE POPOVER THEAD COLUMN (SEARCHABLE DROPDOWN MASSAL)
+// 4. STATE POPOVER THEAD COLUMN (SEARCHABLE DROPDOWN MASSAL)
 // ========================================================
-const activeColumnHeader = ref(null) // { date, dayName, dateLabel }
+const activeColumnHeader = ref(null) // { date, dayName, dateLabel, placement }
 const columnSearchQuery = ref('')
 const columnSearchInputRef = ref(null)
 
-const toggleColumnShiftSelector = (day) => {
+const toggleColumnShiftSelector = (day, event) => {
   if (!props.editable) return
 
   // Tutup popover cell jika sedang terbuka
@@ -160,10 +267,14 @@ const toggleColumnShiftSelector = (day) => {
     activeColumnHeader.value = null
   } else {
     columnSearchQuery.value = ''
+    const placement = computePopoverPlacement(event?.currentTarget)
+    // Di thead, arah vertikal selalu muncul ke bawah
+    placement.vertical = 'bottom'
     activeColumnHeader.value = {
       date: day.date,
       dayName: day.dayName,
       dateLabel: day.dateLabel,
+      placement,
     }
     nextTick(() => {
       columnSearchInputRef.value?.focus()
@@ -296,6 +407,7 @@ const dailyCoverageSummary = computed(() => {
               :key="day.date"
               class="py-2 px-2 text-center border-r border-neutral-200/60 dark:border-[var(--theme-border)] last:border-r-0 relative group/th min-w-[125px] w-[130px]"
               :class="[
+                (activeColumnHeader && activeColumnHeader.date === day.date) ? 'z-40' : '',
                 day.isToday ? 'bg-[var(--theme-primary-soft)] text-[var(--theme-primary)]' : '',
                 day.isWeekend && !day.isToday ? 'bg-neutral-100/50 dark:bg-neutral-900/20 text-neutral-400' : ''
               ]"
@@ -327,8 +439,8 @@ const dailyCoverageSummary = computed(() => {
                   <button
                     v-if="editable"
                     type="button"
-                    @click.stop="toggleColumnShiftSelector(day)"
-                    class="p-0.5 rounded-md text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-200/60 dark:hover:bg-[var(--theme-surface-muted)] transition opacity-60 group-hover/th:opacity-100 cursor-pointer"
+                    @click.stop="toggleColumnShiftSelector(day, $event)"
+                    class="roster-trigger-btn p-0.5 rounded-md text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-200/60 dark:hover:bg-[var(--theme-surface-muted)] transition opacity-60 group-hover/th:opacity-100 cursor-pointer"
                     :title="`Terapkan shift massal kolom untuk ${day.dayName}, ${day.dateLabel}`"
                   >
                     <ChevronDown class="w-3 h-3" />
@@ -341,7 +453,9 @@ const dailyCoverageSummary = computed(() => {
               <!-- ============================================== -->
               <div
                 v-if="activeColumnHeader && activeColumnHeader.date === day.date"
-                class="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 z-40 w-52 p-2.5 rounded-2xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-xl animate-in fade-in zoom-in-95 duration-150 text-left font-normal cursor-default"
+                class="dropdown-popover absolute z-50 w-52 p-2.5 rounded-2xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-xl animate-in fade-in zoom-in-95 duration-150 text-left font-normal cursor-default"
+                :class="getPlacementClasses(activeColumnHeader.placement)"
+                @wheel.stop
               >
                 <!-- Header Popover Kolom -->
                 <div class="flex items-center justify-between pb-1.5 mb-2 border-b border-neutral-100 dark:border-[var(--theme-border)]">
@@ -383,7 +497,10 @@ const dailyCoverageSummary = computed(() => {
                 </div>
 
                 <!-- Opsi Shift yang Difilter -->
-                <div class="space-y-1 max-h-48 overflow-y-auto pr-0.5">
+                <div
+                  class="space-y-1 max-h-48 overflow-y-auto pr-0.5 overscroll-contain"
+                  @wheel="onDropdownListWheel"
+                >
                   <button
                     v-for="st in filteredColumnShiftTypes"
                     :key="st.code"
@@ -428,6 +545,9 @@ const dailyCoverageSummary = computed(() => {
             v-for="row in rows"
             :key="row.id"
             class="hover:bg-neutral-50/70 dark:hover:bg-[var(--theme-surface-muted)]/50 transition-colors group"
+            :class="[
+              (activeCell && activeCell.rowId === row.id) ? 'relative z-40' : ''
+            ]"
           >
             <!-- Left Sticky Column: Pegawai Info -->
             <td class="sticky left-0 z-10 bg-white dark:bg-[var(--theme-surface)] group-hover:bg-neutral-50/90 dark:group-hover:bg-[var(--theme-surface-raised)] py-2 px-3 border-r border-neutral-200/80 dark:border-[var(--theme-border)] transition-colors shadow-[1px_0_0_0_rgba(0,0,0,0.05)]">
@@ -466,6 +586,7 @@ const dailyCoverageSummary = computed(() => {
               :key="day.date"
               class="p-1.5 text-center border-r border-neutral-100 dark:border-[var(--theme-border)] last:border-r-0 relative min-w-[125px]"
               :class="[
+                (activeCell && activeCell.rowId === row.id && activeCell.date === day.date) ? 'z-40' : '',
                 day.isToday ? 'bg-[var(--theme-primary-soft)]/20' : '',
                 day.isWeekend && !day.isToday ? 'bg-neutral-50/30 dark:bg-neutral-900/10' : ''
               ]"
@@ -473,8 +594,8 @@ const dailyCoverageSummary = computed(() => {
               <!-- Cell Shift Button: Tampilan Pill Bulat Sesuai Screenshot Pengguna -->
               <button
                 type="button"
-                @click="openShiftSelector(row, day)"
-                class="w-full py-1.5 px-2 rounded-xl text-xs font-semibold border transition-all flex items-center justify-between gap-1.5 shadow-2xs group/cell cursor-pointer whitespace-nowrap"
+                @click.stop="openShiftSelector(row, day, $event)"
+                class="roster-trigger-btn w-full py-1.5 px-2 rounded-xl text-xs font-semibold border transition-all flex items-center justify-between gap-1.5 shadow-2xs group/cell cursor-pointer whitespace-nowrap"
                 :class="getShiftBadgeClasses(row.schedules?.[day.date])"
                 :title="`${row.name} - ${day.dayName}: ${getShiftMeta(row.schedules?.[day.date]).name} (${getShiftMeta(row.schedules?.[day.date]).time})`"
               >
@@ -500,7 +621,9 @@ const dailyCoverageSummary = computed(() => {
               <!-- ============================================== -->
               <div
                 v-if="activeCell && activeCell.rowId === row.id && activeCell.date === day.date"
-                class="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 z-40 w-52 p-2.5 rounded-2xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-xl animate-in fade-in zoom-in-95 duration-150 text-left font-normal cursor-default"
+                class="dropdown-popover absolute z-50 w-52 p-2.5 rounded-2xl bg-white dark:bg-[var(--theme-surface-raised)] border border-neutral-200 dark:border-[var(--theme-border)] shadow-xl animate-in fade-in zoom-in-95 duration-150 text-left font-normal cursor-default"
+                :class="getPlacementClasses(activeCell.placement)"
+                @wheel.stop
               >
                 <!-- Popover Header -->
                 <div class="flex items-center justify-between pb-1.5 mb-2 border-b border-neutral-100 dark:border-[var(--theme-border)]">
@@ -542,7 +665,10 @@ const dailyCoverageSummary = computed(() => {
                 </div>
 
                 <!-- Shift Options yang Difilter -->
-                <div class="space-y-1 max-h-48 overflow-y-auto pr-0.5">
+                <div
+                  class="space-y-1 max-h-48 overflow-y-auto pr-0.5 overscroll-contain"
+                  @wheel="onDropdownListWheel"
+                >
                   <button
                     v-for="st in filteredCellShiftTypes"
                     :key="st.code"
