@@ -1106,7 +1106,7 @@ watch(
     v-model="isCreatePatternModalOpen"
     title="Buat Pola Roster Baru"
     subtitle="Definisikan urutan rotasi shift mingguan atau kalender bulanan penuh"
-    size="xl"
+    size="balanced"
   >
     <div class="h-[490px] flex flex-col min-h-0 space-y-3 text-xs">
       

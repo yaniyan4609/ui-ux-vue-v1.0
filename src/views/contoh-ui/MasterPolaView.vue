@@ -30,7 +30,6 @@ import {
   X,
   Copy,
   Sparkles,
-  Zap,
   Clock,
   ChevronDown,
 } from 'lucide-vue-next'
@@ -59,29 +58,70 @@ const itemsPerPage = ref(10)
 const selectedIds = ref([])
 const isBatchDeleteModalOpen = ref(false)
 
-// Day Names & Index Mapping (Senin - Minggu)
+// Day Mapping (Senin - Minggu)
 const daysList = [
-  { key: 'senin', label: 'SENIN', index: 0 },
-  { key: 'selasa', label: 'SELASA', index: 1 },
-  { key: 'rabu', label: 'RABU', index: 2 },
-  { key: 'kamis', label: 'KAMIS', index: 3 },
-  { key: 'jumat', label: 'JUMAT', index: 4 },
-  { key: 'sabtu', label: 'SABTU', index: 5 },
-  { key: 'minggu', label: 'MINGGU', index: 6 },
+  { key: 'senin', label: 'Senin', index: 0 },
+  { key: 'selasa', label: 'Selasa', index: 1 },
+  { key: 'rabu', label: 'Rabu', index: 2 },
+  { key: 'kamis', label: 'Kamis', index: 3 },
+  { key: 'jumat', label: 'Jumat', index: 4 },
+  { key: 'sabtu', label: 'Sabtu', index: 5 },
+  { key: 'minggu', label: 'Minggu', index: 6 },
 ]
 
 // Helper lookup info shift
-const getShiftInfo = (code) => {
+const getShiftMeta = (code) => {
   return (
     shiftTypes.find((s) => s.code === code) || {
       code: code || 'OFF',
-      name: code === 'OFF' ? 'Libur' : (code || '-'),
+      name: code === 'OFF' ? 'Libur (Off)' : (code || '-'),
       badgeVariant: 'neutral',
+      hours: 0,
     }
   )
 }
 
-// Dropdown Options: Target Divisi (Searchable with Badge Counts)
+// Styling pill badge shift per sel (persis pola BaseRosterGrid)
+const getShiftPillClasses = (code) => {
+  switch (code) {
+    case 'P':
+      return 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/40 hover:bg-emerald-100 dark:hover:bg-emerald-950/60'
+    case 'S':
+      return 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200/80 dark:border-amber-800/40 hover:bg-amber-100 dark:hover:bg-amber-950/60'
+    case 'M':
+      return 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200/80 dark:border-purple-800/40 hover:bg-purple-100 dark:hover:bg-purple-950/60'
+    case 'C':
+      return 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200/80 dark:border-blue-800/40 hover:bg-blue-100 dark:hover:bg-blue-950/60'
+    case 'REG':
+      return 'bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border-sky-200/80 dark:border-sky-800/40 hover:bg-sky-100 dark:hover:bg-sky-950/60'
+    case 'OFF':
+    default:
+      return 'bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-500 dark:text-neutral-400 border-neutral-200/60 dark:border-[var(--theme-border)] hover:bg-neutral-200/60 dark:hover:bg-[var(--theme-surface-raised)]'
+  }
+}
+
+// Inisial avatar pola
+const getPatternAvatar = (pola) => {
+  if (pola.id === 'tpl-5-2') return '5-2'
+  if (pola.id === 'tpl-2-2-2-1') return '2-1'
+  if (pola.id === 'tpl-3-3-1') return '3-1'
+  if (pola.id === 'tpl-4-2') return '4-2'
+  if (pola.id === 'tpl-reguler') return 'REG'
+  if (pola.id === 'tpl-security-weekend') return 'SEC'
+  if (pola.id === 'tpl-cs-care') return 'CS'
+  return (pola.name || 'PL').slice(0, 3).toUpperCase()
+}
+
+// Hitung total jam kerja per minggu
+const calculatePatternTotalHours = (pattern) => {
+  if (!pattern || !Array.isArray(pattern)) return 0
+  return pattern.reduce((sum, code) => {
+    const shift = shiftTypes.find((s) => s.code === code)
+    return sum + (shift?.hours || 0)
+  }, 0)
+}
+
+// Dropdown Options: Target Divisi
 const divisiOptions = computed(() => {
   const counts = {}
   listPola.value.forEach((p) => {
@@ -92,14 +132,14 @@ const divisiOptions = computed(() => {
   return [
     { value: 'all', label: 'Semua Target Divisi', badge: listPola.value.length },
     { value: 'Teknologi & IT', label: 'Teknologi & IT', badge: counts['Teknologi & IT'] || counts['IT Operations 24/7'] || 0 },
-    { value: 'Keamanan & Fasilitas', label: 'Keamanan & Fasilitas', badge: counts['Divisi Keamanan & Pos Komando Fasilitas'] || counts['Security'] || 0 },
+    { value: 'Keamanan', label: 'Keamanan & Fasilitas', badge: counts['Divisi Keamanan & Pos Komando Fasilitas'] || counts['Security Satpam'] || 0 },
     { value: 'Operasional Gudang', label: 'Operasional Gudang', badge: counts['Operasional Gudang & Distribusi Lapangan'] || 0 },
     { value: 'Layanan & CS', label: 'Layanan & Customer Care', badge: counts['Divisi Layanan & Customer Care'] || 0 },
-    { value: 'Administrasi', label: 'Administrasi & HR', badge: counts['Administrasi'] || 0 },
+    { value: 'Administrasi', label: 'Administrasi, Keuangan, HR', badge: counts['Administrasi'] || 0 },
   ]
 })
 
-// Dropdown Options: Status Penyimpanan (Database vs Temp)
+// Dropdown Options: Status Penyimpanan
 const storageOptions = computed(() => {
   const dbCount = listPola.value.filter((p) => p.isDatabase).length
   const tempCount = listPola.value.length - dbCount
@@ -112,17 +152,18 @@ const storageOptions = computed(() => {
 })
 
 // ========================================================
-// 2. TABLE COLUMNS: NAMA POLA, SENIN - MINGGU, AKSI
+// 2. TABLE COLUMNS (PERSIS INSTRUKSI PENGGUNA)
+// thead: Nama Pola | Senin | Selasa | Rabu | Kamis | Jumat | Sabtu | Minggu | Aksi
 // ========================================================
 const tableColumns = [
-  { key: 'nama', label: 'NAMA POLA', sortable: true, cellClass: 'whitespace-nowrap min-w-[210px]' },
-  { key: 'senin', label: 'SENIN', align: 'center', cellClass: 'whitespace-nowrap px-1' },
-  { key: 'selasa', label: 'SELASA', align: 'center', cellClass: 'whitespace-nowrap px-1' },
-  { key: 'rabu', label: 'RABU', align: 'center', cellClass: 'whitespace-nowrap px-1' },
-  { key: 'kamis', label: 'KAMIS', align: 'center', cellClass: 'whitespace-nowrap px-1' },
-  { key: 'jumat', label: 'JUMAT', align: 'center', cellClass: 'whitespace-nowrap px-1' },
-  { key: 'sabtu', label: 'SABTU', align: 'center', cellClass: 'whitespace-nowrap px-1' },
-  { key: 'minggu', label: 'MINGGU', align: 'center', cellClass: 'whitespace-nowrap px-1' },
+  { key: 'nama', label: 'NAMA POLA', sortable: true, cellClass: 'whitespace-nowrap min-w-[230px] w-72' },
+  { key: 'senin', label: 'Senin', align: 'center', cellClass: 'whitespace-nowrap p-1.5 min-w-[130px]' },
+  { key: 'selasa', label: 'Selasa', align: 'center', cellClass: 'whitespace-nowrap p-1.5 min-w-[130px]' },
+  { key: 'rabu', label: 'Rabu', align: 'center', cellClass: 'whitespace-nowrap p-1.5 min-w-[130px]' },
+  { key: 'kamis', label: 'Kamis', align: 'center', cellClass: 'whitespace-nowrap p-1.5 min-w-[130px]' },
+  { key: 'jumat', label: 'Jumat', align: 'center', cellClass: 'whitespace-nowrap p-1.5 min-w-[130px]' },
+  { key: 'sabtu', label: 'Sabtu', align: 'center', cellClass: 'whitespace-nowrap p-1.5 min-w-[130px]' },
+  { key: 'minggu', label: 'Minggu', align: 'center', cellClass: 'whitespace-nowrap p-1.5 min-w-[130px]' },
 ]
 
 // ========================================================
@@ -194,23 +235,6 @@ const paginatedList = computed(() => {
   return processedList.value.slice(start, start + Number(itemsPerPage.value))
 })
 
-// Multi-select Logic
-const isAllSelected = computed(() => {
-  if (paginatedList.value.length === 0) return false
-  return paginatedList.value.every((p) => selectedIds.value.includes(p.id))
-})
-
-const toggleSelectAll = () => {
-  if (isAllSelected.value) {
-    const pageIds = paginatedList.value.map((p) => p.id)
-    selectedIds.value = selectedIds.value.filter((id) => !pageIds.includes(id))
-  } else {
-    const pageIds = paginatedList.value.map((p) => p.id)
-    const set = new Set([...selectedIds.value, ...pageIds])
-    selectedIds.value = Array.from(set)
-  }
-}
-
 // ========================================================
 // 4. ACTION ITEMS UNTUK ROW DROPDOWN
 // ========================================================
@@ -260,7 +284,7 @@ const handleBatchDeleteConfirm = () => {
   listPola.value = listPola.value.filter((p) => !selectedIds.value.includes(p.id))
   selectedIds.value = []
   isBatchDeleteModalOpen.value = false
-  toast.error(`${count} master pola terpilih telah dihapus dari sistem.`, 'Hapus Massal')
+  toast.error(`${count} pola terpilih telah dihapus dari sistem.`, 'Hapus Massal')
 }
 
 const handleBatchSetDatabase = (isDb) => {
@@ -278,7 +302,7 @@ const handleBatchSetDatabase = (isDb) => {
 }
 
 // ========================================================
-// 5. MODAL FORM: TAMBAH & EDIT POLA (7 HARI SENIN - MINGGU)
+// 5. MODAL FORM: TAMBAH & EDIT POLA (UKURAN BALANCED PROPORSI)
 // ========================================================
 const isFormModalOpen = ref(false)
 const isEditMode = ref(false)
@@ -519,7 +543,7 @@ const exportSelected = () => {
   <!-- Main View Container: Layout Kanonikal Data View -->
   <div class="h-full flex flex-col min-h-0 overflow-hidden gap-2.5 w-full max-w-7xl mx-auto select-none relative">
     
-    <!-- 1. Top Compact Header: Title & Action Buttons (Persis Layout Gambar Kanonikal) -->
+    <!-- 1. Top Compact Header: Title & Action Buttons -->
     <div class="flex items-center justify-between gap-3 pb-2 border-b border-neutral-200 dark:border-[var(--theme-border)] shrink-0">
       <div class="flex items-center gap-2.5 min-w-0">
         <div class="w-8 h-8 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 flex items-center justify-center shrink-0 shadow-2xs">
@@ -673,7 +697,7 @@ const exportSelected = () => {
       </div>
     </div>
 
-    <!-- 4. BASE DATA TABLE DENGAN THEAD: NAMA POLA | SENIN - MINGGU | AKSI -->
+    <!-- 4. BASE DATA TABLE: TAMPILAN PERSIS BASE ROSTER GRID GAMBAR ACUAN -->
     <BaseDataTable
       :columns="tableColumns"
       :rows="paginatedList"
@@ -691,141 +715,158 @@ const exportSelected = () => {
       empty-action-text="Reset Filter Pencarian"
       @empty-action="handleResetDefault"
     >
-      <!-- Kolom: NAMA POLA -->
+      <!-- Custom Header Kolom: NAMA POLA & TOTAL JAM (Persis thead gambar acuan) -->
+      <template #header-nama>
+        <div class="flex items-center justify-between w-full pr-2">
+          <span class="uppercase text-[10px] tracking-wider font-bold text-neutral-500">
+            Nama Pola ({{ listPola.length }})
+          </span>
+          <span class="text-[10px] text-neutral-400 font-mono font-medium">Total Jam</span>
+        </div>
+      </template>
+
+      <!-- Kolom: NAMA POLA (Avatar Initial + Nama Pola + Subtitle + Total Jam Badge) -->
       <template #cell-nama="{ row }">
-        <div class="flex items-center gap-2.5 py-1">
-          <div class="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-[var(--theme-surface-muted)] border border-neutral-200/80 dark:border-[var(--theme-border-strong)] text-neutral-800 dark:text-neutral-200 font-bold text-xs flex items-center justify-center shrink-0">
-            <CalendarRange class="w-4 h-4 text-neutral-600 dark:text-neutral-400" />
-          </div>
-          <div class="min-w-0">
-            <span class="font-semibold text-neutral-900 dark:text-white block leading-tight truncate">
-              {{ row.name }}
-            </span>
-            <div class="flex items-center gap-1.5 mt-0.5">
-              <span class="text-[10.5px] text-neutral-400 truncate max-w-[150px]">
-                {{ row.suitableFor || 'Semua Divisi' }}
-              </span>
-              <BaseBadge
-                :variant="row.isDatabase ? 'success' : 'warning'"
-                size="sm"
-                class="text-[9px] px-1 py-0"
-              >
-                {{ row.isDatabase ? 'DB' : 'Temp' }}
-              </BaseBadge>
+        <div class="flex items-center justify-between gap-2 py-1 pr-1">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-[var(--theme-surface-muted)] border border-neutral-200/80 dark:border-[var(--theme-border-strong)] text-neutral-800 dark:text-neutral-200 font-bold text-xs flex items-center justify-center shrink-0">
+              {{ getPatternAvatar(row) }}
             </div>
+            <div class="min-w-0">
+              <span class="font-bold text-neutral-900 dark:text-white block leading-tight truncate text-xs">
+                {{ row.name }}
+              </span>
+              <span class="text-[10px] text-neutral-400 block truncate mt-0.5 max-w-[160px]">
+                {{ row.suitableFor }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Total Hours Badge (Persis 176j di screenshot) -->
+          <div class="text-right shrink-0">
+            <span class="px-1.5 py-0.5 rounded-md text-[10.5px] font-mono font-bold bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300">
+              {{ calculatePatternTotalHours(row.pattern) }}j
+            </span>
           </div>
         </div>
       </template>
 
-      <!-- Kolom: SENIN -->
+      <!-- Kolom: SENIN (Pill Bulat Persis Screenshot) -->
       <template #cell-senin="{ row }">
-        <div class="flex flex-col items-center justify-center py-1">
-          <BaseBadge
-            :variant="getShiftInfo(row.pattern[0]).badgeVariant"
-            size="sm"
-            class="font-bold font-mono px-2 py-0.5"
-          >
-            {{ row.pattern[0] || 'OFF' }}
-          </BaseBadge>
-          <span class="text-[9.5px] text-neutral-500 dark:text-neutral-400 mt-0.5 truncate max-w-[70px]">
-            {{ getShiftInfo(row.pattern[0]).name }}
-          </span>
+        <div
+          class="w-full py-1.5 px-2 rounded-xl text-xs font-semibold border transition-all flex items-center justify-between gap-1.5 shadow-2xs whitespace-nowrap"
+          :class="getShiftPillClasses(row.pattern[0])"
+        >
+          <div class="flex items-center gap-1.5 min-w-0">
+            <span class="w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
+              {{ row.pattern[0] || 'OFF' }}
+            </span>
+            <span class="text-[11px] font-semibold truncate">
+              {{ getShiftMeta(row.pattern[0]).name }}
+            </span>
+          </div>
         </div>
       </template>
 
       <!-- Kolom: SELASA -->
       <template #cell-selasa="{ row }">
-        <div class="flex flex-col items-center justify-center py-1">
-          <BaseBadge
-            :variant="getShiftInfo(row.pattern[1]).badgeVariant"
-            size="sm"
-            class="font-bold font-mono px-2 py-0.5"
-          >
-            {{ row.pattern[1] || 'OFF' }}
-          </BaseBadge>
-          <span class="text-[9.5px] text-neutral-500 dark:text-neutral-400 mt-0.5 truncate max-w-[70px]">
-            {{ getShiftInfo(row.pattern[1]).name }}
-          </span>
+        <div
+          class="w-full py-1.5 px-2 rounded-xl text-xs font-semibold border transition-all flex items-center justify-between gap-1.5 shadow-2xs whitespace-nowrap"
+          :class="getShiftPillClasses(row.pattern[1])"
+        >
+          <div class="flex items-center gap-1.5 min-w-0">
+            <span class="w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
+              {{ row.pattern[1] || 'OFF' }}
+            </span>
+            <span class="text-[11px] font-semibold truncate">
+              {{ getShiftMeta(row.pattern[1]).name }}
+            </span>
+          </div>
         </div>
       </template>
 
       <!-- Kolom: RABU -->
       <template #cell-rabu="{ row }">
-        <div class="flex flex-col items-center justify-center py-1">
-          <BaseBadge
-            :variant="getShiftInfo(row.pattern[2]).badgeVariant"
-            size="sm"
-            class="font-bold font-mono px-2 py-0.5"
-          >
-            {{ row.pattern[2] || 'OFF' }}
-          </BaseBadge>
-          <span class="text-[9.5px] text-neutral-500 dark:text-neutral-400 mt-0.5 truncate max-w-[70px]">
-            {{ getShiftInfo(row.pattern[2]).name }}
-          </span>
+        <div
+          class="w-full py-1.5 px-2 rounded-xl text-xs font-semibold border transition-all flex items-center justify-between gap-1.5 shadow-2xs whitespace-nowrap"
+          :class="getShiftPillClasses(row.pattern[2])"
+        >
+          <div class="flex items-center gap-1.5 min-w-0">
+            <span class="w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
+              {{ row.pattern[2] || 'OFF' }}
+            </span>
+            <span class="text-[11px] font-semibold truncate">
+              {{ getShiftMeta(row.pattern[2]).name }}
+            </span>
+          </div>
         </div>
       </template>
 
       <!-- Kolom: KAMIS -->
       <template #cell-kamis="{ row }">
-        <div class="flex flex-col items-center justify-center py-1">
-          <BaseBadge
-            :variant="getShiftInfo(row.pattern[3]).badgeVariant"
-            size="sm"
-            class="font-bold font-mono px-2 py-0.5"
-          >
-            {{ row.pattern[3] || 'OFF' }}
-          </BaseBadge>
-          <span class="text-[9.5px] text-neutral-500 dark:text-neutral-400 mt-0.5 truncate max-w-[70px]">
-            {{ getShiftInfo(row.pattern[3]).name }}
-          </span>
+        <div
+          class="w-full py-1.5 px-2 rounded-xl text-xs font-semibold border transition-all flex items-center justify-between gap-1.5 shadow-2xs whitespace-nowrap"
+          :class="getShiftPillClasses(row.pattern[3])"
+        >
+          <div class="flex items-center gap-1.5 min-w-0">
+            <span class="w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
+              {{ row.pattern[3] || 'OFF' }}
+            </span>
+            <span class="text-[11px] font-semibold truncate">
+              {{ getShiftMeta(row.pattern[3]).name }}
+            </span>
+          </div>
         </div>
       </template>
 
       <!-- Kolom: JUMAT -->
       <template #cell-jumat="{ row }">
-        <div class="flex flex-col items-center justify-center py-1">
-          <BaseBadge
-            :variant="getShiftInfo(row.pattern[4]).badgeVariant"
-            size="sm"
-            class="font-bold font-mono px-2 py-0.5"
-          >
-            {{ row.pattern[4] || 'OFF' }}
-          </BaseBadge>
-          <span class="text-[9.5px] text-neutral-500 dark:text-neutral-400 mt-0.5 truncate max-w-[70px]">
-            {{ getShiftInfo(row.pattern[4]).name }}
-          </span>
+        <div
+          class="w-full py-1.5 px-2 rounded-xl text-xs font-semibold border transition-all flex items-center justify-between gap-1.5 shadow-2xs whitespace-nowrap"
+          :class="getShiftPillClasses(row.pattern[4])"
+        >
+          <div class="flex items-center gap-1.5 min-w-0">
+            <span class="w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
+              {{ row.pattern[4] || 'OFF' }}
+            </span>
+            <span class="text-[11px] font-semibold truncate">
+              {{ getShiftMeta(row.pattern[4]).name }}
+            </span>
+          </div>
         </div>
       </template>
 
       <!-- Kolom: SABTU -->
       <template #cell-sabtu="{ row }">
-        <div class="flex flex-col items-center justify-center py-1">
-          <BaseBadge
-            :variant="getShiftInfo(row.pattern[5]).badgeVariant"
-            size="sm"
-            class="font-bold font-mono px-2 py-0.5"
-          >
-            {{ row.pattern[5] || 'OFF' }}
-          </BaseBadge>
-          <span class="text-[9.5px] text-neutral-500 dark:text-neutral-400 mt-0.5 truncate max-w-[70px]">
-            {{ getShiftInfo(row.pattern[5]).name }}
-          </span>
+        <div
+          class="w-full py-1.5 px-2 rounded-xl text-xs font-semibold border transition-all flex items-center justify-between gap-1.5 shadow-2xs whitespace-nowrap"
+          :class="getShiftPillClasses(row.pattern[5])"
+        >
+          <div class="flex items-center gap-1.5 min-w-0">
+            <span class="w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
+              {{ row.pattern[5] || 'OFF' }}
+            </span>
+            <span class="text-[11px] font-semibold truncate">
+              {{ getShiftMeta(row.pattern[5]).name }}
+            </span>
+          </div>
         </div>
       </template>
 
       <!-- Kolom: MINGGU -->
       <template #cell-minggu="{ row }">
-        <div class="flex flex-col items-center justify-center py-1">
-          <BaseBadge
-            :variant="getShiftInfo(row.pattern[6]).badgeVariant"
-            size="sm"
-            class="font-bold font-mono px-2 py-0.5"
-          >
-            {{ row.pattern[6] || 'OFF' }}
-          </BaseBadge>
-          <span class="text-[9.5px] text-neutral-500 dark:text-neutral-400 mt-0.5 truncate max-w-[70px]">
-            {{ getShiftInfo(row.pattern[6]).name }}
-          </span>
+        <div
+          class="w-full py-1.5 px-2 rounded-xl text-xs font-semibold border transition-all flex items-center justify-between gap-1.5 shadow-2xs whitespace-nowrap"
+          :class="getShiftPillClasses(row.pattern[6])"
+        >
+          <div class="flex items-center gap-1.5 min-w-0">
+            <span class="w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black font-mono shrink-0 bg-white/70 dark:bg-black/30 shadow-2xs">
+              {{ row.pattern[6] || 'OFF' }}
+            </span>
+            <span class="text-[11px] font-semibold truncate">
+              {{ getShiftMeta(row.pattern[6]).name }}
+            </span>
+          </div>
         </div>
       </template>
 
@@ -880,7 +921,7 @@ const exportSelected = () => {
                 @change="onToggleSelect"
               />
               <div class="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-[var(--theme-surface-muted)] font-bold text-xs flex items-center justify-center shrink-0">
-                <CalendarRange class="w-4 h-4 text-neutral-600 dark:text-neutral-400" />
+                {{ getPatternAvatar(row) }}
               </div>
               <div>
                 <h3 class="text-sm font-bold text-neutral-900 dark:text-white leading-tight">
@@ -892,12 +933,17 @@ const exportSelected = () => {
               </div>
             </div>
 
-            <BaseBadge
-              :variant="row.isDatabase ? 'success' : 'warning'"
-              size="sm"
-            >
-              {{ row.isDatabase ? 'DB' : 'Temp' }}
-            </BaseBadge>
+            <div class="flex items-center gap-1.5">
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300">
+                {{ calculatePatternTotalHours(row.pattern) }}j
+              </span>
+              <BaseBadge
+                :variant="row.isDatabase ? 'success' : 'warning'"
+                size="sm"
+              >
+                {{ row.isDatabase ? 'DB' : 'Temp' }}
+              </BaseBadge>
+            </div>
           </div>
 
           <!-- Mid Row: 7 Hari Mini Grid -->
@@ -952,12 +998,12 @@ const exportSelected = () => {
       </template>
     </BaseDataTable>
 
-    <!-- 5. MODAL FORM: TAMBAH / UBAH POLA ROSTER -->
+    <!-- 5. MODAL FORM: TAMBAH / UBAH POLA ROSTER (UKURAN BALANCED PROPORSI) -->
     <BaseModal
       v-model="isFormModalOpen"
       :title="isEditMode ? 'Ubah Data Pola' : 'Tambah Pola Baru'"
-      :subtitle="isEditMode ? 'Sesuaikan susunan shift 7 hari dan peruntukan divisi' : 'Rancang pola rotasi shift mingguan (Senin s/d Minggu) untuk mempercepat generate roster'"
-      size="lg"
+      :subtitle="isEditMode ? 'Sesuaikan susunan shift 7 hari dan peruntukan divisi' : 'Rancang pola rotasi shift mingguan (Senin s/d Minggu) untuk jadwal roster'"
+      size="balanced"
     >
       <div class="space-y-4 text-xs">
         <!-- Nama Pola & Target Divisi -->
@@ -1002,7 +1048,7 @@ const exportSelected = () => {
                 Susunan Shift 7 Hari (Senin - Minggu)
               </span>
               <span class="text-[11px] text-neutral-500">
-                Klik tombol hari untuk mengganti shift kerja
+                Klik tombol hari untuk memilih variasi shift
               </span>
             </div>
 
@@ -1065,7 +1111,7 @@ const exportSelected = () => {
                     'bg-neutral-50 text-neutral-700 border-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700'
                   ]"
                 >
-                  <span class="truncate">{{ getShiftInfo(formPattern[d.index]).name }}</span>
+                  <span class="truncate">{{ getShiftMeta(formPattern[d.index]).name }}</span>
                   <ChevronDown class="w-3 h-3 shrink-0 ml-0.5 text-neutral-400" />
                 </button>
 
@@ -1103,7 +1149,7 @@ const exportSelected = () => {
               Simpan Permanen ke Database
             </span>
             <span class="text-[11px] text-neutral-500">
-              Pola yang tersimpan di database dapat langsung diakses oleh semua supervisor HR
+              Pola yang tersimpan di database dapat langsung diakses oleh seluruh supervisor
             </span>
           </div>
           <BaseSwitch v-model="formSaveToDb" />

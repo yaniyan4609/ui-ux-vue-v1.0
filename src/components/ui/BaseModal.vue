@@ -98,6 +98,7 @@ const sizeClass = computed(() => {
     sm: 'max-w-md',
     md: 'max-w-lg',
     lg: 'max-w-2xl',
+    balanced: 'max-w-3xl',
     xl: 'max-w-4xl',
     '2xl': 'max-w-5xl',
     '3xl': 'max-w-6xl',
