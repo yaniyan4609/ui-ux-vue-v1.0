@@ -46,6 +46,7 @@ import {
   Calendar,
   Briefcase,
   Network,
+  Folder,
 } from 'lucide-vue-next'
 
 const toast = useToast()
@@ -72,6 +73,40 @@ const activeDays = computed(() => {
 const searchQuery = ref('')
 const selectedLocationNodes = ref([]) // Array ID terpilih (multi-select)
 const selectedOrgNodes = ref([]) // Array ID terpilih (multi-select)
+
+// Hitungan Ringkas Node Terpilih (Wilayah, Kantor, Divisi, Dept, Jabatan)
+const locationCounts = computed(() => {
+  let wilayah = 0
+  let kantor = 0
+  if (selectedLocationNodes.value && Array.isArray(selectedLocationNodes.value)) {
+    selectedLocationNodes.value.forEach((id) => {
+      if (id.startsWith('wilayah-')) {
+        wilayah++
+      } else {
+        kantor++
+      }
+    })
+  }
+  return { wilayah, kantor, total: wilayah + kantor }
+})
+
+const orgCounts = computed(() => {
+  let divisi = 0
+  let departemen = 0
+  let jabatan = 0
+  if (selectedOrgNodes.value && Array.isArray(selectedOrgNodes.value)) {
+    selectedOrgNodes.value.forEach((id) => {
+      if (['Teknologi & IT', 'Keamanan & Fasilitas', 'Layanan & CS', 'Operasional Gudang', 'Medis & Kesehatan'].includes(id)) {
+        divisi++
+      } else if (id.startsWith('dept-')) {
+        departemen++
+      } else {
+        jabatan++
+      }
+    })
+  }
+  return { divisi, departemen, jabatan, total: divisi + departemen + jabatan }
+})
 
 // Filtered Employees Berbasis Multi-Tree
 const filteredEmployees = computed(() => {
@@ -466,30 +501,92 @@ const employeeScheduleDetails = computed(() => {
         </button>
       </div>
 
-      <!-- Filter 1: Wilayah & Kantor Menggunakan BaseTreeSelect Multi -->
-      <div class="w-full sm:w-64 shrink-0">
+      <!-- Filter 1: Wilayah & Kantor Menggunakan BaseTreeSelect Multi (Format Ringkas Icon & Count) -->
+      <div class="w-full sm:w-60 shrink-0">
         <BaseTreeSelect
           v-model="selectedLocationNodes"
           :nodes="locationTreeNodes"
           :multiple="true"
-          placeholder="Pilih Wilayah & Kantor..."
+          placeholder="Wilayah & Kantor..."
           size="sm"
           clearable
           searchable
-        />
+        >
+          <template #selection="{ count }">
+            <div class="flex items-center gap-1.5 min-w-0 flex-nowrap overflow-hidden text-xs">
+              <MapPin class="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+              <template v-if="count > 0">
+                <span
+                  v-if="locationCounts.wilayah > 0"
+                  class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[10.5px] font-bold bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-200/80 dark:border-sky-800/40 shrink-0 shadow-2xs"
+                  title="Wilayah Terpilih"
+                >
+                  <MapPin class="w-3 h-3 text-sky-600 dark:text-sky-400" />
+                  <span>+{{ locationCounts.wilayah }} Wilayah</span>
+                </span>
+                <span
+                  v-if="locationCounts.kantor > 0"
+                  class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[10.5px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/40 shrink-0 shadow-2xs"
+                  title="Kantor Cabang Terpilih"
+                >
+                  <Building2 class="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                  <span>+{{ locationCounts.kantor }} Kantor</span>
+                </span>
+              </template>
+              <span v-else class="text-neutral-400 dark:text-neutral-500 truncate">
+                Wilayah & Kantor...
+              </span>
+            </div>
+          </template>
+        </BaseTreeSelect>
       </div>
 
-      <!-- Filter 2: Organisasi (Divisi -> Dept -> Jabatan) BaseTreeSelect Multi -->
-      <div class="w-full sm:w-72 shrink-0">
+      <!-- Filter 2: Organisasi (Divisi -> Dept -> Jabatan) BaseTreeSelect Multi (Format Ringkas Icon & Count) -->
+      <div class="w-full sm:w-68 shrink-0">
         <BaseTreeSelect
           v-model="selectedOrgNodes"
           :nodes="organizationTreeNodes"
           :multiple="true"
-          placeholder="Pilih Divisi, Dept & Jabatan..."
+          placeholder="Struktur Organisasi..."
           size="sm"
           clearable
           searchable
-        />
+        >
+          <template #selection="{ count }">
+            <div class="flex items-center gap-1.5 min-w-0 flex-nowrap overflow-hidden text-xs">
+              <Network class="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+              <template v-if="count > 0">
+                <span
+                  v-if="orgCounts.divisi > 0"
+                  class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[10.5px] font-bold bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/40 shrink-0 shadow-2xs"
+                  title="Divisi Terpilih"
+                >
+                  <Briefcase class="w-3 h-3 text-purple-600 dark:text-purple-400" />
+                  <span>+{{ orgCounts.divisi }} Divisi</span>
+                </span>
+                <span
+                  v-if="orgCounts.departemen > 0"
+                  class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[10.5px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/40 shrink-0 shadow-2xs"
+                  title="Departemen Terpilih"
+                >
+                  <Folder class="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                  <span>+{{ orgCounts.departemen }} Dept</span>
+                </span>
+                <span
+                  v-if="orgCounts.jabatan > 0"
+                  class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[10.5px] font-bold bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-800/40 shrink-0 shadow-2xs"
+                  title="Jabatan Terpilih"
+                >
+                  <Users class="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                  <span>+{{ orgCounts.jabatan }} Posisi</span>
+                </span>
+              </template>
+              <span v-else class="text-neutral-400 dark:text-neutral-500 truncate">
+                Divisi, Dept & Jabatan...
+              </span>
+            </div>
+          </template>
+        </BaseTreeSelect>
       </div>
 
       <!-- Reset Filter Button -->

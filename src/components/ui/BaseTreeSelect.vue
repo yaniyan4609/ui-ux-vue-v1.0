@@ -52,6 +52,18 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  icon: {
+    type: [Object, Function],
+    default: null,
+  },
+  compactCount: {
+    type: Boolean,
+    default: false,
+  },
+  countLabel: {
+    type: String,
+    default: 'Unit',
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'change', 'clear'])
@@ -147,26 +159,44 @@ const sizeClasses = computed(() => {
             : 'bg-white hover:bg-neutral-50/70 dark:bg-[var(--theme-surface-raised)] dark:hover:bg-[var(--theme-surface-muted)] border-neutral-200 dark:border-[var(--theme-border)] hover:border-neutral-300 dark:hover:border-[var(--theme-border-strong)]',
         ]"
       >
-        <div class="flex items-center gap-1.5 min-w-0 flex-1 flex-wrap">
-          <Network class="w-3.5 h-3.5 text-neutral-400 shrink-0 mr-0.5" />
-          <template v-if="selectedLabels.length > 0">
-            <span
-              v-for="(lbl, idx) in selectedLabels.slice(0, 2)"
-              :key="idx"
-              class="inline-flex items-center px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-[var(--theme-primary-soft)] text-[var(--theme-primary-soft-text)] border border-neutral-200/60 dark:border-[var(--theme-border-strong)] max-w-[160px] truncate"
-            >
-              {{ lbl }}
+        <div class="flex items-center gap-1.5 min-w-0 flex-1 flex-nowrap overflow-hidden">
+          <slot
+            name="selection"
+            :selected-ids="multiple ? (Array.isArray(modelValue) ? modelValue : []) : [modelValue]"
+            :selected-labels="selectedLabels"
+            :count="selectedLabels.length"
+          >
+            <component
+              :is="icon || Network"
+              class="w-3.5 h-3.5 text-neutral-400 shrink-0 mr-0.5"
+            />
+            <template v-if="compactCount && selectedLabels.length > 0">
+              <span class="text-xs font-semibold text-neutral-800 dark:text-neutral-200 truncate">
+                {{ placeholder }}:
+              </span>
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded-lg text-[10.5px] font-bold bg-[var(--theme-primary-soft)] text-[var(--theme-primary-soft-text)] border border-[var(--theme-border)] shrink-0">
+                +{{ selectedLabels.length }} {{ countLabel }}
+              </span>
+            </template>
+            <template v-else-if="selectedLabels.length > 0">
+              <span
+                v-for="(lbl, idx) in selectedLabels.slice(0, 1)"
+                :key="idx"
+                class="inline-flex items-center px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-[var(--theme-primary-soft)] text-[var(--theme-primary-soft-text)] border border-neutral-200/60 dark:border-[var(--theme-border-strong)] max-w-[130px] truncate"
+              >
+                {{ lbl }}
+              </span>
+              <span
+                v-if="selectedLabels.length > 1"
+                class="inline-flex items-center px-1.5 py-0.5 rounded-lg text-[10.5px] font-bold bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300 border border-neutral-200/80 dark:border-[var(--theme-border-strong)] shrink-0"
+              >
+                +{{ selectedLabels.length - 1 }}
+              </span>
+            </template>
+            <span v-else class="truncate text-neutral-400 dark:text-neutral-500 text-xs">
+              {{ placeholder }}
             </span>
-            <span
-              v-if="selectedLabels.length > 2"
-              class="inline-flex items-center px-1.5 py-0.5 rounded-lg text-[10.5px] font-bold bg-neutral-100 dark:bg-[var(--theme-surface-muted)] text-neutral-700 dark:text-neutral-300 border border-neutral-200/80 dark:border-[var(--theme-border-strong)]"
-            >
-              +{{ selectedLabels.length - 2 }} unit
-            </span>
-          </template>
-          <span v-else class="truncate text-neutral-400 dark:text-neutral-500 text-xs">
-            {{ placeholder }}
-          </span>
+          </slot>
         </div>
 
         <div class="flex items-center gap-1 shrink-0 ml-1.5">
